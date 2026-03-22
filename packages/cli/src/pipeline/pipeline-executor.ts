@@ -792,7 +792,7 @@ export class PipelineExecutor extends EventEmitter {
 type CommandHandler = (
   args: Record<string, unknown>,
   context: PipelineContext
-) => Promise<CommandResult>;
+) => Promise<CommandResult> | CommandResult;
 
 // ============================================================================
 // Pre-defined Pipelines

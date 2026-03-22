@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miyabi Gantt</title>
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  /* Miyabi Brand */
+  --cherry: #f8b4c8;
+  --cherry-deep: #e8849e;
+  --cherry-light: #fce4ec;
+  --indigo: #1e3a5f;
+  --indigo-light: #2c5282;
+  --gold: #d4a843;
+  --gold-light: #f0d68a;
+  --white: #fafafa;
+  --dark: #171717;
+
+  /* Semantic Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f7f8;
+  --bg-tertiary: #efefef;
+  --bg-glass: rgba(255, 255, 255, 0.72);
+  --bg-glass-border: rgba(255, 255, 255, 0.3);
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-color: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.10);
+
+  /* Status Colors */
+  --status-completed: #34d399;
+  --status-active: #60a5fa;
+  --status-pending: #9ca3af;
+  --status-critical: var(--gold);
+
+  /* Agent Gradients */
+  --gradient-shikirn: linear-gradient(135deg, #f8b4c8, #e8849e);
+  --gradient-mitskrn: linear-gradient(135deg, #93c5fd, #3b82f6);
+  --gradient-tskrn: linear-gradient(135deg, #a78bfa, #7c3aed);
+  --gradient-tshkrn: linear-gradient(135deg, #6ee7b7, #10b981);
+  --gradient-medmn: linear-gradient(135deg, #fbbf24, #f59e0b);
+  --gradient-matmrn: linear-gradient(135deg, #f472b6, #ec4899);
+  --gradient-hakbrn: linear-gradient(135deg, #fb923c, #f97316);
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --header-height: 72px;
+  --stats-height: 56px;
+  --status-bar-height: 36px;
+  --row-height: 44px;
+  --group-row-height: 36px;
+  --cell-width: 48px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 20px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease-out;
+  --transition-slow: 0.5s ease;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #252525;
+  --bg-glass: rgba(30, 30, 30, 0.80);
+  --bg-glass-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #666666;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --status-completed: #34d399;
+  --status-active: #60a5fa;
+  --status-pending: #4b5563;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  transition: background var(--transition-slow), color var(--transition-slow);
+}
+
+::selection {
+  background: var(--cherry);
+  color: var(--dark);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+  z-index: 100;
+  transition: background var(--transition-slow), border-color var(--transition-slow);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--cherry-deep), var(--indigo), var(--gold));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.app-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Stats Cards */
+.header-stats {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+  cursor: default;
+}
+
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stat-dot.completed { background: var(--status-completed); }
+.stat-dot.active { background: var(--status-active); }
+.stat-dot.pending { background: var(--status-pending); }
+.stat-dot.total { background: var(--cherry-deep); }
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: color var(--transition-slow);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+  transition: color var(--transition-slow);
+}
+
+/* Donut Chart */
+.donut-container {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin-right: 8px;
+}
+
+.donut-svg {
+  transform: rotate(-90deg);
+  width: 44px;
+  height: 44px;
+}
+
+.donut-bg {
+  fill: none;
+  stroke: var(--bg-tertiary);
+  stroke-width: 4;
+  transition: stroke var(--transition-slow);
+}
+
+.donut-progress {
+  fill: none;
+  stroke: url(#donutGradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.donut-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: color var(--transition-slow);
+}
+
+/* Header Controls */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  color: var(--text-primary);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   TOOLBAR (Filters + Zoom)
+   ============================================================ */
+.toolbar {
+  height: var(--stats-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--transition-slow), border-color var(--transition-slow);
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-family);
+  letter-spacing: 0.01em;
+}
+
+.filter-pill:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.filter-pill.active {
+  background: var(--indigo);
+  color: #fff;
+  border-color: var(--indigo);
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-slow);
+}
+
+.zoom-btn {
+  padding: 5px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-family);
+}
+
+.zoom-btn:hover {
+  color: var(--text-primary);
+}
+
+.zoom-btn.active {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+.main-container {
+  display: flex;
+  height: calc(100vh - var(--header-height) - var(--stats-height) - var(--status-bar-height));
+  overflow: hidden;
+}
+
+/* ============================================================
+   SIDEBAR (Task List)
+   ============================================================ */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: background var(--transition-slow), border-color var(--transition-slow);
+  z-index: 10;
+}
+
+.sidebar-header {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  transition: all var(--transition-slow);
+}
+
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Sidebar Rows */
+.sidebar-group-row {
+  height: var(--group-row-height);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--transition-slow);
+}
+
+.group-chevron {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  transition: transform var(--transition-normal);
+  color: var(--text-tertiary);
+  font-size: 0.65rem;
+}
+
+.group-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.group-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  transition: color var(--transition-slow);
+}
+
+.group-count {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  transition: all var(--transition-slow);
+}
+
+.sidebar-task-row {
+  height: var(--row-height);
+  display: flex;
+  align-items: center;
+  padding: 0 16px 0 34px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  overflow: hidden;
+}
+
+.sidebar-task-row:hover {
+  background: var(--bg-secondary);
+}
+
+.sidebar-task-row.selected {
+  background: var(--cherry-light);
+}
+
+[data-theme="dark"] .sidebar-task-row.selected {
+  background: rgba(248, 180, 200, 0.08);
+}
+
+.sidebar-task-row.hidden-task {
+  display: none;
+}
+
+.task-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.task-status-dot.completed { background: var(--status-completed); }
+.task-status-dot.active { background: var(--status-active); box-shadow: 0 0 6px rgba(96, 165, 250, 0.4); }
+.task-status-dot.pending { background: var(--status-pending); }
+
+.task-agent-emoji {
+  font-size: 0.85rem;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.task-name {
+  font-size: 0.8rem;
+  font-weight: 450;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-slow);
+}
+
+/* ============================================================
+   TIMELINE AREA
+   ============================================================ */
+.timeline-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Timeline Header (dates) */
+.timeline-header {
+  height: 36px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--transition-slow), border-color var(--transition-slow);
+}
+
+.timeline-header-inner {
+  display: flex;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.timeline-date-cell {
+  width: var(--cell-width);
+  min-width: var(--cell-width);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  border-right: 1px solid var(--border-subtle);
+  transition: color var(--transition-slow), border-color var(--transition-slow);
+  user-select: none;
+}
+
+.timeline-date-cell .day-num {
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  transition: color var(--transition-slow);
+}
+
+.timeline-date-cell.weekend {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+[data-theme="dark"] .timeline-date-cell.weekend {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.timeline-date-cell.today-cell {
+  background: rgba(248, 180, 200, 0.12);
+}
+
+/* Timeline Body */
+.timeline-body {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.timeline-body-inner {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Grid Rows */
+.timeline-group-row {
+  height: var(--group-row-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--transition-slow);
+}
+
+.timeline-task-row {
+  height: var(--row-height);
+  position: relative;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-slow);
+}
+
+.timeline-task-row:nth-child(even) {
+  background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .timeline-task-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.timeline-task-row.hidden-task {
+  display: none;
+}
+
+/* Grid Lines */
+.grid-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.grid-line {
+  width: var(--cell-width);
+  min-width: var(--cell-width);
+  height: 100%;
+  border-right: 1px solid var(--border-subtle);
+  transition: border-color var(--transition-slow);
+}
+
+.grid-line.weekend {
+  background: rgba(0, 0, 0, 0.012);
+}
+
+[data-theme="dark"] .grid-line.weekend {
+  background: rgba(255, 255, 255, 0.008);
+}
+
+/* ============================================================
+   TASK BARS
+   ============================================================ */
+.task-bar-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28px;
+  z-index: 5;
+  cursor: pointer;
+  opacity: 0;
+  animation: taskSlideIn 0.5s ease forwards;
+}
+
+@keyframes taskSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.task-bar {
+  height: 100%;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.task-bar:hover {
+  box-shadow: var(--shadow-md);
+  transform: scaleY(1.08);
+}
+
+.task-bar-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  border-radius: 6px;
+}
+
+.task-bar-progress {
+  height: 100%;
+  border-radius: 6px;
+  position: relative;
+  min-width: 2px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-bar-progress.animate-progress {
+  width: 0 !important;
+}
+
+.task-bar-label {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.task-bar-percent {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Critical Path Glow */
+.task-bar-container.critical .task-bar {
+  box-shadow: 0 0 8px rgba(212, 168, 67, 0.3), var(--shadow-sm);
+}
+
+.task-bar-container.critical .task-bar::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 7px;
+  border: 1.5px solid var(--gold);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.task-bar-container.critical.show-critical .task-bar::after {
+  opacity: 1;
+  animation: criticalPulse 2s ease-in-out infinite;
+}
+
+@keyframes criticalPulse {
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 4px rgba(212, 168, 67, 0.2); }
+  50% { opacity: 1; box-shadow: 0 0 12px rgba(212, 168, 67, 0.5); }
+}
+
+/* Agent-specific gradients */
+.agent-shikirn { background: var(--gradient-shikirn); }
+.agent-mitskrn { background: var(--gradient-mitskrn); }
+.agent-tskrn { background: var(--gradient-tskrn); }
+.agent-tshkrn { background: var(--gradient-tshkrn); }
+.agent-medmn { background: var(--gradient-medmn); }
+.agent-matmrn { background: var(--gradient-matmrn); }
+.agent-hakbrn { background: var(--gradient-hakbrn); }
+
+/* ============================================================
+   TODAY MARKER
+   ============================================================ */
+.today-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ef4444;
+  z-index: 8;
+  pointer-events: none;
+  animation: todayPulse 2s ease-in-out infinite;
+}
+
+@keyframes todayPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.today-marker::before {
+  content: '今日';
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #ef4444;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.today-marker::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================================================
+   MILESTONES
+   ============================================================ */
+.milestone-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 14px;
+  height: 14px;
+  background: var(--gold);
+  border: 2px solid var(--gold-light);
+  z-index: 7;
+  box-shadow: 0 0 10px rgba(212, 168, 67, 0.35);
+  cursor: pointer;
+}
+
+.milestone-label {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.milestone-icon {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(calc(-50% + 28px));
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
+/* ============================================================
+   DEPENDENCY ARROWS (SVG)
+   ============================================================ */
+.dependency-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  overflow: visible;
+}
+
+.dep-arrow {
+  fill: none;
+  stroke: var(--text-tertiary);
+  stroke-width: 1.2;
+  opacity: 0.35;
+  transition: opacity var(--transition-fast), stroke var(--transition-slow);
+}
+
+.dep-arrow:hover {
+  opacity: 0.8;
+}
+
+.dep-arrowhead {
+  fill: var(--text-tertiary);
+  opacity: 0.35;
+  transition: opacity var(--transition-fast), fill var(--transition-slow);
+}
+
+/* ============================================================
+   TOOLTIP
+   ============================================================ */
+.tooltip {
+  position: fixed;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-xl);
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  min-width: 220px;
+  max-width: 300px;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(-4px);
+}
+
+.tooltip-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  padding: 3px 0;
+}
+
+.tooltip-label {
+  color: var(--text-tertiary);
+}
+
+.tooltip-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.tooltip-progress-bar {
+  height: 3px;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.tooltip-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+/* ============================================================
+   DETAIL PANEL (Slide-in)
+   ============================================================ */
+.detail-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.detail-panel-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
+  box-shadow: var(--shadow-xl);
+  z-index: 160;
+  transform: translateX(100%);
+  transition: transform var(--transition-normal), background var(--transition-slow), border-color var(--transition-slow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.detail-panel.visible {
+  transform: translateX(0);
+}
+
+.detail-panel-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  transition: border-color var(--transition-slow);
+}
+
+.detail-panel-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  transition: color var(--transition-slow);
+}
+
+.detail-panel-agent {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  transition: color var(--transition-slow);
+}
+
+.detail-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.detail-close-btn:hover {
+  background: var(--bg-tertiary);
+  transform: scale(1.05);
+}
+
+.detail-panel-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  transition: color var(--transition-slow);
+}
+
+.detail-progress-bar {
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+  transition: background var(--transition-slow);
+}
+
+.detail-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-progress-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color var(--transition-slow);
+}
+
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-info-item {
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-slow);
+}
+
+.detail-info-label {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+  transition: color var(--transition-slow);
+}
+
+.detail-info-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color var(--transition-slow);
+}
+
+.detail-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.detail-status-badge.completed {
+  background: rgba(52, 211, 153, 0.12);
+  color: #059669;
+}
+
+.detail-status-badge.active {
+  background: rgba(96, 165, 250, 0.12);
+  color: #2563eb;
+}
+
+.detail-status-badge.pending {
+  background: rgba(156, 163, 175, 0.12);
+  color: #6b7280;
+}
+
+[data-theme="dark"] .detail-status-badge.completed {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+[data-theme="dark"] .detail-status-badge.active {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .detail-status-badge.pending {
+  background: rgba(156, 163, 175, 0.1);
+  color: #9ca3af;
+}
+
+.detail-deps-list {
+  list-style: none;
+}
+
+.detail-dep-item {
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background var(--transition-slow), color var(--transition-slow);
+}
+
+.detail-dep-item .dep-arrow-icon {
+  color: var(--text-tertiary);
+  font-size: 0.65rem;
+}
+
+/* ============================================================
+   STATUS BAR
+   ============================================================ */
+.status-bar {
+  height: var(--status-bar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  transition: all var(--transition-slow);
+  user-select: none;
+}
+
+.status-shortcuts {
+  display: flex;
+  gap: 14px;
+}
+
+.shortcut-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shortcut-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  transition: all var(--transition-slow);
+}
+
+.status-info {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  .header, .toolbar, .status-bar, .detail-panel, .detail-panel-overlay, .tooltip {
+    display: none !important;
+  }
+
+  body {
+    overflow: visible;
+    height: auto;
+  }
+
+  .main-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .timeline-body {
+    overflow: visible;
+  }
+
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .today-marker {
+    animation: none;
+    opacity: 1;
+  }
+
+  .task-bar-container {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE (1024px+)
+   ============================================================ */
+@media (max-width: 1200px) {
+  :root {
+    --sidebar-width: 220px;
+  }
+
+  .header-stats {
+    gap: 8px;
+  }
+
+  .stat-label {
+    display: none;
+  }
+
+  .detail-panel {
+    width: 320px;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 180px;
+    --cell-width: 40px;
+  }
+
+  .app-subtitle {
+    display: none;
+  }
+
+  .donut-container {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="header">
+  <div class="header-left">
+    <div>
+      <div class="app-title">Miyabi Gantt</div>
+      <div class="app-subtitle">Agent Pipeline Orchestration</div>
+    </div>
+    <div class="header-stats">
+      <div class="donut-container">
+        <svg class="donut-svg" viewBox="0 0 36 36">
+          <defs>
+            <linearGradient id="donutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--cherry-deep)" />
+              <stop offset="100%" stop-color="var(--indigo)" />
+            </linearGradient>
+          </defs>
+          <circle class="donut-bg" cx="18" cy="18" r="15.9"/>
+          <circle class="donut-progress" id="donutProgress" cx="18" cy="18" r="15.9"/>
+        </svg>
+        <span class="donut-label" id="donutLabel">0%</span>
+      </div>
+      <div class="stat-card" id="statTotal">
+        <span class="stat-dot total"></span>
+        <span class="stat-value" id="statTotalVal">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-card" id="statCompleted">
+        <span class="stat-dot completed"></span>
+        <span class="stat-value" id="statCompletedVal">0</span>
+        <span class="stat-label">Done</span>
+      </div>
+      <div class="stat-card" id="statActive">
+        <span class="stat-dot active"></span>
+        <span class="stat-value" id="statActiveVal">0</span>
+        <span class="stat-label">Active</span>
+      </div>
+      <div class="stat-card" id="statPending">
+        <span class="stat-dot pending"></span>
+        <span class="stat-value" id="statPendingVal">0</span>
+        <span class="stat-label">Remaining</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode (D)">
+      <span id="themeIcon">🌙</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     TOOLBAR
+     ============================================================ -->
+<div class="toolbar">
+  <div class="filter-pills">
+    <button class="filter-pill active" data-filter="all">All</button>
+    <button class="filter-pill" data-filter="active">Active</button>
+    <button class="filter-pill" data-filter="completed">Completed</button>
+    <button class="filter-pill" data-filter="critical">Critical</button>
+  </div>
+  <div class="zoom-controls">
+    <button class="zoom-btn active" data-zoom="day" title="Day view (1)">Day</button>
+    <button class="zoom-btn" data-zoom="week" title="Week view (2)">Week</button>
+    <button class="zoom-btn" data-zoom="month" title="Month view (3)">Month</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN CONTAINER
+     ============================================================ -->
+<div class="main-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">Tasks</div>
+    <div class="sidebar-scroll" id="sidebarScroll"></div>
+  </aside>
+
+  <!-- Timeline -->
+  <div class="timeline-container">
+    <div class="timeline-header">
+      <div class="timeline-header-inner" id="timelineHeaderInner"></div>
+    </div>
+    <div class="timeline-body" id="timelineBody">
+      <div class="timeline-body-inner" id="timelineBodyInner">
+        <div class="grid-lines" id="gridLines"></div>
+        <svg class="dependency-svg" id="depSvg">
+          <defs>
+            <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" class="dep-arrowhead"/>
+            </marker>
+          </defs>
+        </svg>
+        <div id="taskBarsContainer"></div>
+        <div id="milestonesContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DETAIL PANEL
+     ============================================================ -->
+<div class="detail-panel-overlay" id="detailOverlay"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-panel-header">
+    <div>
+      <div class="detail-panel-title" id="detailTitle"></div>
+      <div class="detail-panel-agent" id="detailAgent"></div>
+    </div>
+    <button class="detail-close-btn" id="detailClose" title="Close (Esc)">✕</button>
+  </div>
+  <div class="detail-panel-body" id="detailBody"></div>
+</div>
+
+<!-- ============================================================
+     TOOLTIP
+     ============================================================ -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- ============================================================
+     STATUS BAR
+     ============================================================ -->
+<div class="status-bar">
+  <div class="status-shortcuts">
+    <span class="shortcut-hint"><span class="shortcut-key">D</span> Dark mode</span>
+    <span class="shortcut-hint"><span class="shortcut-key">1</span><span class="shortcut-key">2</span><span class="shortcut-key">3</span> Zoom</span>
+    <span class="shortcut-hint"><span class="shortcut-key">C</span> Critical path</span>
+    <span class="shortcut-hint"><span class="shortcut-key">Esc</span> Close</span>
+  </div>
+  <div class="status-info">
+    <span id="zoomIndicator">Zoom: Day</span>
+    <span id="lastUpdated"></span>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ============================================================
+  // DATA
+  // ============================================================
+  const tasks = [
+    { id: 1,  name: 'Issue 受付・分析',       agent: '🎯 しきるん',     group: '分析', start: 0,  duration: 2, progress: 100, status: 'completed', critical: true },
+    { id: 2,  name: 'ラベル自動分類',         agent: '🔍 みつけるん',   group: '分析', start: 1,  duration: 1, progress: 100, status: 'completed', deps: [1] },
+    { id: 3,  name: 'タスク分解・DAG構築',    agent: '🎯 しきるん',     group: '分析', start: 2,  duration: 1, progress: 100, status: 'completed', critical: true, deps: [1] },
+    { id: 4,  name: 'コンポーネント設計',      agent: '💻 つくるん',     group: '開発', start: 3,  duration: 2, progress: 80,  status: 'active',    critical: true, deps: [3] },
+    { id: 5,  name: 'UIコンポーネント実装',    agent: '💻 つくるん',     group: '開発', start: 5,  duration: 5, progress: 45,  status: 'active',    critical: true, deps: [4] },
+    { id: 6,  name: 'アニメーション実装',      agent: '💻 つくるん',     group: '開発', start: 7,  duration: 3, progress: 20,  status: 'active',    deps: [4] },
+    { id: 7,  name: 'テスト作成',             agent: '✅ たしかめるん', group: '開発', start: 5,  duration: 4, progress: 30,  status: 'active',    deps: [4] },
+    { id: 8,  name: 'ダークモード対応',        agent: '💻 つくるん',     group: '開発', start: 8,  duration: 2, progress: 0,   status: 'pending',   deps: [5] },
+    { id: 9,  name: 'コードレビュー',          agent: '👁️ めだまん',    group: '品質', start: 10, duration: 2, progress: 0,   status: 'pending',   critical: true, deps: [5, 7] },
+    { id: 10, name: 'セキュリティスキャン',    agent: '👁️ めだまん',    group: '品質', start: 10, duration: 1, progress: 0,   status: 'pending',   deps: [5] },
+    { id: 11, name: 'パフォーマンステスト',    agent: '✅ たしかめるん', group: '品質', start: 11, duration: 1, progress: 0,   status: 'pending',   deps: [9] },
+    { id: 12, name: 'PR作成',                 agent: '📋 まとめるん',   group: '納品', start: 12, duration: 1, progress: 0,   status: 'pending',   critical: true, deps: [9, 11] },
+    { id: 13, name: 'ステージングデプロイ',    agent: '🚀 はこぶん',    group: '納品', start: 13, duration: 1, progress: 0,   status: 'pending',   critical: true, deps: [12] },
+    { id: 14, name: '本番デプロイ',            agent: '🚀 はこぶん',    group: '納品', start: 14, duration: 1, progress: 0,   status: 'pending',   critical: true, deps: [13] },
+  ];
+
+  const milestones = [
+    { id: 'm1', name: 'MVP完成',      day: 10, icon: '💎' },
+    { id: 'm2', name: 'v1.0 リリース', day: 15, icon: '🚀' },
+  ];
+
+  const groups = ['分析', '開発', '品質', '納品'];
+  const groupColors = {
+    '分析': 'var(--cherry-deep)',
+    '開発': 'var(--indigo-light)',
+    '品質': 'var(--gold)',
+    '納品': 'var(--status-completed)',
+  };
+
+  // Agent name -> gradient class mapping
+  function agentClass(agent) {
+    if (agent.includes('しきるん'))     return 'agent-shikirn';
+    if (agent.includes('みつけるん'))   return 'agent-mitskrn';
+    if (agent.includes('つくるん'))     return 'agent-tskrn';
+    if (agent.includes('たしかめるん')) return 'agent-tshkrn';
+    if (agent.includes('めだまん'))     return 'agent-medmn';
+    if (agent.includes('まとめるん'))   return 'agent-matmrn';
+    if (agent.includes('はこぶん'))     return 'agent-hakbrn';
+    return 'agent-shikirn';
+  }
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  let currentZoom = 'day';
+  let currentFilter = 'all';
+  let showCritical = false;
+  let selectedTaskId = null;
+  let collapsedGroups = new Set();
+  let isDragging = false;
+  let dragStartX = 0;
+  let scrollStartX = 0;
+
+  const zoomConfig = {
+    day:   { cellWidth: 48,  totalDays: 18, label: 'Day' },
+    week:  { cellWidth: 120, totalDays: 18, label: 'Week' },
+    month: { cellWidth: 28,  totalDays: 32, label: 'Month' },
+  };
+
+  // ============================================================
+  // DOM REFS
+  // ============================================================
+  const $ = id => document.getElementById(id);
+  const sidebarScroll = $('sidebarScroll');
+  const timelineHeaderInner = $('timelineHeaderInner');
+  const timelineBody = $('timelineBody');
+  const timelineBodyInner = $('timelineBodyInner');
+  const gridLines = $('gridLines');
+  const taskBarsContainer = $('taskBarsContainer');
+  const milestonesContainer = $('milestonesContainer');
+  const depSvg = $('depSvg');
+  const tooltipEl = $('tooltip');
+  const detailPanel = $('detailPanel');
+  const detailOverlay = $('detailOverlay');
+
+  // ============================================================
+  // UTILITIES
+  // ============================================================
+  function getBaseDate() {
+    const d = new Date();
+    d.setDate(d.getDate() - 5);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  const baseDate = getBaseDate();
+
+  function dayToDate(day) {
+    const d = new Date(baseDate);
+    d.setDate(d.getDate() + day);
+    return d;
+  }
+
+  function formatDate(d) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate();
+  }
+
+  function formatDateFull(d) {
+    return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate();
+  }
+
+  function isWeekend(d) {
+    const day = d.getDay();
+    return day === 0 || day === 6;
+  }
+
+  function getTodayOffset() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diff = (today - baseDate) / (1000 * 60 * 60 * 24);
+    return diff;
+  }
+
+  function getCellWidth() {
+    return zoomConfig[currentZoom].cellWidth;
+  }
+
+  function getTotalDays() {
+    return zoomConfig[currentZoom].totalDays;
+  }
+
+  // ============================================================
+  // COMPUTE STATS
+  // ============================================================
+  function computeStats() {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const active = tasks.filter(t => t.status === 'active').length;
+    const pending = tasks.filter(t => t.status === 'pending').length;
+    const overallProgress = Math.round(tasks.reduce((s, t) => s + t.progress, 0) / total);
+
+    $('statTotalVal').textContent = total;
+    $('statCompletedVal').textContent = completed;
+    $('statActiveVal').textContent = active;
+    $('statPendingVal').textContent = pending;
+
+    // Donut chart
+    const circumference = 2 * Math.PI * 15.9;
+    const offset = circumference - (overallProgress / 100) * circumference;
+    const donut = $('donutProgress');
+    donut.style.strokeDasharray = circumference;
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        donut.style.strokeDashoffset = offset;
+        $('donutLabel').textContent = overallProgress + '%';
+      }, 300);
+    });
+  }
+
+  // ============================================================
+  // BUILD SIDEBAR
+  // ============================================================
+  function buildSidebar() {
+    sidebarScroll.innerHTML = '';
+
+    groups.forEach(group => {
+      const groupTasks = tasks.filter(t => t.group === group);
+
+      // Group row
+      const groupRow = document.createElement('div');
+      groupRow.className = 'sidebar-group-row';
+      groupRow.dataset.group = group;
+
+      const chevron = document.createElement('span');
+      chevron.className = 'group-chevron' + (collapsedGroups.has(group) ? ' collapsed' : '');
+      chevron.innerHTML = '&#9662;';
+
+      const label = document.createElement('span');
+      label.className = 'group-label';
+      label.textContent = group;
+
+      const count = document.createElement('span');
+      count.className = 'group-count';
+      count.textContent = groupTasks.length;
+
+      groupRow.appendChild(chevron);
+      groupRow.appendChild(label);
+      groupRow.appendChild(count);
+
+      groupRow.addEventListener('click', () => {
+        if (collapsedGroups.has(group)) {
+          collapsedGroups.delete(group);
+        } else {
+          collapsedGroups.add(group);
+        }
+        buildSidebar();
+        buildTimeline();
+      });
+
+      sidebarScroll.appendChild(groupRow);
+
+      // Task rows
+      groupTasks.forEach(task => {
+        const hidden = collapsedGroups.has(group) || !isTaskVisible(task);
+        const row = document.createElement('div');
+        row.className = 'sidebar-task-row' + (hidden ? ' hidden-task' : '') + (selectedTaskId === task.id ? ' selected' : '');
+        row.dataset.taskId = task.id;
+
+        const dot = document.createElement('span');
+        dot.className = 'task-status-dot ' + task.status;
+
+        const emoji = document.createElement('span');
+        emoji.className = 'task-agent-emoji';
+        emoji.textContent = task.agent.split(' ')[0];
+
+        const name = document.createElement('span');
+        name.className = 'task-name';
+        name.textContent = task.name;
+
+        row.appendChild(dot);
+        row.appendChild(emoji);
+        row.appendChild(name);
+
+        row.addEventListener('click', () => openDetailPanel(task));
+
+        sidebarScroll.appendChild(row);
+      });
+    });
+  }
+
+  // ============================================================
+  // FILTER LOGIC
+  // ============================================================
+  function isTaskVisible(task) {
+    switch (currentFilter) {
+      case 'active':    return task.status === 'active';
+      case 'completed': return task.status === 'completed';
+      case 'critical':  return task.critical === true;
+      default:          return true;
+    }
+  }
+
+  // ============================================================
+  // BUILD TIMELINE HEADER
+  // ============================================================
+  function buildTimelineHeader() {
+    timelineHeaderInner.innerHTML = '';
+    const cellW = getCellWidth();
+    const totalDays = getTotalDays();
+
+    for (let i = 0; i < totalDays; i++) {
+      const d = dayToDate(i);
+      const cell = document.createElement('div');
+      cell.className = 'timeline-date-cell';
+      cell.style.width = cellW + 'px';
+      cell.style.minWidth = cellW + 'px';
+
+      if (isWeekend(d)) cell.classList.add('weekend');
+
+      const todayDiff = getTodayOffset();
+      if (Math.abs(i - todayDiff) < 0.5) cell.classList.add('today-cell');
+
+      const dayLabel = document.createElement('span');
+      dayLabel.className = 'day-num';
+
+      if (currentZoom === 'day') {
+        dayLabel.textContent = d.getDate();
+        const monthLabel = document.createElement('span');
+        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        monthLabel.textContent = dayNames[d.getDay()];
+        cell.appendChild(dayLabel);
+        cell.appendChild(monthLabel);
+      } else if (currentZoom === 'week') {
+        dayLabel.textContent = formatDate(d);
+        cell.appendChild(dayLabel);
+      } else {
+        dayLabel.textContent = d.getDate();
+        cell.appendChild(dayLabel);
+      }
+
+      timelineHeaderInner.appendChild(cell);
+    }
+  }
+
+  // ============================================================
+  // BUILD GRID LINES
+  // ============================================================
+  function buildGridLines(totalHeight) {
+    gridLines.innerHTML = '';
+    const cellW = getCellWidth();
+    const totalDays = getTotalDays();
+
+    for (let i = 0; i < totalDays; i++) {
+      const d = dayToDate(i);
+      const line = document.createElement('div');
+      line.className = 'grid-line';
+      line.style.width = cellW + 'px';
+      line.style.minWidth = cellW + 'px';
+      line.style.height = totalHeight + 'px';
+      if (isWeekend(d)) line.classList.add('weekend');
+      gridLines.appendChild(line);
+    }
+  }
+
+  // ============================================================
+  // BUILD TIMELINE BODY (rows, task bars, dependencies, milestones)
+  // ============================================================
+  function buildTimeline() {
+    // Clear
+    timelineBodyInner.innerHTML = '';
+    taskBarsContainer.innerHTML = '';
+    milestonesContainer.innerHTML = '';
+
+    // Re-add persistent elements
+    timelineBodyInner.appendChild(gridLines);
+    timelineBodyInner.appendChild(depSvg);
+    timelineBodyInner.appendChild(taskBarsContainer);
+    timelineBodyInner.appendChild(milestonesContainer);
+
+    const cellW = getCellWidth();
+    const totalDays = getTotalDays();
+    const totalWidth = cellW * totalDays;
+
+    timelineBodyInner.style.width = totalWidth + 'px';
+    timelineHeaderInner.style.width = totalWidth + 'px';
+
+    let rowIndex = 0;
+    const taskRowPositions = {};
+    let staggerDelay = 0;
+
+    groups.forEach(group => {
+      const groupTasks = tasks.filter(t => t.group === group);
+
+      // Group row in timeline
+      const groupRow = document.createElement('div');
+      groupRow.className = 'timeline-group-row';
+      groupRow.style.width = totalWidth + 'px';
+      timelineBodyInner.appendChild(groupRow);
+      rowIndex++;
+
+      // Task rows
+      groupTasks.forEach(task => {
+        const hidden = collapsedGroups.has(group) || !isTaskVisible(task);
+        const taskRow = document.createElement('div');
+        taskRow.className = 'timeline-task-row' + (hidden ? ' hidden-task' : '');
+        taskRow.dataset.taskId = task.id;
+        taskRow.style.width = totalWidth + 'px';
+        timelineBodyInner.appendChild(taskRow);
+
+        if (!hidden) {
+          // Calculate position for task bar
+          const topOffset = getRowTop(rowIndex);
+          taskRowPositions[task.id] = {
+            top: topOffset,
+            left: task.start * cellW,
+            width: task.duration * cellW,
+            rowIndex: rowIndex
+          };
+
+          // Create task bar
+          createTaskBar(task, topOffset, cellW, staggerDelay);
+          staggerDelay += 50;
+        }
+
+        rowIndex++;
+      });
+    });
+
+    // Calculate total height
+    const totalHeight = rowIndex * 44; // approximate
+    buildGridLines(totalHeight);
+    depSvg.setAttribute('width', totalWidth);
+    depSvg.setAttribute('height', totalHeight);
+
+    // Today marker
+    const todayOffset = getTodayOffset();
+    if (todayOffset >= 0 && todayOffset < totalDays) {
+      const todayMarker = document.createElement('div');
+      todayMarker.className = 'today-marker';
+      todayMarker.style.left = (todayOffset * cellW) + 'px';
+      timelineBodyInner.appendChild(todayMarker);
+    }
+
+    // Milestones
+    milestones.forEach(ms => {
+      if (ms.day < totalDays) {
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = (ms.day * cellW) + 'px';
+        wrapper.style.top = '8px';
+        wrapper.style.zIndex = '7';
+
+        const diamond = document.createElement('div');
+        diamond.className = 'milestone-marker';
+
+        const label = document.createElement('div');
+        label.className = 'milestone-label';
+        label.textContent = ms.name;
+
+        const icon = document.createElement('div');
+        icon.className = 'milestone-icon';
+        icon.textContent = ms.icon;
+
+        wrapper.appendChild(diamond);
+        wrapper.appendChild(label);
+        wrapper.appendChild(icon);
+        milestonesContainer.appendChild(wrapper);
+      }
+    });
+
+    // Draw dependencies
+    drawDependencies(taskRowPositions, cellW);
+  }
+
+  function getRowTop(rowIndex) {
+    // Each group row = group-row-height, each task row = row-height
+    // This is a simplified calculation
+    let top = 0;
+    let currentRow = 0;
+    for (const group of groups) {
+      top += 36; // group row height
+      currentRow++;
+      const groupTasks = tasks.filter(t => t.group === group);
+      for (const task of groupTasks) {
+        if (collapsedGroups.has(group) || !isTaskVisible(task)) continue;
+        if (currentRow === rowIndex) return top;
+        top += 44; // task row height
+        currentRow++;
+      }
+    }
+    return top;
+  }
+
+  // ============================================================
+  // CREATE TASK BAR
+  // ============================================================
+  function createTaskBar(task, topOffset, cellW, delay) {
+    const container = document.createElement('div');
+    container.className = 'task-bar-container' + (task.critical ? ' critical' : '') + (showCritical && task.critical ? ' show-critical' : '');
+    container.style.left = (task.start * cellW + 2) + 'px';
+    container.style.width = (task.duration * cellW - 4) + 'px';
+    container.style.top = (topOffset + 8) + 'px';
+    container.style.animationDelay = delay + 'ms';
+    container.dataset.taskId = task.id;
+
+    const bar = document.createElement('div');
+    bar.className = 'task-bar';
+
+    const bg = document.createElement('div');
+    bg.className = 'task-bar-bg ' + agentClass(task.agent);
+
+    const progressFill = document.createElement('div');
+    progressFill.className = 'task-bar-progress ' + agentClass(task.agent) + ' animate-progress';
+    progressFill.style.width = task.progress + '%';
+
+    const labelText = document.createElement('span');
+    labelText.className = 'task-bar-label';
+    const barWidth = task.duration * cellW - 4;
+    labelText.textContent = barWidth > 80 ? task.name : task.agent.split(' ')[0];
+
+    const percentText = document.createElement('span');
+    percentText.className = 'task-bar-percent';
+    percentText.textContent = barWidth > 60 ? task.progress + '%' : '';
+
+    bar.appendChild(bg);
+    bar.appendChild(progressFill);
+    bar.appendChild(labelText);
+    bar.appendChild(percentText);
+    container.appendChild(bar);
+
+    // Hover tooltip
+    container.addEventListener('mouseenter', (e) => showTooltip(e, task));
+    container.addEventListener('mousemove', (e) => moveTooltip(e));
+    container.addEventListener('mouseleave', hideTooltip);
+
+    // Click detail
+    container.addEventListener('click', () => openDetailPanel(task));
+
+    taskBarsContainer.appendChild(container);
+
+    // Animate progress bars after slide-in
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        progressFill.classList.remove('animate-progress');
+      }, delay + 500);
+    });
+  }
+
+  // ============================================================
+  // DRAW DEPENDENCIES (SVG Bezier Curves)
+  // ============================================================
+  function drawDependencies(positions, cellW) {
+    // Clear old paths
+    const existing = depSvg.querySelectorAll('.dep-path-group');
+    existing.forEach(el => el.remove());
+
+    tasks.forEach(task => {
+      if (!task.deps || !positions[task.id]) return;
+
+      task.deps.forEach(depId => {
+        const from = positions[depId];
+        const to = positions[task.id];
+        if (!from || !to) return;
+
+        const x1 = from.left + from.width - 2;
+        const y1 = from.top + 22;
+        const x2 = to.left + 2;
+        const y2 = to.top + 22;
+
+        const midX = x1 + (x2 - x1) * 0.5;
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.classList.add('dep-path-group');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+        path.classList.add('dep-arrow');
+        path.setAttribute('marker-end', 'url(#arrowhead)');
+
+        group.appendChild(path);
+        depSvg.appendChild(group);
+      });
+    });
+  }
+
+  // ============================================================
+  // TOOLTIP
+  // ============================================================
+  function showTooltip(e, task) {
+    const startDate = dayToDate(task.start);
+    const endDate = dayToDate(task.start + task.duration);
+    const gradClass = agentClass(task.agent);
+
+    tooltipEl.innerHTML = `
+      <div class="tooltip-title">${task.agent.split(' ')[0]} ${task.name}</div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Agent</span>
+        <span class="tooltip-value">${task.agent}</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Period</span>
+        <span class="tooltip-value">${formatDate(startDate)} - ${formatDate(endDate)}</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Duration</span>
+        <span class="tooltip-value">${task.duration} day${task.duration > 1 ? 's' : ''}</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Phase</span>
+        <span class="tooltip-value">${task.group}</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Status</span>
+        <span class="tooltip-value" style="text-transform:capitalize">${task.status}</span>
+      </div>
+      <div class="tooltip-row">
+        <span class="tooltip-label">Progress</span>
+        <span class="tooltip-value">${task.progress}%</span>
+      </div>
+      ${task.critical ? '<div class="tooltip-row"><span class="tooltip-label">Path</span><span class="tooltip-value" style="color:var(--gold)">Critical</span></div>' : ''}
+      <div class="tooltip-progress-bar">
+        <div class="tooltip-progress-fill ${gradClass}" style="width:${task.progress}%"></div>
+      </div>
+    `;
+
+    tooltipEl.classList.add('visible');
+    moveTooltip(e);
+  }
+
+  function moveTooltip(e) {
+    const pad = 16;
+    let x = e.clientX + pad;
+    let y = e.clientY + pad;
+    const rect = tooltipEl.getBoundingClientRect();
+
+    if (x + rect.width > window.innerWidth - pad) {
+      x = e.clientX - rect.width - pad;
+    }
+    if (y + rect.height > window.innerHeight - pad) {
+      y = e.clientY - rect.height - pad;
+    }
+
+    tooltipEl.style.left = x + 'px';
+    tooltipEl.style.top = y + 'px';
+  }
+
+  function hideTooltip() {
+    tooltipEl.classList.remove('visible');
+  }
+
+  // ============================================================
+  // DETAIL PANEL
+  // ============================================================
+  function openDetailPanel(task) {
+    selectedTaskId = task.id;
+    buildSidebar();
+
+    const startDate = dayToDate(task.start);
+    const endDate = dayToDate(task.start + task.duration);
+
+    $('detailTitle').textContent = task.name;
+    $('detailAgent').textContent = task.agent;
+
+    const body = $('detailBody');
+    const statusClass = task.status;
+    const statusLabels = { completed: '完了', active: '進行中', pending: '未着手' };
+
+    let depsHtml = '';
+    if (task.deps && task.deps.length > 0) {
+      const depItems = task.deps.map(depId => {
+        const depTask = tasks.find(t => t.id === depId);
+        return `<li class="detail-dep-item"><span class="dep-arrow-icon">→</span> ${depTask ? depTask.name : 'Task #' + depId}</li>`;
+      }).join('');
+      depsHtml = `
+        <div class="detail-section">
+          <div class="detail-section-title">Dependencies</div>
+          <ul class="detail-deps-list">${depItems}</ul>
+        </div>
+      `;
+    }
+
+    body.innerHTML = `
+      <div class="detail-section">
+        <div class="detail-section-title">Status</div>
+        <span class="detail-status-badge ${statusClass}">
+          <span class="task-status-dot ${statusClass}"></span>
+          ${statusLabels[task.status] || task.status}
+        </span>
+        ${task.critical ? '<span class="detail-status-badge" style="background:rgba(212,168,67,0.12);color:var(--gold);margin-left:6px">Critical Path</span>' : ''}
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Progress</div>
+        <div class="detail-progress-bar">
+          <div class="detail-progress-fill ${agentClass(task.agent)}" id="detailProgressFill" style="width:0%"></div>
+        </div>
+        <div class="detail-progress-text">${task.progress}% complete</div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Details</div>
+        <div class="detail-info-grid">
+          <div class="detail-info-item">
+            <div class="detail-info-label">Start</div>
+            <div class="detail-info-value">${formatDateFull(startDate)}</div>
+          </div>
+          <div class="detail-info-item">
+            <div class="detail-info-label">End</div>
+            <div class="detail-info-value">${formatDateFull(endDate)}</div>
+          </div>
+          <div class="detail-info-item">
+            <div class="detail-info-label">Duration</div>
+            <div class="detail-info-value">${task.duration} day${task.duration > 1 ? 's' : ''}</div>
+          </div>
+          <div class="detail-info-item">
+            <div class="detail-info-label">Phase</div>
+            <div class="detail-info-value">${task.group}</div>
+          </div>
+        </div>
+      </div>
+      ${depsHtml}
+    `;
+
+    // Animate progress fill
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const fill = $('detailProgressFill');
+        if (fill) fill.style.width = task.progress + '%';
+      }, 100);
+    });
+
+    detailPanel.classList.add('visible');
+    detailOverlay.classList.add('visible');
+  }
+
+  function closeDetailPanel() {
+    detailPanel.classList.remove('visible');
+    detailOverlay.classList.remove('visible');
+    selectedTaskId = null;
+    buildSidebar();
+  }
+
+  // ============================================================
+  // THEME
+  // ============================================================
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    $('themeIcon').textContent = isDark ? '🌙' : '☀️';
+  }
+
+  // ============================================================
+  // ZOOM
+  // ============================================================
+  function setZoom(zoom) {
+    currentZoom = zoom;
+    document.querySelectorAll('.zoom-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.zoom === zoom);
+    });
+    $('zoomIndicator').textContent = 'Zoom: ' + zoomConfig[zoom].label;
+    buildTimelineHeader();
+    buildTimeline();
+  }
+
+  // ============================================================
+  // FILTER
+  // ============================================================
+  function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.filter === filter);
+    });
+    buildSidebar();
+    buildTimeline();
+  }
+
+  // ============================================================
+  // CRITICAL PATH TOGGLE
+  // ============================================================
+  function toggleCritical() {
+    showCritical = !showCritical;
+    document.querySelectorAll('.task-bar-container.critical').forEach(el => {
+      el.classList.toggle('show-critical', showCritical);
+    });
+  }
+
+  // ============================================================
+  // SCROLL SYNC
+  // ============================================================
+  function syncScroll() {
+    const scrollLeft = timelineBody.scrollLeft;
+    const scrollTop = timelineBody.scrollTop;
+
+    requestAnimationFrame(() => {
+      timelineHeaderInner.style.transform = `translateX(-${scrollLeft}px)`;
+      sidebarScroll.scrollTop = scrollTop;
+    });
+  }
+
+  function syncSidebarScroll() {
+    const scrollTop = sidebarScroll.scrollTop;
+    requestAnimationFrame(() => {
+      timelineBody.scrollTop = scrollTop;
+    });
+  }
+
+  // ============================================================
+  // DRAG TO SCROLL
+  // ============================================================
+  function onMouseDown(e) {
+    if (e.target.closest('.task-bar-container') || e.target.closest('.milestone-marker')) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    scrollStartX = timelineBody.scrollLeft;
+    timelineBody.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartX;
+    timelineBody.scrollLeft = scrollStartX - dx;
+  }
+
+  function onMouseUp() {
+    isDragging = false;
+    timelineBody.style.cursor = '';
+  }
+
+  // ============================================================
+  // KEYBOARD SHORTCUTS
+  // ============================================================
+  function onKeyDown(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    switch (e.key.toLowerCase()) {
+      case 'd':
+        toggleTheme();
+        break;
+      case '1':
+        setZoom('day');
+        break;
+      case '2':
+        setZoom('week');
+        break;
+      case '3':
+        setZoom('month');
+        break;
+      case 'c':
+        toggleCritical();
+        break;
+      case 'escape':
+        closeDetailPanel();
+        break;
+    }
+  }
+
+  // ============================================================
+  // EVENT LISTENERS
+  // ============================================================
+  function setupEvents() {
+    // Theme toggle
+    $('themeToggle').addEventListener('click', toggleTheme);
+
+    // Detail panel
+    $('detailClose').addEventListener('click', closeDetailPanel);
+    detailOverlay.addEventListener('click', closeDetailPanel);
+
+    // Filters
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => setFilter(pill.dataset.filter));
+    });
+
+    // Zoom
+    document.querySelectorAll('.zoom-btn').forEach(btn => {
+      btn.addEventListener('click', () => setZoom(btn.dataset.zoom));
+    });
+
+    // Scroll sync
+    timelineBody.addEventListener('scroll', syncScroll);
+    sidebarScroll.addEventListener('scroll', syncSidebarScroll);
+
+    // Drag to scroll
+    timelineBody.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+
+    // Touch support for drag scroll
+    let touchStartX = 0;
+    let touchScrollX = 0;
+    timelineBody.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchScrollX = timelineBody.scrollLeft;
+    }, { passive: true });
+
+    timelineBody.addEventListener('touchmove', (e) => {
+      const dx = e.touches[0].clientX - touchStartX;
+      timelineBody.scrollLeft = touchScrollX - dx;
+    }, { passive: true });
+
+    // Keyboard
+    document.addEventListener('keydown', onKeyDown);
+  }
+
+  // ============================================================
+  // LAST UPDATED
+  // ============================================================
+  function setLastUpdated() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    $('lastUpdated').textContent = 'Updated ' + h + ':' + m;
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  function init() {
+    computeStats();
+    buildSidebar();
+    buildTimelineHeader();
+    buildTimeline();
+    setupEvents();
+    setLastUpdated();
+  }
+
+  // Start
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>

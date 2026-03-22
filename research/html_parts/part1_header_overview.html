@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miyabi - Agentic OS 完全ガイド</title>
+  <style>
+    /* ============================================================
+       MIYABI DESIGN SYSTEM
+       Japanese aesthetic: cherry blossom, indigo, gold, wisteria
+       ============================================================ */
+
+    /* --- CSS Custom Properties (Design Tokens) --- */
+    :root {
+      /* Primary palette */
+      --sakura-50: #fef7f9;
+      --sakura-100: #fdeef3;
+      --sakura-200: #fcd5e3;
+      --sakura-300: #f9a8c9;
+      --sakura-400: #f472a8;
+      --sakura-500: #ec4899;
+      --sakura-600: #db2777;
+
+      /* Indigo / Ai-iro */
+      --indigo-50: #eef2ff;
+      --indigo-100: #e0e7ff;
+      --indigo-200: #c7d2fe;
+      --indigo-300: #a5b4fc;
+      --indigo-400: #818cf8;
+      --indigo-500: #6366f1;
+      --indigo-600: #4f46e5;
+      --indigo-700: #4338ca;
+      --indigo-800: #3730a3;
+      --indigo-900: #312e81;
+      --indigo-950: #1e1b4b;
+
+      /* Gold / Kin */
+      --gold-100: #fef9c3;
+      --gold-200: #fef08a;
+      --gold-300: #fde047;
+      --gold-400: #facc15;
+      --gold-500: #eab308;
+      --gold-600: #ca8a04;
+
+      /* Wisteria / Fuji */
+      --fuji-100: #f3e8ff;
+      --fuji-200: #e9d5ff;
+      --fuji-300: #d8b4fe;
+      --fuji-400: #c084fc;
+      --fuji-500: #a855f7;
+      --fuji-600: #9333ea;
+
+      /* Neutral / Sumi */
+      --sumi-50: #f8fafc;
+      --sumi-100: #f1f5f9;
+      --sumi-200: #e2e8f0;
+      --sumi-300: #cbd5e1;
+      --sumi-400: #94a3b8;
+      --sumi-500: #64748b;
+      --sumi-600: #475569;
+      --sumi-700: #334155;
+      --sumi-800: #1e293b;
+      --sumi-900: #0f172a;
+      --sumi-950: #020617;
+
+      /* Semantic */
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+
+      /* Gradients */
+      --grad-hero: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #7c3aed 75%, #db2777 100%);
+      --grad-sakura: linear-gradient(135deg, #fdeef3 0%, #fcd5e3 50%, #f9a8c9 100%);
+      --grad-indigo: linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #818cf8 100%);
+      --grad-gold: linear-gradient(135deg, #fef9c3 0%, #fde047 50%, #eab308 100%);
+      --grad-fuji: linear-gradient(135deg, #f3e8ff 0%, #d8b4fe 50%, #a855f7 100%);
+      --grad-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 6px 10px rgba(0,0,0,0.08);
+      --shadow-xl: 0 20px 50px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1);
+      --shadow-glow-sakura: 0 0 30px rgba(236,72,153,0.3);
+      --shadow-glow-indigo: 0 0 30px rgba(99,102,241,0.3);
+      --shadow-glow-gold: 0 0 30px rgba(234,179,8,0.3);
+
+      /* Typography */
+      --font-display: 'Noto Serif JP', 'Yu Mincho', serif;
+      --font-body: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      --space-3xl: 4rem;
+      --space-4xl: 6rem;
+
+      /* Border radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+
+      /* Transitions */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+
+      /* Layout */
+      --max-width: 1200px;
+      --max-width-narrow: 800px;
+    }
+
+    /* --- Reset & Base --- */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--sumi-800);
+      background-color: var(--sumi-50);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+
+    /* --- Utility Classes --- */
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-xl);
+    }
+
+    .container--narrow {
+      max-width: var(--max-width-narrow);
+    }
+
+    .section {
+      padding: var(--space-4xl) 0;
+      position: relative;
+    }
+
+    .section--dark {
+      background: var(--sumi-900);
+      color: var(--sumi-100);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: var(--space-lg);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: var(--grad-indigo);
+      border-radius: var(--radius-full);
+      margin: var(--space-md) auto 0;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--sumi-500);
+      font-size: 1.1rem;
+      max-width: 640px;
+      margin: 0 auto var(--space-3xl);
+      line-height: 1.9;
+    }
+
+    /* --- Animations --- */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes rotate-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes particle-drift {
+      0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(50px) scale(0.5); opacity: 0; }
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+    }
+
+    .animate-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .stagger-children > * {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+    }
+
+    .stagger-children.is-visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(2) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(3) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(4) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(5) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(6) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(7) { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(8) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(9) { transition-delay: 0.45s; opacity: 1; transform: translateY(0); }
+    .stagger-children.is-visible > *:nth-child(10) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+
+    /* --- Navigation Bar --- */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: var(--space-md) 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background var(--duration-normal) var(--ease-out),
+                  box-shadow var(--duration-normal) var(--ease-out);
+    }
+
+    .navbar.scrolled {
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar__logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .navbar__logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--grad-hero);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .navbar__links {
+      display: flex;
+      list-style: none;
+      gap: var(--space-lg);
+    }
+
+    .navbar__links a {
+      color: var(--sumi-300);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color var(--duration-fast);
+      position: relative;
+    }
+
+    .navbar__links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--sakura-400);
+      border-radius: var(--radius-full);
+      transition: width var(--duration-normal) var(--ease-out);
+    }
+
+    .navbar__links a:hover {
+      color: white;
+    }
+
+    .navbar__links a:hover::after {
+      width: 100%;
+    }
+
+    /* Mobile menu toggle */
+    .navbar__toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: var(--space-xs);
+    }
+
+    /* ============================================================
+       HERO SECTION
+       ============================================================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--sumi-950);
+    }
+
+    /* Animated gradient background */
+    .hero__bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg,
+        #0c0a1d 0%,
+        #1a1145 20%,
+        #2d1b69 40%,
+        #4c1d95 55%,
+        #7c2d8e 70%,
+        #9d174d 85%,
+        #831843 100%
+      );
+      background-size: 300% 300%;
+      animation: gradient-shift 15s ease infinite;
+    }
+
+    /* Floating particles */
+    .hero__particles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .hero__particle {
+      position: absolute;
+      bottom: -20px;
+      width: 6px;
+      height: 6px;
+      background: var(--sakura-300);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particle-drift linear infinite;
+    }
+
+    .hero__particle:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; width: 4px; height: 4px; }
+    .hero__particle:nth-child(2) { left: 25%; animation-duration: 15s; animation-delay: 2s; width: 6px; height: 6px; background: var(--fuji-300); }
+    .hero__particle:nth-child(3) { left: 40%; animation-duration: 10s; animation-delay: 4s; width: 3px; height: 3px; }
+    .hero__particle:nth-child(4) { left: 55%; animation-duration: 18s; animation-delay: 1s; width: 5px; height: 5px; background: var(--indigo-300); }
+    .hero__particle:nth-child(5) { left: 70%; animation-duration: 14s; animation-delay: 3s; width: 4px; height: 4px; }
+    .hero__particle:nth-child(6) { left: 85%; animation-duration: 11s; animation-delay: 5s; width: 7px; height: 7px; background: var(--gold-300); }
+    .hero__particle:nth-child(7) { left: 15%; animation-duration: 16s; animation-delay: 6s; width: 3px; height: 3px; background: var(--sakura-200); }
+    .hero__particle:nth-child(8) { left: 60%; animation-duration: 13s; animation-delay: 7s; width: 5px; height: 5px; background: var(--fuji-200); }
+    .hero__particle:nth-child(9) { left: 35%; animation-duration: 17s; animation-delay: 3s; width: 4px; height: 4px; }
+    .hero__particle:nth-child(10) { left: 80%; animation-duration: 19s; animation-delay: 8s; width: 6px; height: 6px; background: var(--sakura-400); }
+    .hero__particle:nth-child(11) { left: 48%; animation-duration: 14s; animation-delay: 2s; width: 3px; height: 3px; background: var(--indigo-200); }
+    .hero__particle:nth-child(12) { left: 92%; animation-duration: 12s; animation-delay: 9s; width: 5px; height: 5px; }
+
+    /* Grid overlay */
+    .hero__grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    }
+
+    /* Radial glow */
+    .hero__glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .hero__glow--1 {
+      top: -200px;
+      right: -100px;
+      background: var(--sakura-500);
+    }
+
+    .hero__glow--2 {
+      bottom: -200px;
+      left: -100px;
+      background: var(--indigo-600);
+    }
+
+    .hero__glow--3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--fuji-600);
+      width: 400px;
+      height: 400px;
+      opacity: 0.2;
+    }
+
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 900px;
+      padding: var(--space-xl);
+      animation: fadeInUp 1s var(--ease-out) 0.3s both;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius-full);
+      color: var(--sakura-200);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: var(--space-2xl);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero__badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+
+    .hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      color: white;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero__title-gradient {
+      background: linear-gradient(135deg, #f9a8c9 0%, #c084fc 40%, #818cf8 70%, #fde047 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 4s linear infinite;
+    }
+
+    .hero__tagline {
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      color: var(--sumi-300);
+      line-height: 1.8;
+      margin-bottom: var(--space-2xl);
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero__tagline strong {
+      color: var(--sakura-300);
+      font-weight: 600;
+    }
+
+    .hero__cta-group {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius-full);
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .btn--primary {
+      background: linear-gradient(135deg, var(--sakura-500), var(--fuji-500));
+      color: white;
+      box-shadow: 0 4px 20px rgba(236,72,153,0.4);
+    }
+
+    .btn--primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(236,72,153,0.5);
+    }
+
+    .btn--ghost {
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn--ghost:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    .hero__stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-3xl);
+      margin-top: var(--space-3xl);
+      flex-wrap: wrap;
+    }
+
+    .hero__stat {
+      text-align: center;
+    }
+
+    .hero__stat-value {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: white;
+    }
+
+    .hero__stat-label {
+      font-size: 0.85rem;
+      color: var(--sumi-400);
+      margin-top: 2px;
+    }
+
+    /* Scroll indicator */
+    .hero__scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+      color: var(--sumi-400);
+      font-size: 0.8rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .hero__scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--sumi-400), transparent);
+    }
+
+    /* ============================================================
+       WHAT IS MIYABI SECTION
+       ============================================================ */
+    .what-is {
+      background: white;
+      position: relative;
+    }
+
+    .what-is::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(to bottom, var(--sumi-950), transparent);
+      pointer-events: none;
+    }
+
+    .what-is__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3xl);
+      align-items: center;
+    }
+
+    .what-is__illustration {
+      position: relative;
+      padding: var(--space-2xl);
+    }
+
+    .what-is__flow {
+      background: var(--sumi-50);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      border: 1px solid var(--sumi-200);
+    }
+
+    .what-is__flow-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      transition: all var(--duration-normal) var(--ease-out);
+      position: relative;
+    }
+
+    .what-is__flow-step:hover {
+      background: white;
+      box-shadow: var(--shadow-md);
+      transform: translateX(8px);
+    }
+
+    .what-is__flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 28px;
+      width: 2px;
+      height: 12px;
+      background: var(--indigo-200);
+    }
+
+    .what-is__flow-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .what-is__flow-icon--write { background: var(--indigo-100); }
+    .what-is__flow-icon--ai { background: var(--fuji-100); }
+    .what-is__flow-icon--code { background: var(--sakura-100); }
+    .what-is__flow-icon--check { background: var(--gold-100); }
+    .what-is__flow-icon--deploy { background: #dcfce7; }
+
+    .what-is__flow-text h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--sumi-800);
+      margin-bottom: 2px;
+    }
+
+    .what-is__flow-text p {
+      font-size: 0.82rem;
+      color: var(--sumi-500);
+      line-height: 1.5;
+    }
+
+    .what-is__flow-arrow {
+      text-align: center;
+      color: var(--indigo-300);
+      font-size: 1.2rem;
+      padding: var(--space-xs) 0;
+    }
+
+    .what-is__content h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      color: var(--sumi-900);
+      margin-bottom: var(--space-lg);
+      line-height: 1.3;
+    }
+
+    .what-is__content h2 span {
+      background: linear-gradient(135deg, var(--sakura-500), var(--fuji-500));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .what-is__analogy {
+      background: var(--indigo-50);
+      border-left: 4px solid var(--indigo-400);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: var(--space-lg);
+      margin: var(--space-xl) 0;
+      font-size: 1rem;
+      line-height: 2;
+    }
+
+    .what-is__analogy-title {
+      font-weight: 700;
+      color: var(--indigo-700);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .what-is__text {
+      font-size: 1.05rem;
+      color: var(--sumi-600);
+      line-height: 2;
+      margin-bottom: var(--space-md);
+    }
+
+    .what-is__highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      background: var(--sakura-100);
+      border-radius: var(--radius-sm);
+      color: var(--sakura-600);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* ============================================================
+       THREE LAWS SECTION
+       ============================================================ */
+    .three-laws {
+      background: var(--sumi-950);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .three-laws::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(236,72,153,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .three-laws .section-title {
+      color: white;
+    }
+
+    .three-laws .section-title::after {
+      background: linear-gradient(135deg, var(--sakura-400), var(--fuji-400));
+    }
+
+    .three-laws .section-subtitle {
+      color: var(--sumi-400);
+    }
+
+    .laws-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xl);
+    }
+
+    .law-card {
+      position: relative;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      transition: all var(--duration-slow) var(--ease-out);
+      overflow: hidden;
+    }
+
+    .law-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+
+    .law-card:nth-child(1)::before { background: var(--grad-indigo); }
+    .law-card:nth-child(2)::before { background: var(--grad-sakura); }
+    .law-card:nth-child(3)::before { background: var(--grad-gold); }
+
+    .law-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255,255,255,0.15);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .law-card:nth-child(1):hover { box-shadow: 0 20px 60px rgba(0,0,0,0.3), var(--shadow-glow-indigo); }
+    .law-card:nth-child(2):hover { box-shadow: 0 20px 60px rgba(0,0,0,0.3), var(--shadow-glow-sakura); }
+    .law-card:nth-child(3):hover { box-shadow: 0 20px 60px rgba(0,0,0,0.3), var(--shadow-glow-gold); }
+
+    .law-card__number {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      font-weight: 900;
+      opacity: 0.08;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      line-height: 1;
+    }
+
+    .law-card__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: var(--space-lg);
+    }
+
+    .law-card:nth-child(1) .law-card__icon { background: rgba(99,102,241,0.2); }
+    .law-card:nth-child(2) .law-card__icon { background: rgba(236,72,153,0.2); }
+    .law-card:nth-child(3) .law-card__icon { background: rgba(234,179,8,0.2); }
+
+    .law-card__title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+      color: white;
+    }
+
+    .law-card__name {
+      font-size: 0.85rem;
+      color: var(--sumi-400);
+      margin-bottom: var(--space-md);
+      font-weight: 500;
+    }
+
+    .law-card__desc {
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: var(--sumi-300);
+      margin-bottom: var(--space-lg);
+    }
+
+    .law-card__example {
+      background: rgba(255,255,255,0.05);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      font-size: 0.85rem;
+      color: var(--sumi-300);
+      line-height: 1.7;
+    }
+
+    .law-card__example-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--sumi-500);
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+    }
+
+    /* ============================================================
+       GITHUB AS OS SECTION
+       ============================================================ */
+    .github-os {
+      background: linear-gradient(180deg, white 0%, var(--indigo-50) 100%);
+    }
+
+    .os-mapping-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-xl);
+    }
+
+    .os-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      border: 1px solid var(--sumi-200);
+      transition: all var(--duration-normal) var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .os-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--indigo-200);
+    }
+
+    .os-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .os-card__emoji {
+      font-size: 2rem;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-lg);
+      flex-shrink: 0;
+    }
+
+    .os-card:nth-child(1) .os-card__emoji { background: var(--indigo-100); }
+    .os-card:nth-child(2) .os-card__emoji { background: var(--sakura-100); }
+    .os-card:nth-child(3) .os-card__emoji { background: var(--fuji-100); }
+    .os-card:nth-child(4) .os-card__emoji { background: var(--gold-100); }
+    .os-card:nth-child(5) .os-card__emoji { background: #dcfce7; }
+    .os-card:nth-child(6) .os-card__emoji { background: #fee2e2; }
+    .os-card:nth-child(7) .os-card__emoji { background: #e0f2fe; }
+
+    .os-card__titles h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--sumi-900);
+    }
+
+    .os-card__titles .os-card__role {
+      font-size: 0.8rem;
+      color: var(--indigo-500);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .os-card__arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) 0;
+      color: var(--sumi-400);
+      font-size: 0.85rem;
+    }
+
+    .os-card__arrow-icon {
+      font-size: 1.2rem;
+      color: var(--indigo-400);
+    }
+
+    .os-card__metaphor {
+      background: var(--sumi-50);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-top: var(--space-sm);
+    }
+
+    .os-card__metaphor-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--sumi-500);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+
+    .os-card__metaphor p {
+      font-size: 0.9rem;
+      line-height: 1.8;
+      color: var(--sumi-600);
+    }
+
+    .os-card__desc {
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: var(--sumi-600);
+      margin-bottom: var(--space-md);
+    }
+
+    /* OS metaphor big visual */
+    .os-metaphor-visual {
+      margin-top: var(--space-3xl);
+      background: var(--sumi-900);
+      border-radius: var(--radius-xl);
+      padding: var(--space-3xl);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .os-metaphor-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 40%, rgba(99,102,241,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 60%, rgba(168,85,247,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .os-metaphor-visual__title {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: white;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .os-metaphor-diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-xl);
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .os-column {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .os-column__title {
+      text-align: center;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--sumi-400);
+      margin-bottom: var(--space-sm);
+      font-weight: 600;
+    }
+
+    .os-column__item {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-lg);
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--sumi-200);
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .os-column__item:hover {
+      background: rgba(255,255,255,0.1);
+      transform: scale(1.03);
+    }
+
+    .os-column__item span {
+      display: block;
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+
+    .os-arrows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-lg);
+      padding-top: var(--space-2xl);
+      color: var(--sumi-500);
+      font-size: 1.5rem;
+    }
+
+    .os-arrows__symbol {
+      color: var(--sakura-400);
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+
+    /* ============================================================
+       ARCHITECTURE OVERVIEW SECTION
+       ============================================================ */
+    .architecture {
+      background: white;
+      position: relative;
+    }
+
+    .arch-diagram {
+      background: var(--sumi-50);
+      border-radius: var(--radius-xl);
+      padding: var(--space-3xl);
+      border: 1px solid var(--sumi-200);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arch-diagram::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(236,72,153,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Pipeline flow */
+    .arch-pipeline {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .arch-pipeline__step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 120px;
+      max-width: 160px;
+      flex: 1;
+      position: relative;
+      padding: var(--space-md);
+    }
+
+    .arch-pipeline__step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 40px;
+      right: -2px;
+      width: 20px;
+      height: 2px;
+      background: var(--sumi-300);
+    }
+
+    .arch-pipeline__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: var(--space-md);
+      position: relative;
+      transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .arch-pipeline__step:hover .arch-pipeline__icon {
+      transform: scale(1.1);
+    }
+
+    .arch-pipeline__icon--issue { background: var(--indigo-100); border: 2px solid var(--indigo-200); }
+    .arch-pipeline__icon--analyze { background: var(--fuji-100); border: 2px solid var(--fuji-200); }
+    .arch-pipeline__icon--code { background: var(--sakura-100); border: 2px solid var(--sakura-200); }
+    .arch-pipeline__icon--review { background: var(--gold-100); border: 2px solid var(--gold-200); }
+    .arch-pipeline__icon--test { background: #dbeafe; border: 2px solid #bfdbfe; }
+    .arch-pipeline__icon--pr { background: #dcfce7; border: 2px solid #bbf7d0; }
+    .arch-pipeline__icon--deploy { background: #fce7f3; border: 2px solid #fbcfe8; }
+
+    .arch-pipeline__label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--sumi-700);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .arch-pipeline__sublabel {
+      font-size: 0.7rem;
+      color: var(--sumi-500);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* Agent cards below pipeline */
+    .arch-agents {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space-lg);
+      margin-top: var(--space-3xl);
+    }
+
+    .arch-agent-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      border: 1px solid var(--sumi-200);
+      transition: all var(--duration-normal) var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arch-agent-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .arch-agent-card:nth-child(1)::before { background: #ef4444; }
+    .arch-agent-card:nth-child(2)::before { background: var(--indigo-500); }
+    .arch-agent-card:nth-child(3)::before { background: var(--sakura-500); }
+    .arch-agent-card:nth-child(4)::before { background: var(--gold-500); }
+    .arch-agent-card:nth-child(5)::before { background: #3b82f6; }
+    .arch-agent-card:nth-child(6)::before { background: var(--success); }
+    .arch-agent-card:nth-child(7)::before { background: var(--fuji-500); }
+
+    .arch-agent-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .arch-agent-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .arch-agent-card__emoji {
+      font-size: 1.3rem;
+    }
+
+    .arch-agent-card__name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--sumi-800);
+    }
+
+    .arch-agent-card__role {
+      font-size: 0.78rem;
+      color: var(--sumi-500);
+      line-height: 1.6;
+    }
+
+    .arch-agent-card__level {
+      display: inline-block;
+      margin-top: var(--space-sm);
+      font-size: 0.7rem;
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+    }
+
+    .arch-agent-card__level--red { background: #fee2e2; color: #dc2626; }
+    .arch-agent-card__level--green { background: #dcfce7; color: #16a34a; }
+    .arch-agent-card__level--blue { background: #dbeafe; color: #2563eb; }
+
+    /* ============================================================
+       TECH STACK SECTION
+       ============================================================ */
+    .tech-stack {
+      background: linear-gradient(180deg, var(--sumi-50) 0%, white 50%, var(--sumi-50) 100%);
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-xl);
+    }
+
+    .tech-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      border: 1px solid var(--sumi-200);
+      transition: all var(--duration-normal) var(--ease-out);
+      position: relative;
+    }
+
+    .tech-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .tech-card__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: var(--space-lg);
+    }
+
+    .tech-card:nth-child(1) .tech-card__icon { background: #dbeafe; }
+    .tech-card:nth-child(2) .tech-card__icon { background: var(--fuji-100); }
+    .tech-card:nth-child(3) .tech-card__icon { background: var(--sumi-100); }
+    .tech-card:nth-child(4) .tech-card__icon { background: #dcfce7; }
+    .tech-card:nth-child(5) .tech-card__icon { background: var(--sakura-100); }
+    .tech-card:nth-child(6) .tech-card__icon { background: var(--gold-100); }
+
+    .tech-card__title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--sumi-900);
+      margin-bottom: var(--space-sm);
+    }
+
+    .tech-card__desc {
+      font-size: 0.88rem;
+      color: var(--sumi-500);
+      line-height: 1.7;
+      margin-bottom: var(--space-lg);
+    }
+
+    .tech-card__list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .tech-card__list li {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.85rem;
+      color: var(--sumi-700);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--sumi-50);
+      border-radius: var(--radius-sm);
+      transition: background var(--duration-fast);
+    }
+
+    .tech-card__list li:hover {
+      background: var(--sumi-100);
+    }
+
+    .tech-card__list li .tech-tag {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 1px 8px;
+      background: var(--indigo-100);
+      color: var(--indigo-700);
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       RESPONSIVE DESIGN
+       ============================================================ */
+    @media (max-width: 1024px) {
+      .laws-grid {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .os-metaphor-diagram {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+      }
+
+      .os-arrows {
+        flex-direction: row;
+        padding-top: 0;
+      }
+
+      .arch-pipeline {
+        flex-wrap: wrap;
+        gap: var(--space-md);
+      }
+
+      .arch-pipeline__step:not(:last-child)::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 var(--space-md);
+      }
+
+      .section {
+        padding: var(--space-3xl) 0;
+      }
+
+      .navbar__links {
+        display: none;
+      }
+
+      .navbar__toggle {
+        display: block;
+      }
+
+      .hero__stats {
+        gap: var(--space-xl);
+      }
+
+      .hero__stat-value {
+        font-size: 1.6rem;
+      }
+
+      .what-is__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .what-is__illustration {
+        order: -1;
+        padding: var(--space-md);
+      }
+
+      .os-mapping-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-agents {
+        grid-template-columns: 1fr;
+      }
+
+      .tech-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero__title {
+        font-size: 2.5rem;
+      }
+
+      .hero__cta-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+
+      .hero__stats {
+        flex-direction: column;
+        gap: var(--space-md);
+      }
+    }
+
+    /* --- Print styles --- */
+    @media print {
+      .navbar, .hero__particles, .hero__scroll {
+        display: none;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: var(--space-2xl) 0;
+      }
+
+      .section {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;900&family=Noto+Serif+JP:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION BAR
+     ============================================================ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="#" class="navbar__logo">
+      <span class="navbar__logo-icon">雅</span>
+      Miyabi
+    </a>
+    <ul class="navbar__links">
+      <li><a href="#what-is">Miyabiとは</a></li>
+      <li><a href="#three-laws">三法則</a></li>
+      <li><a href="#github-os">GitHub OS</a></li>
+      <li><a href="#architecture">アーキテクチャ</a></li>
+      <li><a href="#tech-stack">技術スタック</a></li>
+    </ul>
+    <button class="navbar__toggle" aria-label="メニューを開く">&#9776;</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="hero" id="hero">
+  <!-- Animated background -->
+  <div class="hero__bg"></div>
+
+  <!-- Floating particles (cherry blossom petals) -->
+  <div class="hero__particles">
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+    <div class="hero__particle"></div>
+  </div>
+
+  <!-- Grid overlay -->
+  <div class="hero__grid"></div>
+
+  <!-- Radial glows -->
+  <div class="hero__glow hero__glow--1"></div>
+  <div class="hero__glow hero__glow--2"></div>
+  <div class="hero__glow hero__glow--3"></div>
+
+  <!-- Content -->
+  <div class="hero__content">
+    <div class="hero__badge">
+      <span class="hero__badge-dot"></span>
+      世界初の実用的 Agentic OS テンプレート
+    </div>
+
+    <h1 class="hero__title">
+      <span class="hero__title-gradient">Miyabi</span>
+    </h1>
+
+    <p class="hero__tagline">
+      Issueを書くだけで、<strong>AIが自動でコードを書き</strong>、テストし、レビューし、本番環境にデプロイする。<br>
+      GitHubをOSとして活用する、自律型AI開発フレームワーク。
+    </p>
+
+    <div class="hero__cta-group">
+      <a href="#what-is" class="btn btn--primary">
+        Miyabiを知る &darr;
+      </a>
+      <a href="#architecture" class="btn btn--ghost">
+        アーキテクチャを見る
+      </a>
+    </div>
+
+    <div class="hero__stats">
+      <div class="hero__stat">
+        <div class="hero__stat-value">7</div>
+        <div class="hero__stat-label">AIエージェント</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">10-15<span style="font-size:1rem;">分</span></div>
+        <div class="hero__stat-label">Issue から本番まで</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">172+</div>
+        <div class="hero__stat-label">統合ツール</div>
+      </div>
+      <div class="hero__stat">
+        <div class="hero__stat-value">&le;5%</div>
+        <div class="hero__stat-label">人間介入率</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="hero__scroll">
+    <span>Scroll</span>
+    <div class="hero__scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     WHAT IS MIYABI (Miyabiとは？)
+     ============================================================ -->
+<section class="section what-is" id="what-is">
+  <div class="container">
+    <div class="what-is__grid animate-on-scroll">
+      <!-- Left: Visual Flow -->
+      <div class="what-is__illustration">
+        <div class="what-is__flow">
+          <div class="what-is__flow-step">
+            <div class="what-is__flow-icon what-is__flow-icon--write">&#9997;&#65039;</div>
+            <div class="what-is__flow-text">
+              <h4>1. あなたがIssueを書く</h4>
+              <p>「ログインページを作って」とGitHubに書くだけ</p>
+            </div>
+          </div>
+
+          <div class="what-is__flow-step">
+            <div class="what-is__flow-icon what-is__flow-icon--ai">&#129302;</div>
+            <div class="what-is__flow-text">
+              <h4>2. AIが内容を理解する</h4>
+              <p>IssueAgentが「何を作ればいいか」を分析します</p>
+            </div>
+          </div>
+
+          <div class="what-is__flow-step">
+            <div class="what-is__flow-icon what-is__flow-icon--code">&#128187;</div>
+            <div class="what-is__flow-text">
+              <h4>3. 自動でコードを書く</h4>
+              <p>CodeGenAgentが本番品質のコードを生成します</p>
+            </div>
+          </div>
+
+          <div class="what-is__flow-step">
+            <div class="what-is__flow-icon what-is__flow-icon--check">&#128270;</div>
+            <div class="what-is__flow-text">
+              <h4>4. チェック＆テスト</h4>
+              <p>ReviewAgentとTestAgentが品質を100点満点で評価</p>
+            </div>
+          </div>
+
+          <div class="what-is__flow-step">
+            <div class="what-is__flow-icon what-is__flow-icon--deploy">&#127881;</div>
+            <div class="what-is__flow-text">
+              <h4>5. 自動で公開される</h4>
+              <p>DeploymentAgentが安全に本番環境へデプロイ</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Explanation -->
+      <div class="what-is__content">
+        <h2><span>Miyabi</span>とは？</h2>
+
+        <p class="what-is__text">
+          Miyabi（雅）は、<strong>あなたの代わりにプログラミングをしてくれるAIシステム</strong>です。
+        </p>
+
+        <p class="what-is__text">
+          普通のソフトウェア開発では、エンジニアがコードを書いて、テストして、レビューして、サーバーにアップロード（デプロイ）します。
+          Miyabiを使うと、これらの作業を<span class="what-is__highlight">&#9889; 全部AIが自動でやってくれます</span>。
+        </p>
+
+        <div class="what-is__analogy">
+          <div class="what-is__analogy-title">
+            &#128161; わかりやすいたとえ
+          </div>
+          <p>
+            <strong>レストランに例えると...</strong><br>
+            あなたは「カレーが食べたい」とメニューに書くだけ（= Issue作成）。<br>
+            すると、料理長（CoordinatorAgent）が指示を出し、<br>
+            調理担当（CodeGenAgent）が料理を作り、<br>
+            味見係（ReviewAgent）が品質をチェックし、<br>
+            配膳係（DeploymentAgent）がテーブルに届けてくれます。<br>
+            <strong>あなたは注文するだけ。あとは全自動。</strong>
+          </p>
+        </div>
+
+        <p class="what-is__text">
+          Windows 95がパソコンを、iPhoneがスマホを「誰でも使えるもの」に変えたように、<br>
+          MiyabiはAI開発を<span class="what-is__highlight">&#127793; 誰でも使えるもの</span>に変えます。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     THREE LAWS OF AUTONOMY (自律の三法則)
+     ============================================================ -->
+<section class="section three-laws" id="three-laws">
+  <div class="container">
+    <h2 class="section-title animate-on-scroll">&#9878;&#65039; 自律の三法則</h2>
+    <p class="section-subtitle animate-on-scroll">
+      MiyabiのすべてのAIエージェントは、この3つの法則に従って動きます。<br>
+      これはAIが「暴走」しないためのルールブックです。
+    </p>
+
+    <div class="laws-grid stagger-children">
+      <!-- Law 1 -->
+      <div class="law-card">
+        <div class="law-card__number">01</div>
+        <div class="law-card__icon">&#128202;</div>
+        <h3 class="law-card__title">第一法則</h3>
+        <div class="law-card__name">客観性の法則（Objectivity）</div>
+        <p class="law-card__desc">
+          AIは「なんとなく」で判断しません。すべての判断は<strong>データと数字に基づいて</strong>行います。
+          感情や気分に左右されず、常に冷静に数字で評価します。
+        </p>
+        <div class="law-card__example">
+          <div class="law-card__example-title">&#128073; 具体的には</div>
+          コードの品質を0〜100点で採点し、80点以上でないと合格にしません。
+          「なんとなく良さそう」ではなく「87点だから合格」と判断します。
+        </div>
+      </div>
+
+      <!-- Law 2 -->
+      <div class="law-card">
+        <div class="law-card__number">02</div>
+        <div class="law-card__icon">&#9889;</div>
+        <h3 class="law-card__title">第二法則</h3>
+        <div class="law-card__name">自給自足の法則（Self-Sufficiency）</div>
+        <p class="law-card__desc">
+          AIは<strong>できるだけ人間に頼らず、自分で問題を解決</strong>します。
+          失敗しても最大3回自動でやり直し、本当にダメなときだけ人間に助けを求めます。
+        </p>
+        <div class="law-card__example">
+          <div class="law-card__example-title">&#128073; 具体的には</div>
+          人間が介入する割合を5%以下に抑えることが目標。
+          コードが不合格なら自動で修正を試み、3回やり直してもダメな場合だけ人間にエスカレーションします。
+        </div>
+      </div>
+
+      <!-- Law 3 -->
+      <div class="law-card">
+        <div class="law-card__number">03</div>
+        <div class="law-card__icon">&#128221;</div>
+        <h3 class="law-card__title">第三法則</h3>
+        <div class="law-card__name">追跡可能性の法則（Traceability）</div>
+        <p class="law-card__desc">
+          AIのすべての行動は<strong>記録に残ります</strong>。
+          何をしたか、なぜそうしたかが全部GitHubに記録されるので、後から確認できます。
+        </p>
+        <div class="law-card__example">
+          <div class="law-card__example-title">&#128073; 具体的には</div>
+          すべてのログは <code>.ai/logs/</code> に日付ごとに保存。
+          AIの判断理由もIssueのコメントに記録。「ブラックボックス」にはなりません。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     GITHUB AS OS (GitHub = オペレーティングシステム)
+     ============================================================ -->
+<section class="section github-os" id="github-os">
+  <div class="container">
+    <h2 class="section-title animate-on-scroll">&#128421;&#65039; GitHub = オペレーティングシステム</h2>
+    <p class="section-subtitle animate-on-scroll">
+      パソコンにはWindowsやmacOSという「OS」がありますよね。<br>
+      Miyabiは<strong>GitHub自体をAI開発用のOS</strong>として使います。<br>
+      GitHubの既存機能を、まるでOSのパーツのように活用するアイデアです。
+    </p>
+
+    <div class="os-mapping-grid stagger-children">
+      <!-- Issues -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#128203;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#127911; タスクキュー</span>
+            <h3>GitHub Issues</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          パソコンの「やることリスト」のようなもの。Issueを作ると、それが「AIへの仕事の依頼」になります。
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>レストランの注文伝票と同じ。「これ作って！」と書いた紙をキッチンに渡すイメージです。</p>
+        </div>
+      </div>
+
+      <!-- Labels -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#127991;&#65039;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#9881;&#65039; ステートマシン</span>
+            <h3>Labels（ラベル）</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          53種類のラベルが「今どの段階にいるか」を表します。
+          pending &#8594; analyzing &#8594; implementing &#8594; reviewing &#8594; done
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>宅配便の追跡番号のように、「今どこまで進んでいるか」が一目でわかる仕組みです。</p>
+        </div>
+      </div>
+
+      <!-- Projects V2 -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#128451;&#65039;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#128190; データ保存庫</span>
+            <h3>Projects V2</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          AIの作業データや品質スコア、コスト情報などを保存する場所。
+          パソコンのハードディスクのような役割です。
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>会社の業務データベースのようなもの。誰が何をしたか、結果はどうだったか、全部記録されています。</p>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#9889;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#128295; 実行エンジン</span>
+            <h3>GitHub Actions</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          実際にAIを動かす「エンジン」。16以上のワークフローが自動で起動し、コード生成やテストを実行します。
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>工場のベルトコンベアのように、決められた手順で自動的に作業を進める仕組みです。</p>
+        </div>
+      </div>
+
+      <!-- Webhooks -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#128276;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#128225; 通知システム</span>
+            <h3>Webhooks</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          「何か変化があったよ！」とリアルタイムで知らせる仕組み。
+          Issueが作られたらすぐにAIに通知が届きます。
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>スマホの通知ベルと同じ。LINEが来たら「ピコン！」と鳴るように、変化を即座に伝えます。</p>
+        </div>
+      </div>
+
+      <!-- Secrets -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#128272;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#128737;&#65039; セキュリティ</span>
+            <h3>Secrets</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          APIキーやパスワードなど、大切な情報を暗号化して安全に保管する「金庫」です。
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>銀行の貸金庫のように、大事なものを鍵をかけて安全にしまっておく場所です。</p>
+        </div>
+      </div>
+
+      <!-- CODEOWNERS -->
+      <div class="os-card">
+        <div class="os-card__header">
+          <div class="os-card__emoji">&#128100;</div>
+          <div class="os-card__titles">
+            <span class="os-card__role">&#128274; アクセス制御</span>
+            <h3>CODEOWNERS</h3>
+          </div>
+        </div>
+        <p class="os-card__desc">
+          「このファイルの責任者は誰か」を定義します。AIが勝手に重要なファイルを変更することを防ぎます。
+        </p>
+        <div class="os-card__metaphor">
+          <div class="os-card__metaphor-label">&#127793; 身近なたとえ</div>
+          <p>会社で「この書類の承認は部長が必要」というルールのように、変更には許可が必要です。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Big visual diagram -->
+    <div class="os-metaphor-visual animate-on-scroll">
+      <h3 class="os-metaphor-visual__title">&#128260; パソコンのOSと同じ構造</h3>
+      <div class="os-metaphor-diagram">
+        <!-- Traditional OS column -->
+        <div class="os-column">
+          <div class="os-column__title">&#128187; 従来のOS</div>
+          <div class="os-column__item"><span>&#128196;</span>ファイルシステム</div>
+          <div class="os-column__item"><span>&#9881;&#65039;</span>プロセス管理</div>
+          <div class="os-column__item"><span>&#128268;</span>デバイスドライバ</div>
+          <div class="os-column__item"><span>&#128276;</span>イベントシステム</div>
+          <div class="os-column__item"><span>&#128274;</span>権限管理</div>
+        </div>
+
+        <!-- Arrows -->
+        <div class="os-arrows">
+          <span class="os-arrows__symbol">&#10231;</span>
+          <span class="os-arrows__symbol">&#10231;</span>
+          <span class="os-arrows__symbol">&#10231;</span>
+          <span class="os-arrows__symbol">&#10231;</span>
+          <span class="os-arrows__symbol">&#10231;</span>
+        </div>
+
+        <!-- Miyabi OS column -->
+        <div class="os-column">
+          <div class="os-column__title">&#129302; Miyabi OS (GitHub)</div>
+          <div class="os-column__item"><span>&#128451;&#65039;</span>Projects V2</div>
+          <div class="os-column__item"><span>&#128203;</span>Issues &amp; Labels</div>
+          <div class="os-column__item"><span>&#9889;</span>GitHub Actions</div>
+          <div class="os-column__item"><span>&#128276;</span>Webhooks</div>
+          <div class="os-column__item"><span>&#128272;</span>Secrets &amp; CODEOWNERS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ARCHITECTURE OVERVIEW (アーキテクチャ概要)
+     ============================================================ -->
+<section class="section architecture" id="architecture">
+  <div class="container">
+    <h2 class="section-title animate-on-scroll">&#127959;&#65039; アーキテクチャ概要</h2>
+    <p class="section-subtitle animate-on-scroll">
+      Miyabiの全体像を見てみましょう。<br>
+      Issueが作られてから本番環境にデプロイされるまでの流れと、<br>
+      それぞれの段階を担当する7つのAIエージェントを紹介します。
+    </p>
+
+    <!-- Pipeline Diagram -->
+    <div class="arch-diagram animate-on-scroll">
+      <div class="arch-pipeline">
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--issue">&#128203;</div>
+          <div class="arch-pipeline__label">Issue作成</div>
+          <div class="arch-pipeline__sublabel">あなたが依頼を書く</div>
+        </div>
+
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--analyze">&#128270;</div>
+          <div class="arch-pipeline__label">分析</div>
+          <div class="arch-pipeline__sublabel">IssueAgent<br>が内容を理解</div>
+        </div>
+
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--code">&#128187;</div>
+          <div class="arch-pipeline__label">コード生成</div>
+          <div class="arch-pipeline__sublabel">CodeGenAgent<br>が実装</div>
+        </div>
+
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--review">&#128270;</div>
+          <div class="arch-pipeline__label">レビュー</div>
+          <div class="arch-pipeline__sublabel">ReviewAgent<br>が品質チェック</div>
+        </div>
+
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--test">&#129514;</div>
+          <div class="arch-pipeline__label">テスト</div>
+          <div class="arch-pipeline__sublabel">TestAgent<br>が動作確認</div>
+        </div>
+
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--pr">&#128230;</div>
+          <div class="arch-pipeline__label">PR作成</div>
+          <div class="arch-pipeline__sublabel">PRAgent<br>が変更をまとめる</div>
+        </div>
+
+        <div class="arch-pipeline__step">
+          <div class="arch-pipeline__icon arch-pipeline__icon--deploy">&#127881;</div>
+          <div class="arch-pipeline__label">デプロイ</div>
+          <div class="arch-pipeline__sublabel">DeploymentAgent<br>が本番公開</div>
+        </div>
+      </div>
+
+      <!-- Agent Cards -->
+      <div class="arch-agents stagger-children">
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#128081;</span>
+            <span class="arch-agent-card__name">CoordinatorAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            全体の司令塔。Issue分析からタスク分解、エージェント選定、実行監視まで統括します。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--red">&#128308; 統括（決裁権限）</span>
+        </div>
+
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#128269;</span>
+            <span class="arch-agent-card__name">IssueAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            Issueの内容を読み解き、53種類のラベルで分類し、複雑度を評価するアナライザー。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--green">&#128994; 分析</span>
+        </div>
+
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#128296;</span>
+            <span class="arch-agent-card__name">CodeGenAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            Claude Sonnet 4を使って本番品質のコード、テスト、ドキュメントを自動生成します。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--blue">&#128309; 実行</span>
+        </div>
+
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#128373;&#65039;</span>
+            <span class="arch-agent-card__name">ReviewAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            コードを100点満点で評価。80点以上で合格。正確性、パフォーマンス、セキュリティを審査。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--blue">&#128309; 実行</span>
+        </div>
+
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#129514;</span>
+            <span class="arch-agent-card__name">TestAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            テストを実行し、カバレッジを収集し、基準を満たしているか検証するテストランナー。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--blue">&#128309; 実行</span>
+        </div>
+
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#128230;</span>
+            <span class="arch-agent-card__name">PRAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            Conventional Commits形式でPull Requestを自動作成。コミットメッセージも自動生成。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--blue">&#128309; 実行</span>
+        </div>
+
+        <div class="arch-agent-card">
+          <div class="arch-agent-card__header">
+            <span class="arch-agent-card__emoji">&#128640;</span>
+            <span class="arch-agent-card__name">DeploymentAgent</span>
+          </div>
+          <div class="arch-agent-card__role">
+            ステージング環境でテスト後、本番環境にデプロイ。問題があれば自動ロールバック。
+          </div>
+          <span class="arch-agent-card__level arch-agent-card__level--blue">&#128309; 実行</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TECHNOLOGY STACK (技術スタック)
+     ============================================================ -->
+<section class="section tech-stack" id="tech-stack">
+  <div class="container">
+    <h2 class="section-title animate-on-scroll">&#128736;&#65039; 技術スタック</h2>
+    <p class="section-subtitle animate-on-scroll">
+      Miyabiを構成する技術たち。<br>
+      それぞれの技術が何をしているのか、簡単に紹介します。
+    </p>
+
+    <div class="tech-grid stagger-children">
+      <!-- Languages -->
+      <div class="tech-card">
+        <div class="tech-card__icon">&#128220;</div>
+        <h3 class="tech-card__title">言語とランタイム</h3>
+        <p class="tech-card__desc">
+          Miyabiは主にTypeScriptで書かれています。TypeScriptは「型」があるJavaScriptで、間違いを事前に防げます。
+        </p>
+        <ul class="tech-card__list">
+          <li><span class="tech-tag">TypeScript</span> Strict モード / ES2022</li>
+          <li><span class="tech-tag">Node.js</span> v18+ ランタイム</li>
+          <li><span class="tech-tag">pnpm 9</span> パッケージ管理</li>
+          <li><span class="tech-tag">Python</span> コンテキスト最適化用</li>
+        </ul>
+      </div>
+
+      <!-- AI / Agent -->
+      <div class="tech-card">
+        <div class="tech-card__icon">&#129302;</div>
+        <h3 class="tech-card__title">AI / エージェント基盤</h3>
+        <p class="tech-card__desc">
+          AIの頭脳であるClaude APIと、エージェント間の通信プロトコルMCPが核心技術です。
+        </p>
+        <ul class="tech-card__list">
+          <li><span class="tech-tag">Anthropic SDK</span> Claude Sonnet 4</li>
+          <li><span class="tech-tag">MCP SDK</span> 172+ 統合ツール</li>
+          <li><span class="tech-tag">Agent Skill Bus</span> 110+ スキル</li>
+        </ul>
+      </div>
+
+      <!-- GitHub Integration -->
+      <div class="tech-card">
+        <div class="tech-card__icon">&#128025;</div>
+        <h3 class="tech-card__title">GitHub統合</h3>
+        <p class="tech-card__desc">
+          GitHubのAPIを使って、Issue、PR、Projects、Actionsを自動操作します。
+        </p>
+        <ul class="tech-card__list">
+          <li><span class="tech-tag">Octokit REST</span> GitHub REST API</li>
+          <li><span class="tech-tag">Octokit GraphQL</span> 高度なクエリ</li>
+          <li><span class="tech-tag">Actions</span> 16+ ワークフロー</li>
+          <li><span class="tech-tag">Webhooks</span> リアルタイム連携</li>
+        </ul>
+      </div>
+
+      <!-- Testing -->
+      <div class="tech-card">
+        <div class="tech-card__icon">&#9989;</div>
+        <h3 class="tech-card__title">テスト / 品質管理</h3>
+        <p class="tech-card__desc">
+          コードの品質を自動で保証する仕組み。テスト、型チェック、コード規約を自動実行します。
+        </p>
+        <ul class="tech-card__list">
+          <li><span class="tech-tag">Vitest</span> ユニット / 統合テスト</li>
+          <li><span class="tech-tag">Playwright</span> E2E ブラウザテスト</li>
+          <li><span class="tech-tag">ESLint</span> コード規約チェック</li>
+          <li><span class="tech-tag">TypeScript</span> 型安全性検証</li>
+        </ul>
+      </div>
+
+      <!-- CLI / UI -->
+      <div class="tech-card">
+        <div class="tech-card__icon">&#128187;</div>
+        <h3 class="tech-card__title">CLI / ユーザーインターフェース</h3>
+        <p class="tech-card__desc">
+          ターミナル（黒い画面）で美しく操作できるコマンドラインツールです。25以上のコマンドを搭載。
+        </p>
+        <ul class="tech-card__list">
+          <li><span class="tech-tag">Commander.js</span> コマンド体系</li>
+          <li><span class="tech-tag">chalk</span> 色付きテキスト</li>
+          <li><span class="tech-tag">ora</span> ローディングアニメ</li>
+          <li><span class="tech-tag">Next.js 15</span> Web ダッシュボード</li>
+        </ul>
+      </div>
+
+      <!-- DevOps -->
+      <div class="tech-card">
+        <div class="tech-card__icon">&#128230;</div>
+        <h3 class="tech-card__title">インフラ / DevOps</h3>
+        <p class="tech-card__desc">
+          コンテナ技術で、どの環境でも同じように動くことを保証します。分散実行にも対応。
+        </p>
+        <ul class="tech-card__list">
+          <li><span class="tech-tag">Docker</span> コンテナ化</li>
+          <li><span class="tech-tag">PostgreSQL</span> データ永続化</li>
+          <li><span class="tech-tag">Redis</span> キャッシュ / 座標</li>
+          <li><span class="tech-tag">Tailscale</span> 分散クラスター</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCROLL ANIMATION SCRIPT
+     ============================================================ -->
+<script>
+  // Intersection Observer for scroll animations
+  document.addEventListener('DOMContentLoaded', function() {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    // Observe all animated elements
+    document.querySelectorAll('.animate-on-scroll, .stagger-children').forEach(function(el) {
+      observer.observe(el);
+    });
+
+    // Navbar scroll effect
+    var navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  });
+</script>

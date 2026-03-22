@@ -5,6 +5,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { loadConfig, saveConfig, mergeConfig, validateConfig, getDefaultConfig } from '../config/loader';
+import { isJsonMode, outputSuccess } from '../utils/agent-output';
 
 export interface ConfigOptions {
   init?: boolean;
@@ -14,6 +15,13 @@ export interface ConfigOptions {
 }
 
 export async function config(options: ConfigOptions = {}) {
+  // JSON mode: output config as structured JSON without prompting
+  if (options.json || isJsonMode()) {
+    const currentConfig = loadConfig();
+    outputSuccess(currentConfig, 'Configuration loaded successfully');
+    return;
+  }
+
   // Show current config
   if (options.show) {
     const currentConfig = loadConfig();

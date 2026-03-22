@@ -22,6 +22,7 @@ import type {
 } from '../types/index';
 import * as fs from 'fs';
 import * as path from 'path';
+import { spawn } from 'child_process';
 
 // Ω-System imports (optional - for enhanced execution)
 import {
@@ -267,25 +268,21 @@ export class CodeGenAgent extends BaseAgent {
   // ============================================================================
 
   /**
-   * Generate code using template-based generation
+   * Generate code using template-based generation (fast path) or LLM via Codex CLI.
    *
-   * Generates files based on task type and specifications.
-   * Supports Discord community files, documentation, and configuration.
+   * For known patterns (Discord, GitHub workflows, config), uses templates.
+   * For all other tasks, falls back to Codex CLI (or Claude Code CLI) for
+   * real AI-powered code generation.
    */
   private async generateCode(spec: CodeSpec, _context: string): Promise<GeneratedCode> {
-    this.log('🧠 Code generation starting (template-based)');
+    this.log('🧠 Code generation starting');
 
     // Identify generatable files from spec
     const generatableFiles = await this.identifyGeneratableFiles(spec);
 
     if (generatableFiles.length === 0) {
-      this.log('⚠️  No generatable files identified for this task');
-      return {
-        files: [],
-        tests: [],
-        documentation: '',
-        summary: `No files could be automatically generated for: ${spec.feature}`,
-      };
+      this.log('🤖 No template match found — falling back to LLM code generation via Codex CLI');
+      return await this.generateWithCodex(spec, _context);
     }
 
     const files: Array<{ path: string; content: string; type: 'new' | 'modified' }> = [];
@@ -377,6 +374,223 @@ export class CodeGenAgent extends BaseAgent {
       default:
         throw new Error(`Unknown file type: ${fileSpec.type}`);
     }
+  }
+
+  // ============================================================================
+  // LLM-Powered Code Generation (Codex CLI / Claude Code CLI fallback)
+  // ============================================================================
+
+  /**
+   * Generate code using Codex CLI (or Claude Code CLI as fallback).
+   *
+   * Builds a detailed prompt from the CodeSpec, invokes the CLI via stdin,
+   * and parses the structured JSON response into GeneratedCode format.
+   */
+  private async generateWithCodex(spec: CodeSpec, context: string): Promise<GeneratedCode> {
+    const prompt = this.buildCodeGenPrompt(spec, context);
+
+    // Try Codex CLI first, fall back to Claude Code CLI
+    let stdout: string;
+    try {
+      stdout = await this.invokeCodeCLI('codex', ['exec', '-'], prompt);
+    } catch (codexError) {
+      this.log(`⚠️  Codex CLI unavailable (${(codexError as Error).message}), trying Claude Code CLI`);
+      try {
+        stdout = await this.invokeCodeCLI('claude', ['-p', '--output-format', 'json'], prompt);
+
+        // Claude Code wraps result in a JSON envelope
+        try {
+          const envelope = JSON.parse(stdout);
+          if (envelope.result !== undefined) {
+            stdout = typeof envelope.result === 'string' ? envelope.result : JSON.stringify(envelope.result);
+          }
+        } catch {
+          // Not a JSON envelope, use raw output
+        }
+      } catch (claudeError) {
+        this.log(`❌ Both Codex CLI and Claude Code CLI failed`);
+        throw new Error(
+          `LLM code generation failed. Codex: ${(codexError as Error).message}. Claude: ${(claudeError as Error).message}`
+        );
+      }
+    }
+
+    // Parse the LLM response into GeneratedCode
+    return this.parseLLMCodeResponse(stdout, spec);
+  }
+
+  /**
+   * Build a detailed prompt for LLM code generation from a CodeSpec.
+   */
+  private buildCodeGenPrompt(spec: CodeSpec, context: string): string {
+    const requirementsList = spec.requirements.map((r, i) => `${i + 1}. ${r}`).join('\n');
+    const constraintsList = spec.constraints.map((c) => `- ${c}`).join('\n');
+    const depsList = spec.context.dependencies.slice(0, 20).join(', ') || 'none';
+    const contextSnippet = context ? `\n\nExisting codebase context:\n${context.substring(0, 3000)}` : '';
+
+    return `Generate production-ready TypeScript code for the following feature. Return ONLY a JSON object (no markdown code blocks, no extra text).
+
+Feature: ${spec.feature}
+
+Requirements:
+${requirementsList}
+
+Constraints:
+${constraintsList}
+
+Architecture: ${spec.context.architecture}
+Available dependencies: ${depsList}
+${contextSnippet}
+
+Return this exact JSON structure:
+{
+  "files": [
+    {
+      "path": "src/example.ts",
+      "content": "// full file content here",
+      "action": "create"
+    }
+  ],
+  "tests": [
+    {
+      "path": "src/__tests__/example.test.ts",
+      "content": "// full test content here"
+    }
+  ],
+  "summary": "Brief description of what was generated"
+}
+
+Rules:
+- All code must be valid TypeScript with strict mode
+- Include proper error handling
+- Include type definitions
+- Follow existing project patterns
+- Files must have complete, working content (no placeholders or TODOs)`;
+  }
+
+  /**
+   * Invoke a CLI tool (codex or claude) with a prompt via stdin.
+   * Returns the stdout content on success.
+   */
+  private invokeCodeCLI(command: string, args: string[], prompt: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const proc = spawn(command, args, {
+        cwd: process.cwd(),
+        shell: process.platform === 'win32', // Windows needs shell for .cmd resolution
+      });
+
+      proc.stdin.write(prompt);
+      proc.stdin.end();
+
+      let stdout = '';
+      let stderr = '';
+
+      proc.stdout.on('data', (data: Buffer) => {
+        stdout += data.toString();
+      });
+
+      proc.stderr.on('data', (data: Buffer) => {
+        stderr += data.toString();
+      });
+
+      const timeoutMs = 180000; // 3 minutes
+      const timeoutId = setTimeout(() => {
+        proc.kill();
+        reject(new Error(`${command} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+
+      proc.on('close', (code: number | null) => {
+        clearTimeout(timeoutId);
+        if (code === 0) {
+          resolve(stdout.trim());
+        } else {
+          reject(new Error(`${command} exited with code ${code}: ${stderr.substring(0, 500)}`));
+        }
+      });
+
+      proc.on('error', (error: Error) => {
+        clearTimeout(timeoutId);
+        reject(new Error(`Failed to spawn ${command}: ${error.message}`));
+      });
+    });
+  }
+
+  /**
+   * Parse the raw LLM response into a GeneratedCode structure.
+   * Handles multiple JSON formats (code-fenced, raw, etc.).
+   */
+  private parseLLMCodeResponse(rawOutput: string, spec: CodeSpec): GeneratedCode {
+    let parsed: any;
+
+    // Try multiple JSON extraction patterns
+    const patterns = [
+      /```json\s*([\s\S]*?)\s*```/,   // ```json ... ```
+      /```\s*([\s\S]*?)\s*```/,        // ``` ... ```
+      /(\{[\s\S]*\})/,                 // raw { ... }
+    ];
+
+    for (const pattern of patterns) {
+      const match = rawOutput.match(pattern);
+      if (match) {
+        try {
+          parsed = JSON.parse(match[1].trim());
+          break;
+        } catch {
+          // Try next pattern
+        }
+      }
+    }
+
+    // Last resort: parse the entire output
+    if (!parsed) {
+      try {
+        parsed = JSON.parse(rawOutput.trim());
+      } catch {
+        this.log('⚠️  Could not parse LLM response as JSON, returning raw output as single file');
+        return {
+          files: [{
+            path: `src/${this.featureToFilename(spec.feature)}.ts`,
+            content: rawOutput.trim(),
+            type: 'new' as const,
+          }],
+          tests: [],
+          documentation: '',
+          summary: `LLM-generated code for: ${spec.feature} (raw output — JSON parse failed)`,
+        };
+      }
+    }
+
+    // Map parsed response to GeneratedCode format
+    const files = (parsed.files || []).map((f: any) => ({
+      path: f.path,
+      content: f.content,
+      type: (f.action === 'modify' ? 'modified' : 'new') as 'new' | 'modified',
+    }));
+
+    const tests = (parsed.tests || []).map((t: any) => ({
+      path: t.path,
+      content: t.content,
+    }));
+
+    this.log(`✅ LLM generated ${files.length} files and ${tests.length} tests`);
+
+    return {
+      files,
+      tests,
+      documentation: '',
+      summary: parsed.summary || `LLM-generated code for: ${spec.feature}`,
+    };
+  }
+
+  /**
+   * Convert a feature name to a reasonable filename (kebab-case).
+   */
+  private featureToFilename(feature: string): string {
+    return feature
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 50) || 'generated';
   }
 
   // ============================================================================

@@ -81,7 +81,7 @@ export function linkToProject(
   _owner: string,
   _repo: string,
   _token: string
-): Promise<void> {
+): void {
   // This is handled automatically by the project-sync.yml workflow
   // No manual linking needed
   console.log('Projects V2 will auto-sync via workflow');

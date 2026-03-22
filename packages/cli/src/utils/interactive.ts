@@ -66,7 +66,6 @@ export async function confirmOrDefault(
     return defaultValue;
   }
 
-  // @ts-expect-error - inquirer is an ESM-only module
   const inquirer = (await import('inquirer')).default;
 
   const { confirmed } = await inquirer.prompt([

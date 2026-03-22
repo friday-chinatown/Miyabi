@@ -19,7 +19,6 @@ import { autoLabelIssues } from '../analyze/issues';
 import { deployWorkflows } from '../setup/workflows';
 import { deployClaudeConfig, verifyClaudeConfig } from '../setup/claude-config';
 
-// @ts-expect-error - inquirer is an ESM-only module
 import _inquirer from 'inquirer';
 import { linkToProject } from '../setup/projects';
 import { confirmOrDefault } from '../utils/interactive';

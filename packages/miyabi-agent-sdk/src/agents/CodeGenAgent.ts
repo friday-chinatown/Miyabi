@@ -8,6 +8,7 @@
  */
 import { AnthropicClient } from "../clients/AnthropicClient.js";
 import { ClaudeCodeClient } from "../clients/ClaudeCodeClient.js";
+import { CodexClient } from "../clients/CodexClient.js";
 import { GitHubClient } from "../clients/GitHubClient.js";
 
 export interface CodeGenInput {
@@ -23,6 +24,7 @@ export interface CodeGenInput {
   useRealAPI?: boolean;
   anthropicClient?: AnthropicClient;
   claudeCodeClient?: ClaudeCodeClient;
+  codexClient?: CodexClient;
   githubClient?: GitHubClient;
 }
 
@@ -50,15 +52,20 @@ interface CodeGenConfig {
   githubToken?: string;
   anthropicApiKey?: string;
   useClaudeCode?: boolean;
+  useCodex?: boolean;
 }
 
 export class CodeGenAgent {
   private anthropicClient?: AnthropicClient;
   private claudeCodeClient?: ClaudeCodeClient;
+  private codexClient?: CodexClient;
   private githubClient?: GitHubClient;
 
   constructor(config?: CodeGenConfig) {
     if (config) {
+      if (config.useCodex) {
+        this.codexClient = new CodexClient();
+      }
       if (config.useClaudeCode) {
         this.claudeCodeClient = new ClaudeCodeClient();
       } else if (config.anthropicApiKey) {
@@ -76,9 +83,10 @@ export class CodeGenAgent {
       const githubClient = input.githubClient || this.githubClient;
       const anthropicClient = input.anthropicClient || this.anthropicClient;
       const claudeCodeClient = input.claudeCodeClient || this.claudeCodeClient;
+      const codexClient = input.codexClient || this.codexClient;
       const useRealAPI =
         input.useRealAPI !== false &&
-        !!(githubClient || anthropicClient || claudeCodeClient);
+        !!(githubClient || anthropicClient || claudeCodeClient || codexClient);
 
       // 1. 既存コード読み込み
       const context = await this.loadContext(input.context, githubClient);
@@ -90,6 +98,7 @@ export class CodeGenAgent {
         input.language || "typescript",
         anthropicClient,
         claudeCodeClient,
+        codexClient,
         useRealAPI
       );
 
@@ -158,6 +167,7 @@ export class CodeGenAgent {
     language: string,
     anthropicClient?: AnthropicClient,
     claudeCodeClient?: ClaudeCodeClient,
+    codexClient?: CodexClient,
     useRealAPI?: boolean
   ): Promise<{
     files: Array<{
@@ -174,12 +184,34 @@ export class CodeGenAgent {
     tokensUsed?: { input: number; output: number };
     cost?: number;
   }> {
+    const contextStr = context.files
+      .map((f) => `File: ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
+      .join("\n\n");
+
+    // Mode 0: Codex CLI (preferred for code generation — coding-specialized)
+    if (useRealAPI && codexClient) {
+      try {
+        const result = await codexClient.generateCode({
+          taskId: "code-gen",
+          requirements,
+          context: contextStr,
+          language,
+        });
+
+        return {
+          files: result.files,
+          tests: result.tests,
+          qualityScore: result.qualityScore,
+          tokensUsed: { input: 0, output: 0 },
+          cost: 0,
+        };
+      } catch {
+        // Codex failed, fall through to Claude Code
+      }
+    }
+
     if (useRealAPI && claudeCodeClient) {
       // Mode 1: Claude Code CLI ($0)
-      const contextStr = context.files
-        .map((f) => `File: ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
-        .join("\n\n");
-
       const result = await claudeCodeClient.generateCode({
         taskId: "code-gen",
         requirements,
@@ -198,10 +230,6 @@ export class CodeGenAgent {
 
     if (useRealAPI && anthropicClient) {
       // Mode 2: Anthropic API (有料)
-      const contextStr = context.files
-        .map((f) => `File: ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
-        .join("\n\n");
-
       const result = await anthropicClient.generateCode(
         requirements,
         contextStr,

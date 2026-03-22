@@ -1,15 +1,15 @@
 /**
- * Claude Code Client
+ * Codex Client
  *
- * Claude Code CLI を使用したローカル実行クライアント。
- * Anthropic API を直接呼ばず、サブスク内で $0 で動作する。
+ * OpenAI Codex CLI (v0.116.0) を使用したローカル実行クライアント。
+ * サブスクリプションベースなので $0 で動作する。
+ * Codex はファイル操作とコーディングタスクに特化している。
  *
- * 修正履歴:
- * - Issue #320: codex exec → claude -p に修正
+ * ClaudeCodeClient.ts と同じパターンで実装。
  */
 import { spawn } from "child_process";
 
-export interface ClaudeCodeResponse {
+export interface CodexResponse {
   content: string;
   tokensUsed?: {
     input: number;
@@ -18,27 +18,37 @@ export interface ClaudeCodeResponse {
   cost?: number;
 }
 
-export class ClaudeCodeClient {
-  private claudeCommand: string;
+export class CodexClient {
+  private codexCommand: string;
+  private model?: string;
 
-  constructor(claudeCommand = "claude") {
-    this.claudeCommand = claudeCommand;
+  constructor(codexCommand = "codex", model?: string) {
+    this.codexCommand = codexCommand;
+    this.model = model;
   }
 
   /**
-   * Claude Code CLI でプロンプトを実行
+   * Codex CLI でプロンプトを実行
    *
-   * `claude -p --output-format json` で非対話的に実行し、stdout を返す。
-   * プロンプトは stdin 経由で渡し、シェルエスケープ問題を回避する。
+   * `codex exec -` で stdin からプロンプトを渡して非対話的に実行する。
+   * stdin 経由なのでシェルエスケープ問題を回避できる。
    */
   async executePrompt(
     prompt: string,
     options?: { timeout?: number; workingDir?: string }
-  ): Promise<ClaudeCodeResponse> {
+  ): Promise<CodexResponse> {
     return new Promise((resolve, reject) => {
-      // claude -p --output-format json で stdin からプロンプトを渡す
-      const args = ["-p", "--output-format", "json"];
-      const proc = spawn(this.claudeCommand, args, {
+      // codex exec - で stdin からプロンプトを渡す
+      const args: string[] = ["exec"];
+
+      // --model フラグでモデルを指定
+      if (this.model) {
+        args.push("--model", this.model);
+      }
+
+      args.push("-"); // stdin からプロンプトを読み取る
+
+      const proc = spawn(this.codexCommand, args, {
         cwd: options?.workingDir || process.cwd(),
         shell: process.platform === "win32", // Windows では .cmd 解決に shell が必要
       });
@@ -63,7 +73,7 @@ export class ClaudeCodeClient {
             proc.kill();
             reject(
               new Error(
-                `Claude Code execution timed out after ${options.timeout}ms`
+                `Codex execution timed out after ${options.timeout}ms`
               )
             );
           }, options.timeout)
@@ -73,33 +83,18 @@ export class ClaudeCodeClient {
         if (timeoutId) clearTimeout(timeoutId);
 
         if (code === 0) {
-          // --output-format json の場合、レスポンスは JSON エンベロープ
-          let content = stdout.trim();
-          let inputTokens = Math.floor(prompt.length / 4);
-          let outputTokens = Math.floor(content.length / 4);
-          let cost = 0;
-
-          try {
-            const envelope = JSON.parse(content);
-            if (envelope.result !== undefined) {
-              content = envelope.result;
-              inputTokens = envelope.usage?.input_tokens ?? inputTokens;
-              outputTokens = envelope.usage?.output_tokens ?? outputTokens;
-              cost = envelope.total_cost_usd ?? 0;
-            }
-          } catch {
-            // JSON パース失敗時はそのまま使用
-          }
-
           resolve({
-            content,
-            tokensUsed: { input: inputTokens, output: outputTokens },
-            cost,
+            content: stdout.trim(),
+            tokensUsed: {
+              input: Math.floor(prompt.length / 4),
+              output: Math.floor(stdout.length / 4),
+            },
+            cost: 0, // サブスクリプションベースなので無料
           });
         } else {
           reject(
             new Error(
-              `Claude Code failed with exit code ${code}\nStderr: ${stderr}`
+              `Codex failed with exit code ${code}\nStderr: ${stderr}`
             )
           );
         }
@@ -107,46 +102,15 @@ export class ClaudeCodeClient {
 
       proc.on("error", (error: Error) => {
         if (timeoutId) clearTimeout(timeoutId);
-        reject(new Error(`Failed to spawn Claude Code: ${error.message}`));
+        reject(new Error(`Failed to spawn Codex: ${error.message}`));
       });
     });
   }
 
   /**
-   * GitHub Issue を分析
-   */
-  async analyzeIssue(issueData: {
-    title: string;
-    body: string;
-    number: number;
-  }): Promise<{
-    type: string;
-    complexity: string;
-    priority: string;
-    relatedFiles: string[];
-    labels: string[];
-  }> {
-    const prompt = `Analyze this GitHub issue and return ONLY a JSON object (no markdown code blocks):
-
-Issue #${issueData.number}: ${issueData.title}
-
-${issueData.body}
-
-Return JSON format:
-{
-  "type": "bug|feature|refactor|docs|test",
-  "complexity": "small|medium|large|xlarge",
-  "priority": "P0|P1|P2|P3",
-  "relatedFiles": ["file1.ts", "file2.ts"],
-  "labels": ["type:bug", "priority:P2-Medium"]
-}`;
-
-    const response = await this.executePrompt(prompt, { timeout: 60000 });
-    return this.parseJSON(response.content);
-  }
-
-  /**
    * コードを生成
+   *
+   * Codex のファイル操作・コーディング特化能力を活用する。
    */
   async generateCode(requirements: {
     taskId: string;
@@ -199,6 +163,8 @@ Return JSON format:
 
   /**
    * コードをレビュー
+   *
+   * Codex でコード品質を分析し、問題点と改善提案を返す。
    */
   async reviewCode(
     files: Array<{ path: string; content: string }>
@@ -241,6 +207,109 @@ Return JSON format:
   }
 
   /**
+   * テストを実行
+   *
+   * Codex 経由でテストコマンドを実行し、結果を構造化して返す。
+   */
+  async runTests(testCommand: string): Promise<{
+    passed: boolean;
+    totalTests: number;
+    passedTests: number;
+    failedTests: number;
+    output: string;
+    failures: Array<{
+      testName: string;
+      message: string;
+      file?: string;
+    }>;
+  }> {
+    const prompt = `Run the following test command and return ONLY a JSON object with the results (no markdown code blocks):
+
+Command: ${testCommand}
+
+Return JSON format:
+{
+  "passed": true,
+  "totalTests": 10,
+  "passedTests": 10,
+  "failedTests": 0,
+  "output": "...",
+  "failures": []
+}
+
+If tests fail, include failure details:
+{
+  "passed": false,
+  "totalTests": 10,
+  "passedTests": 8,
+  "failedTests": 2,
+  "output": "...",
+  "failures": [
+    {
+      "testName": "should handle edge case",
+      "message": "Expected true but got false",
+      "file": "src/example.test.ts"
+    }
+  ]
+}`;
+
+    const response = await this.executePrompt(prompt, { timeout: 180000 });
+    return this.parseJSON(response.content);
+  }
+
+  /**
+   * コードをリファクタリング
+   *
+   * Codex のコーディング特化能力でリファクタリングを実行する。
+   */
+  async refactorCode(
+    files: Array<{ path: string; content: string }>,
+    instructions: string
+  ): Promise<{
+    files: Array<{
+      path: string;
+      content: string;
+      action: "create" | "modify" | "delete";
+    }>;
+    changes: Array<{
+      file: string;
+      description: string;
+    }>;
+    qualityScore: number;
+  }> {
+    const filesStr = files
+      .map((f) => `File: ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
+      .join("\n\n");
+
+    const prompt = `Refactor the following code according to the instructions. Return ONLY a JSON object (no markdown code blocks):
+
+Instructions: ${instructions}
+
+${filesStr}
+
+Return JSON format:
+{
+  "files": [
+    {
+      "path": "src/example.ts",
+      "content": "... refactored code ...",
+      "action": "modify"
+    }
+  ],
+  "changes": [
+    {
+      "file": "src/example.ts",
+      "description": "Extracted helper function for readability"
+    }
+  ],
+  "qualityScore": 90
+}`;
+
+    const response = await this.executePrompt(prompt, { timeout: 120000 });
+    return this.parseJSON(response.content);
+  }
+
+  /**
    * JSON パース（複数パターン対応）
    */
   private parseJSON(text: string): any {
@@ -279,7 +348,7 @@ Return JSON format:
       return JSON.parse(text.trim());
     } catch (error) {
       throw new Error(
-        `Failed to parse Claude response as JSON: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to parse Codex response as JSON: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }

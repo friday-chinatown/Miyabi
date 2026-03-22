@@ -8,6 +8,7 @@
  */
 import { AnthropicClient } from "../clients/AnthropicClient.js";
 import { ClaudeCodeClient } from "../clients/ClaudeCodeClient.js";
+import { CodexClient } from "../clients/CodexClient.js";
 
 export interface ReviewInput {
   files: Array<{
@@ -23,6 +24,7 @@ export interface ReviewInput {
   useRealAPI?: boolean;
   anthropicClient?: AnthropicClient;
   claudeCodeClient?: ClaudeCodeClient;
+  codexClient?: CodexClient;
 }
 
 export interface ReviewOutput {
@@ -47,14 +49,19 @@ export interface ReviewOutput {
 interface ReviewAgentConfig {
   anthropicApiKey?: string;
   useClaudeCode?: boolean;
+  useCodex?: boolean;
 }
 
 export class ReviewAgent {
   private anthropicClient?: AnthropicClient;
   private claudeCodeClient?: ClaudeCodeClient;
+  private codexClient?: CodexClient;
 
   constructor(config?: ReviewAgentConfig) {
     if (config) {
+      if (config.useCodex) {
+        this.codexClient = new CodexClient();
+      }
       if (config.useClaudeCode) {
         this.claudeCodeClient = new ClaudeCodeClient();
       } else if (config.anthropicApiKey) {
@@ -67,8 +74,41 @@ export class ReviewAgent {
     try {
       const anthropicClient = input.anthropicClient || this.anthropicClient;
       const claudeCodeClient = input.claudeCodeClient || this.claudeCodeClient;
+      const codexClient = input.codexClient || this.codexClient;
       const useRealAPI =
-        input.useRealAPI !== false && !!(anthropicClient || claudeCodeClient);
+        input.useRealAPI !== false && !!(anthropicClient || claudeCodeClient || codexClient);
+
+      // Mode 0: Codex CLI (preferred for code review — coding-specialized)
+      if (useRealAPI && codexClient) {
+        try {
+          const result = await codexClient.reviewCode(
+            input.files.map((f) => ({ path: f.path, content: f.content }))
+          );
+          const coverage = input.standards.requireTests
+            ? await this.checkCoverage(input.files)
+            : { percentage: 0 };
+
+          return {
+            success: true,
+            data: {
+              qualityScore: result.qualityScore,
+              passed: result.passed,
+              issues: result.issues.map((issue) => ({
+                severity: issue.severity,
+                file: issue.file || "",
+                line: issue.line,
+                message: issue.message,
+              })),
+              coverage: coverage.percentage,
+              suggestions: result.suggestions,
+              tokensUsed: { input: 0, output: 0 },
+              cost: 0,
+            },
+          };
+        } catch {
+          // Codex failed, fall through to Claude Code
+        }
+      }
 
       if (useRealAPI && claudeCodeClient) {
         const result = await claudeCodeClient.reviewCode(

@@ -1,0 +1,1026 @@
+<!-- ============================================================
+     PART 3: プロジェクト構造ガイド - Complete Directory Reference
+     ============================================================ -->
+
+<section id="project-structure" style="padding: 2rem 0;">
+
+  <!-- Section Header -->
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <h2 style="font-size: 2.4rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+      プロジェクト構造ガイド
+    </h2>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 700px; margin: 0 auto;">
+      Miyabi の全ディレクトリ・全ファイルを初心者向けに完全解説。<br>
+      各セクションをクリックして展開できます。
+    </p>
+  </div>
+
+  <!-- Legend -->
+  <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-bottom: 2.5rem; padding: 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #6366f1;"></span> packages（コアコード）
+    </span>
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #8b5cf6;"></span> AI設定（.claude等）
+    </span>
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #0ea5e9;"></span> CI/CD（.github）
+    </span>
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #10b981;"></span> スクリプト・ツール
+    </span>
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #f59e0b;"></span> ドキュメント
+    </span>
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #ef4444;"></span> テスト
+    </span>
+    <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #475569;">
+      <span style="display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #64748b;"></span> 設定ファイル
+    </span>
+  </div>
+
+  <!-- ==================== TOP-LEVEL OVERVIEW ==================== -->
+  <div style="background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <h3 style="font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem;">
+      Miyabi/ ルートディレクトリ全体像
+    </h3>
+    <div style="font-family: 'Courier New', Consolas, monospace; font-size: 0.9rem; line-height: 2; color: #334155;">
+      <div><span style="color: #6366f1; font-weight: 700;">packages/</span> ........... 11個のTypeScriptパッケージ（メインのコード）</div>
+      <div><span style="color: #8b5cf6; font-weight: 700;">.claude/</span> ............ Claude Code AI設定（スキル・コマンド・MCP）</div>
+      <div><span style="color: #8b5cf6; font-weight: 700;">.claude-plugin/</span> ..... Claude Codeプラグイン配布用</div>
+      <div><span style="color: #8b5cf6; font-weight: 700;">.codex/</span> ............ OpenAI Codex設定</div>
+      <div><span style="color: #0ea5e9; font-weight: 700;">.github/</span> ........... GitHub Actions・Issue テンプレート</div>
+      <div><span style="color: #f59e0b; font-weight: 700;">docs/</span> .............. 150+ ドキュメントファイル</div>
+      <div><span style="color: #10b981; font-weight: 700;">scripts/</span> ........... 60+ 運用・自動化スクリプト</div>
+      <div><span style="color: #ef4444; font-weight: 700;">tests/</span> ............. ルートレベルテスト</div>
+      <div><span style="color: #10b981; font-weight: 700;">templates/</span> ......... プロジェクトテンプレート</div>
+      <div><span style="color: #f59e0b; font-weight: 700;">miyabi_def/</span> ........ SWML定義・世界モデル</div>
+      <div><span style="color: #10b981; font-weight: 700;">workflow-automation/</span>  Python ワークフロー自動化</div>
+      <div><span style="color: #f59e0b; font-weight: 700;">assets/</span> ............ 画像・動画アセット</div>
+      <div><span style="color: #f59e0b; font-weight: 700;">examples/</span> .......... 使用例サンプル</div>
+      <div><span style="color: #10b981; font-weight: 700;">releases/</span> .......... バイナリリリース</div>
+    </div>
+  </div>
+
+  <!-- ==================== ROOT FILES ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#128196;</span> ルートファイル（27ファイル） ― プロジェクト全体の設定
+    </summary>
+    <div style="padding: 1.5rem;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e2e8f0;">
+            <th style="text-align: left; padding: 0.5rem; color: #64748b; font-weight: 600;">ファイル名</th>
+            <th style="text-align: left; padding: 0.5rem; color: #64748b; font-weight: 600;">何をするファイル？</th>
+            <th style="text-align: left; padding: 0.5rem; color: #64748b; font-weight: 600;">なぜ必要？</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">package.json</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">プロジェクト全体の設定。名前、バージョン（0.22.0）、140+のnpmスクリプトを定義</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">Node.jsが「このプロジェクトは何か」を理解するための必須ファイル</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">pnpm-workspace.yaml</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">「packages/*」をモノレポとして管理する宣言</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">11パッケージを1つのリポジトリで効率的に管理するため</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">tsconfig.json</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">TypeScriptコンパイラの全体設定（ES2022、strict mode）</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">型安全なコードを書くためのTypeScript必須設定</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">CLAUDE.md</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">Claude Code AIへの指示書。プロジェクトのルール・知識を記述</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">AIがこのプロジェクトを正しく理解して作業するため</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">vitest.config.ts</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">テストフレームワーク Vitest の設定。workspace projects定義</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">テストの実行方法・対象を統一的に管理</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">playwright.config.ts</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">ブラウザE2Eテスト（Playwright）の設定</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">ダッシュボード等のUIを自動テストするため</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">Dockerfile</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">Dockerコンテナのビルド手順。マルチステージビルド（4段階）</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">どの環境でも同じように動くコンテナを作るため</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">docker-compose.yml</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">複数サービスの一括起動設定</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">開発環境を <code>docker-compose up</code> 一発で起動</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">.env.example</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">環境変数のテンプレート（APIキー等の雛形）</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">実際の <code>.env</code> はGitに入れないので、見本として必要</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">.gitignore</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">Gitで追跡しないファイルの一覧（node_modules、dist、.env等）</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">不要ファイルや秘密情報をリポジトリに入れない</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">.eslintrc.json / .eslintignore</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">コード品質チェックツール（ESLint）の設定</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">コードスタイルを統一し、バグを防ぐ</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">.gitleaks.toml</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">シークレット漏洩検出ツールの設定</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">APIキーやパスワードの誤コミットを防止</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">CODEOWNERS</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">各ディレクトリのコードオーナーを定義</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">PRレビューの自動割り当て</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">BUDGET.yml</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">AI APIの使用予算設定</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">Claude API等のコストを管理</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">LICENSE / NOTICE / SECURITY.md</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">ライセンス、帰属情報、セキュリティポリシー</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">OSSとしての法的・安全性情報</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.6rem 0.5rem; font-family: monospace; font-weight: 600; color: #1e293b;">.miyabi.yml.example</td>
+            <td style="padding: 0.6rem 0.5rem; color: #475569;">Miyabi設定ファイルのテンプレート</td>
+            <td style="padding: 0.6rem 0.5rem; color: #64748b;">ユーザーが自分の <code>.miyabi.yml</code> を作る参考に</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- ==================== PACKAGES/ ==================== -->
+  <details open style="margin-bottom: 1rem; border: 2px solid #6366f1; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.3rem;">&#128230;</span> packages/ ― 11個のTypeScriptパッケージ（プロジェクトの心臓部）
+    </summary>
+    <div style="padding: 1.5rem;">
+
+      <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1.5rem; padding: 1rem; background: #eef2ff; border-radius: 8px; border-left: 4px solid #6366f1;">
+        <strong>モノレポ構造</strong>: 1つのリポジトリの中に11個の独立パッケージがある。pnpmのworkspace機能で連携管理。<br>
+        初心者は最初に <strong>cli</strong>（コマンドライン）、<strong>core</strong>（基盤）、<strong>coding-agents</strong>（AIエージェント群）の3つを理解すれば十分です。
+      </p>
+
+      <!-- CLI -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          &#9733; packages/cli/ ― CLIコマンドライン（npm名: <code>miyabi</code> v0.22.0）【公開パッケージ】
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> <code>npx miyabi</code> で実行するコマンドラインツール。30以上のコマンドを提供。プロジェクト作成、エージェント実行、デプロイまで全てここから操作。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div><span style="color: #6366f1;">src/</span>index.ts .............. CLIのメインエントリポイント（全コマンド登録）</div>
+            <div><span style="color: #6366f1;">config/</span>marketplace.json ... スキルマーケットプレイス設定</div>
+            <div><span style="color: #6366f1;">scripts/</span> ................. 30+の運用スクリプト群</div>
+            <div style="padding-left: 1.5rem;">agentic.ts ........... エージェント操作の起点スクリプト</div>
+            <div style="padding-left: 1.5rem;">fix-esm-imports.js ... ESMインポートパス修正（ビルド後処理）</div>
+            <div style="padding-left: 1.5rem;">post-build.js ........ ビルド後の追加処理</div>
+            <div style="padding-left: 1.5rem;">parallel-executor.ts . 複数タスク同時実行エンジン</div>
+            <div style="padding-left: 1.5rem;">webhook-router.ts .... Webhookイベント振り分け</div>
+            <div style="padding-left: 1.5rem;">label-state-machine.ts ラベル状態遷移管理</div>
+            <div style="padding-left: 1.5rem;">security-manager.ts .. セキュリティスキャン管理</div>
+            <div><span style="color: #6366f1;">templates/</span> .............. プロジェクト生成テンプレート</div>
+            <div style="padding-left: 1.5rem;">.env.example.template  環境変数テンプレート</div>
+            <div style="padding-left: 1.5rem;">CLAUDE.md.template ... AI指示書テンプレート</div>
+            <div style="padding-left: 1.5rem;">labels.yml ........... 53ラベルの定義</div>
+            <div><span style="color: #64748b;">package.json</span> .......... 21の外部依存（commander, inquirer, chalk等）</div>
+          </div>
+          <p style="margin-top: 0.8rem; font-size: 0.85rem; color: #6366f1;"><strong>接続先</strong>: core, shared-utils, agent-skill-bus, miyabi-agent-sdk</p>
+        </div>
+      </details>
+
+      <!-- CORE -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          &#9733; packages/core/ ― エージェント基盤（npm名: <code>@agentic-os/core</code> v0.1.0）
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> 全エージェントの「土台」。エージェントの登録・管理・実行の共通インフラを提供。BusinessBaseAgentはClaude APIを呼び出すビジネスエージェントの親クラス。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div><span style="color: #6366f1;">src/</span>index.ts ........... メインエクスポート（AgentRegistry等）</div>
+            <div><span style="color: #6366f1;">src/</span>business-base-agent.ts .. Claude API統合の基底クラス</div>
+            <div style="padding-left: 3rem; color: #64748b;">モデル: claude-sonnet-4-20250514 / Max: 8192トークン</div>
+            <div><span style="color: #64748b;">package.json</span> ......... @anthropic-ai/sdk, @octokit/rest 等</div>
+          </div>
+          <p style="margin-top: 0.8rem; font-size: 0.85rem; color: #6366f1;"><strong>接続先</strong>: coding-agents（再エクスポート）</p>
+        </div>
+      </details>
+
+      <!-- CODING-AGENTS -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          &#9733; packages/coding-agents/ ― AIコーディングエージェント群（npm名: <code>@miyabi/coding-agents</code> v0.1.0）【最大パッケージ】
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> 7種類のAIエージェント（Coordinator, CodeGen, Review, Issue, PR, Deployment, Test）の実装。自律的にIssueからPRまで処理するコア機能。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div style="font-weight: 600; color: #4f46e5; margin-bottom: 0.3rem;">-- エージェント実装 --</div>
+            <div><span style="color: #6366f1;">coordinator/</span> ......... 司令塔エージェント（Issue分析、DAG構築、タスク配分）</div>
+            <div><span style="color: #6366f1;">codegen/</span> ............. コード生成エージェント</div>
+            <div><span style="color: #6366f1;">review/</span> .............. コードレビューエージェント（100点スコアリング）</div>
+            <div><span style="color: #6366f1;">issue/</span> ............... Issue分析・ラベリングエージェント</div>
+            <div><span style="color: #6366f1;">pr/</span> .................. PR作成・管理エージェント</div>
+            <div><span style="color: #6366f1;">deployment/</span> .......... デプロイエージェント</div>
+            <div style="font-weight: 600; color: #4f46e5; margin-top: 0.5rem; margin-bottom: 0.3rem;">-- 高度な自動化 --</div>
+            <div><span style="color: #6366f1;">omega-system/</span> ........ 6段階パイプライン（最高レベル自律実行）</div>
+            <div><span style="color: #6366f1;">water-spider/</span> ........ 完全自動化モード（Issue自動取得→処理→PR）</div>
+            <div><span style="color: #6366f1;">feedback-loop/</span> ....... フィードバックループ（無限改善サイクル）</div>
+            <div><span style="color: #6366f1;">worktree/</span> ............ Git worktreeによる並列作業管理</div>
+            <div style="font-weight: 600; color: #4f46e5; margin-top: 0.5rem; margin-bottom: 0.3rem;">-- インフラ --</div>
+            <div><span style="color: #6366f1;">coordination/</span> ........ ロック管理、タスクオーケストレーション</div>
+            <div><span style="color: #6366f1;">execution/</span> ........... 並列実行マネージャー</div>
+            <div><span style="color: #6366f1;">monitoring/</span> .......... パフォーマンス監視・メトリクス</div>
+            <div><span style="color: #6366f1;">github/</span> .............. GitHub Discussions、Projects V2統合</div>
+            <div><span style="color: #6366f1;">utils/</span> ............... DAG管理、キャッシュ、リトライ、セキュリティ</div>
+            <div><span style="color: #6366f1;">ui/</span> .................. ターミナルUI（ボックス、テーブル、プログレスバー）</div>
+            <div><span style="color: #6366f1;">types/</span> ............... 20+の型定義ファイル</div>
+            <div><span style="color: #6366f1;">hooks/</span> ............... ダッシュボード統合フック</div>
+            <div>base-agent.ts ........ 全エージェントの基底クラス</div>
+            <div>dynamic-agent.ts ..... 動的エージェント生成</div>
+            <div>tool-factory.ts ...... ツール動的生成</div>
+          </div>
+          <p style="margin-top: 0.8rem; font-size: 0.85rem; color: #6366f1;"><strong>接続先</strong>: shared-utils, miyabi-agent-sdk</p>
+        </div>
+      </details>
+
+      <!-- SHARED-UTILS -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/shared-utils/ ― 共有ユーティリティ（<code>@miyabi/shared-utils</code> v0.1.0）【外部依存ゼロ】
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> 他パッケージから使われる共通機能。リトライ、APIクライアント、非同期ファイル書き込み、システム最適化。外部ライブラリに依存せず純TypeScriptで書かれている。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div><span style="color: #6366f1;">src/</span>retry.ts ........... 指数バックオフリトライ（最大3回、最大10秒）</div>
+            <div><span style="color: #6366f1;">src/</span>api-client.ts ..... HTTPコネクションプーリング+LRUキャッシュ</div>
+            <div style="padding-left: 3rem; color: #64748b;">性能: 25-50%改善、高並行時最大10倍</div>
+            <div><span style="color: #6366f1;">src/</span>async-file-writer.ts 非同期バッチファイル書き込み</div>
+            <div style="padding-left: 3rem; color: #64748b;">性能: 同期比96.34%改善</div>
+            <div><span style="color: #6366f1;">src/</span>system-optimizer.ts CPU/メモリ認識型の並行数制御（1-8）</div>
+            <div><span style="color: #6366f1;">src/</span>index.ts .......... 全モジュール再エクスポート</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- MCP-BUNDLE -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/mcp-bundle/ ― MCPサーバーバンドル（<code>miyabi-mcp-bundle</code> v3.8.0）【公開パッケージ】
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> Claude Desktop / Claude Codeから呼び出せる172個のMCPツールを1つにバンドル。Git, Docker, GitHub, ネットワーク, プロセス管理等21カテゴリ。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div><span style="color: #6366f1;">src/</span>index.ts ... MCPサーバーメイン（3629行、全ツール定義）</div>
+            <div><span style="color: #6366f1;">src/</span>cli.ts ..... コマンドラインエントリ（<code>miyabi-mcp</code>）</div>
+            <div><span style="color: #6366f1;">src/</span>cache.ts ... SimpleCache実装</div>
+            <div><span style="color: #6366f1;">src/</span>types.ts ... 型定義</div>
+            <div><span style="color: #6366f1;">plugins/</span> ....... プラグインZIPファイル群（マーケットプレイス配布）</div>
+            <div><span style="color: #6366f1;">docs/</span> .......... パフォーマンス、セキュリティ、トラブルシューティング</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- MIYABI-AGENT-SDK -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/miyabi-agent-sdk/ ― Agent SDK（<code>@miyabi/agent-sdk</code> v0.1.0）
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> 外部開発者がMiyabiエージェントを作るためのSDK。エージェントの基底クラス、GitHub統合、リトライ設定を提供。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div><span style="color: #6366f1;">src/</span>agent-base.ts ..... エージェント基底クラス</div>
+            <div><span style="color: #6366f1;">src/</span>github-client.ts .. GitHub API統合</div>
+            <div><span style="color: #6366f1;">src/</span>retry-config.ts ... リトライ設定（p-retry使用）</div>
+            <div><span style="color: #6366f1;">src/</span>types.ts .......... AgentContext, AgentResult等</div>
+            <div><span style="color: #6366f1;">src/</span>utils.ts .......... ユーティリティ関数</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- TASK-MANAGER -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/task-manager/ ― タスク管理（<code>@miyabi/task-manager</code> v0.1.0）
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> タスクの分解・DAG（有向非巡回グラフ）構築・状態管理・GitHub Projects双方向同期を担当。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div><span style="color: #6366f1;">src/</span>task-manager.ts ... メインのタスク管理ロジック</div>
+            <div><span style="color: #6366f1;">src/</span>index.ts ......... エクスポート</div>
+          </div>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #6366f1;"><strong>接続先</strong>: coding-agents（peerDependency）</p>
+        </div>
+      </details>
+
+      <!-- GITHUB-PROJECTS -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/github-projects/ ― GitHub Projects V2統合（<code>@agentic-os/github-projects</code> v1.0.0）
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p><strong>何をするの？</strong> GitHub Projects V2のGraphQL API統合。KPIメトリクス収集、週次レポート生成。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8; margin-top: 0.5rem;">
+            <div><span style="color: #6366f1;">src/</span>client.ts ... GitHubProjectsClientメイン</div>
+            <div><span style="color: #6366f1;">src/</span>setup.ts .... プロジェクト初期セットアップ</div>
+            <div><span style="color: #6366f1;">src/</span>types.ts .... ProjectInfo, ProjectItem型</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- MIYABI-WEB -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/miyabi-web/ ― Webダッシュボード（<code>@miyabi/web</code> v1.0.0）【Next.js + React】
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p><strong>何をするの？</strong> ブラウザで見えるダッシュボード。ワークフロー可視化、エージェント状態表示。Next.js 15 + React 18 + Tailwind CSS。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8; margin-top: 0.5rem;">
+            <div><span style="color: #6366f1;">src/app/</span> ................. Next.js App Routerページ群</div>
+            <div><span style="color: #6366f1;">src/app/dashboard/</span> ....... ワークフロー管理画面</div>
+            <div><span style="color: #6366f1;">src/app/api/workflows/</span> ... REST APIエンドポイント</div>
+            <div><span style="color: #6366f1;">src/components/workflow/</span> .. AgentNode, ConditionNode, IssueNode</div>
+            <div><span style="color: #6366f1;">src/hooks/</span> ............... useWorkflowカスタムフック</div>
+            <div><span style="color: #6366f1;">src/lib/</span> ................. APIクライアント、DAGバリデータ</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- DOC-GENERATOR -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/doc-generator/ ― ドキュメント自動生成（<code>@agentic-os/doc-generator</code> v1.0.0）
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p><strong>何をするの？</strong> TypeScriptのAST解析（ts-morph）でコードから自動的にドキュメントを生成。Handlebarsテンプレートエンジン使用。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8; margin-top: 0.5rem;">
+            <div><span style="color: #6366f1;">src/</span>cli.ts .... <code>doc-gen</code> コマンド</div>
+            <div><span style="color: #6366f1;">src/</span>index.ts .. CodeAnalyzer + TemplateEngine</div>
+            <div><span style="color: #6366f1;">example-docs/</span>  生成結果サンプル</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- CONTEXT-ENGINEERING -->
+      <details style="margin-bottom: 0.75rem; border: 1px solid #c7d2fe; border-radius: 8px; overflow: hidden;">
+        <summary style="padding: 0.8rem 1.2rem; cursor: pointer; background: #eef2ff; font-weight: 600; color: #3730a3; font-size: 0.95rem;">
+          packages/context-engineering/ ― コンテキストエンジニアリング（<code>@miyabi/context-engineering</code> v0.1.0）
+        </summary>
+        <div style="padding: 1rem 1.2rem; font-size: 0.88rem; color: #475569;">
+          <p><strong>何をするの？</strong> AIプロンプトの最適化API。FastAPIバックエンドとの通信クライアント + MCPサーバー。</p>
+          <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8; margin-top: 0.5rem;">
+            <div><span style="color: #6366f1;">src/</span>client.ts ........... FastAPI通信クライアント</div>
+            <div><span style="color: #6366f1;">src/</span>types.ts ............ AnalysisResult, PromptTemplate型</div>
+            <div><span style="color: #6366f1;">mcp-server/</span> ............ Context Engineering MCPサーバー</div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </details>
+
+  <!-- ==================== .claude/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 2px solid #8b5cf6; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #fff; font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.3rem;">&#129302;</span> .claude/ ― Claude Code AI設定（エージェント・スキル・コマンド・MCP）
+    </summary>
+    <div style="padding: 1.5rem;">
+
+      <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1.5rem; padding: 1rem; background: #f5f3ff; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+        Claude Code（AI開発アシスタント）がこのプロジェクトを理解するための全設定。スキル、コマンド、フック、MCPサーバー、エージェントプロンプトを含む。
+      </p>
+
+      <!-- agents/ -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #ddd6fe; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f5f3ff; font-weight: 600; color: #5b21b6; font-size: 0.9rem;">
+          agents/ ― エージェント定義（プロンプト＋仕様、53ファイル）
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.85rem; color: #475569;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div style="background: #faf5ff; padding: 0.6rem; border-radius: 4px;">
+              <div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.3rem;">prompts/business/（16ファイル）</div>
+              <div style="font-size: 0.8rem;">ビジネスエージェントのプロンプト:<br>
+              marketing, analytics, CRM, sales, persona, YouTube, SNS戦略, コンテンツ作成, ファネル設計, 市場調査, 商品企画, 自己分析 等</div>
+            </div>
+            <div style="background: #faf5ff; padding: 0.6rem; border-radius: 4px;">
+              <div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.3rem;">prompts/coding/（7ファイル）</div>
+              <div style="font-size: 0.8rem;">コーディングエージェントのプロンプト:<br>
+              coordinator, codegen, review, issue, PR, deployment</div>
+            </div>
+            <div style="background: #faf5ff; padding: 0.6rem; border-radius: 4px;">
+              <div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.3rem;">specs/business/（14ファイル）</div>
+              <div style="font-size: 0.8rem;">各ビジネスエージェントの技術仕様書</div>
+            </div>
+            <div style="background: #faf5ff; padding: 0.6rem; border-radius: 4px;">
+              <div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.3rem;">specs/coding/（7ファイル）</div>
+              <div style="font-size: 0.8rem;">各コーディングエージェントの技術仕様書</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.82rem;">
+            <strong>他のファイル:</strong> AGENT_CHARACTERS.md（キャラクター設定）、agent-name-mapping.json（名前変換表）、COMMUNICATION_PROTOCOL.md（通信規約）、PERFORMANCE_METRICS.md（性能指標）
+          </div>
+        </div>
+      </details>
+
+      <!-- skills/ -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #ddd6fe; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f5f3ff; font-weight: 600; color: #5b21b6; font-size: 0.9rem;">
+          skills/ ― 23実行可能スキル + 13ナレッジガイド
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.85rem; color: #475569;">
+          <p style="margin-bottom: 0.5rem;">3層Progressive Disclosureアーキテクチャ: Layer1(500トークン) → Layer2(1000) → Layer3(5000)</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.4rem; margin-bottom: 0.8rem;">
+            <div style="background: #f0fdf4; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #22c55e;"><strong>coordinator-agent</strong><br>Issue分析→DAG構築</div>
+            <div style="background: #f0fdf4; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #22c55e;"><strong>issue-agent</strong><br>53ラベル自動分類</div>
+            <div style="background: #f0fdf4; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #22c55e;"><strong>code-reviewer</strong><br>100点スコアリング</div>
+            <div style="background: #f0fdf4; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #22c55e;"><strong>pr-agent</strong><br>PR作成・管理</div>
+            <div style="background: #f0fdf4; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #22c55e;"><strong>deploy-agent</strong><br>4段階デプロイ</div>
+            <div style="background: #f0fdf4; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #22c55e;"><strong>test-generator</strong><br>テスト自動生成</div>
+            <div style="background: #eff6ff; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #3b82f6;"><strong>miyabi-pipeline</strong><br>コマンド合成</div>
+            <div style="background: #eff6ff; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #3b82f6;"><strong>miyabi-quality-gate</strong><br>品質ゲート</div>
+            <div style="background: #eff6ff; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #3b82f6;"><strong>miyabi-github-os</strong><br>GitHub as OS</div>
+            <div style="background: #fefce8; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #eab308;"><strong>commit-helper</strong><br>Conventional Commits</div>
+            <div style="background: #fefce8; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #eab308;"><strong>refactor-helper</strong><br>コードスメル検出</div>
+            <div style="background: #fefce8; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #eab308;"><strong>doc-generator</strong><br>ドキュメント生成</div>
+            <div style="background: #fef2f2; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #ef4444;"><strong>ccg</strong><br>AIコース生成</div>
+            <div style="background: #fef2f2; padding: 0.4rem 0.6rem; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid #ef4444;"><strong>teachable-course</strong><br>Teachable連携</div>
+          </div>
+          <div style="font-size: 0.82rem;">
+            <strong>gitnexus/</strong>: 6スキル（CLI, Guide, Exploring, Impact Analysis, Debugging, Refactoring）<br>
+            <strong>guides/</strong>: 13ナレッジガイド（CI/CD, コードレビュー, デバッグ, Git, TDD, セキュリティ, TypeScript等）
+          </div>
+        </div>
+      </details>
+
+      <!-- commands/ -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #ddd6fe; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f5f3ff; font-weight: 600; color: #5b21b6; font-size: 0.9rem;">
+          commands/ ― 10個のスラッシュコマンド定義
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.85rem; color: #475569;">
+          <div style="font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+            <div>agent-run.md ........ <code>/agent-run</code> エージェント実行</div>
+            <div>create-issue.md ..... <code>/create-issue</code> Issue作成</div>
+            <div>deploy.md ........... <code>/deploy</code> デプロイ</div>
+            <div>generate-docs.md .... <code>/generate-docs</code> ドキュメント生成</div>
+            <div>miyabi-auto.md ...... <code>/miyabi-auto</code> 自律モード</div>
+            <div>miyabi-todos.md ..... <code>/miyabi-todos</code> TODO検出</div>
+            <div>review.md ........... <code>/review</code> コードレビュー</div>
+            <div>security-scan.md .... <code>/security-scan</code> セキュリティスキャン</div>
+            <div>test.md ............. <code>/test</code> テスト実行</div>
+            <div>verify.md ........... <code>/verify</code> ヘルスチェック</div>
+            <div>PIPELINE_GUIDE.md ... パイプラインガイド</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- hooks/ -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #ddd6fe; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f5f3ff; font-weight: 600; color: #5b21b6; font-size: 0.9rem;">
+          hooks/ ― 自動実行フック（5個）
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.85rem; color: #475569; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+          <div>agent-event.sh ........ エージェントイベント時の処理</div>
+          <div>auto-format.sh ........ コード自動フォーマット</div>
+          <div>log-commands.sh ....... コマンド実行ログ記録</div>
+          <div>session-continue.sh ... セッション継続処理</div>
+          <div>validate-typescript.sh  TypeScript検証</div>
+          <div>webhook-fallback.js ... Webhook障害時フォールバック</div>
+        </div>
+      </details>
+
+      <!-- mcp-servers/ -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #ddd6fe; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f5f3ff; font-weight: 600; color: #5b21b6; font-size: 0.9rem;">
+          mcp-servers/ ― カスタムMCPサーバー（7サーバー、43+ツール）
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.85rem; color: #475569; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+          <div>miyabi-integration.js ..... Miyabi統合（12ツール: init, status, agent_run等）</div>
+          <div>github-enhanced.cjs ....... GitHub拡張（5ツール: Issue/PR管理）</div>
+          <div>project-context.cjs ....... プロジェクト構造分析（5ツール）</div>
+          <div>ide-integration.cjs ....... IDE統合（3ツール: 診断, 実行, フォーマット）</div>
+          <div>image-generation.js ....... Gemini画像/TTS生成（5ツール）</div>
+          <div>discord-integration.js .... Discord連携（7ツール: メッセージ, リリース通知）</div>
+          <div>check-server.js ........... サーバー動作確認</div>
+          <div>health-check.sh ........... ヘルスチェックスクリプト</div>
+        </div>
+      </details>
+
+      <!-- monitoring/ -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #ddd6fe; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f5f3ff; font-weight: 600; color: #5b21b6; font-size: 0.9rem;">
+          monitoring/ ― リアルタイム監視
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.85rem; color: #475569; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+          <div>dashboard-config.ts ..... ダッシュボード設定</div>
+          <div>metrics-collector.ts .... メトリクス収集</div>
+          <div>websocket-server.ts ..... WebSocketリアルタイム通信</div>
+        </div>
+      </details>
+
+      <!-- Other .claude files -->
+      <div style="margin-top: 0.5rem; padding: 0.8rem 1rem; background: #f8fafc; border-radius: 6px; font-size: 0.85rem; color: #475569;">
+        <strong>その他のファイル:</strong>
+        <span style="font-family: monospace; font-size: 0.82rem;">
+          mcp.json / mcp-config.json（MCP設定）、instructions.md（AI指示書）、overview.md（概要）、QUICK_START.md、TROUBLESHOOTING.md、settings.example.json
+        </span>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== .claude-plugin/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #c4b5fd; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#128268;</span> .claude-plugin/ ― Claude Codeプラグイン配布パッケージ
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+      <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> Miyabiの機能をClaude Codeプラグインとして配布するための設定。<code>plugin.json</code>で10個のプラグインコマンドを定義。</p>
+      <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+        <div>plugin.json ............. プラグインマニフェスト（miyabi-operations v1.0.0）</div>
+        <div>commands.json ........... コマンド一覧定義</div>
+        <div><span style="color: #8b5cf6;">commands/</span> ............... 10コマンド（miyabi-init, auto, status, agent, deploy等）</div>
+        <div><span style="color: #8b5cf6;">agents/</span> ................. 7エージェント定義（codegen, coordinator, review等）</div>
+        <div><span style="color: #8b5cf6;">hooks/</span> .................. pre-commit, post-commit, pre-pr, post-test</div>
+        <div>context.md .............. プロジェクトコンテキスト</div>
+        <div>instructions.md ......... プラグイン指示書</div>
+        <div>marketplace.json ........ マーケットプレイス登録情報</div>
+        <div>verify-plugin.sh ........ プラグイン検証スクリプト</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== .codex/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #c4b5fd; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#129520;</span> .codex/ ― OpenAI Codex設定
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+      <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> OpenAI Codex（別のAIコーディングアシスタント）用の設定。5つのエージェントペルソナを定義。</p>
+      <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+        <div>config.toml ............. Codex全体設定</div>
+        <div><span style="color: #8b5cf6;">agents/</span>default.toml .... デフォルトエージェント</div>
+        <div><span style="color: #8b5cf6;">agents/</span>architect.toml . アーキテクト（設計担当）</div>
+        <div><span style="color: #8b5cf6;">agents/</span>explorer.toml .. エクスプローラー（調査担当）</div>
+        <div><span style="color: #8b5cf6;">agents/</span>reviewer.toml .. レビュアー（レビュー担当）</div>
+        <div><span style="color: #8b5cf6;">agents/</span>worker.toml .... ワーカー（実装担当）</div>
+        <div><span style="color: #8b5cf6;">hooks/</span>notify.py ....... 通知フック</div>
+        <div><span style="color: #8b5cf6;">hooks/</span>session-end.sh .. セッション終了処理</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== .github/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 2px solid #0ea5e9; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: #fff; font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.3rem;">&#9881;</span> .github/ ― GitHub Actions CI/CD + テンプレート
+    </summary>
+    <div style="padding: 1.5rem;">
+
+      <p style="color: #475569; font-size: 0.95rem; margin-bottom: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+        GitHubの自動化設定。コードをpushすると自動でテスト・ビルド・デプロイが走る。Issueテンプレートでバグ報告・機能要望のフォーマットを統一。
+      </p>
+
+      <!-- workflows -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #bae6fd; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f0f9ff; font-weight: 600; color: #0369a1; font-size: 0.9rem;">
+          workflows/ ― 16個のGitHub Actionsワークフロー
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.82rem; color: #475569; line-height: 1.8;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+            <div style="font-family: monospace;">integrated-system-ci.yml <span style="color: #64748b;">統合CIテスト</span></div>
+            <div style="font-family: monospace;">cli-cross-platform.yml <span style="color: #64748b;">クロスプラットフォーム</span></div>
+            <div style="font-family: monospace;">npm-publish.yml <span style="color: #64748b;">npm公開</span></div>
+            <div style="font-family: monospace;">auto-release.yml <span style="color: #64748b;">自動リリース</span></div>
+            <div style="font-family: monospace;">docker-build.yml <span style="color: #64748b;">Dockerビルド</span></div>
+            <div style="font-family: monospace;">autonomous-agent.yml <span style="color: #64748b;">自律エージェント起動</span></div>
+            <div style="font-family: monospace;">ai-auto-label.yml <span style="color: #64748b;">AI自動ラベル付け</span></div>
+            <div style="font-family: monospace;">label-sync.yml <span style="color: #64748b;">ラベル同期</span></div>
+            <div style="font-family: monospace;">state-machine.yml <span style="color: #64748b;">状態遷移管理</span></div>
+            <div style="font-family: monospace;">commit-to-issue.yml <span style="color: #64748b;">コミット→Issue連携</span></div>
+            <div style="font-family: monospace;">codeql.yml <span style="color: #64748b;">CodeQLセキュリティ分析</span></div>
+            <div style="font-family: monospace;">gitleaks.yml <span style="color: #64748b;">秘密情報漏洩検出</span></div>
+            <div style="font-family: monospace;">security-audit.yml <span style="color: #64748b;">セキュリティ監査</span></div>
+            <div style="font-family: monospace;">mcp-health-check.yml <span style="color: #64748b;">MCPサーバー健全性</span></div>
+            <div style="font-family: monospace;">snapshot-test.yml <span style="color: #64748b;">スナップショットテスト</span></div>
+            <div style="font-family: monospace;">webhook-handler.yml <span style="color: #64748b;">Webhookハンドラー</span></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Issue templates -->
+      <details style="margin-bottom: 0.5rem; border: 1px solid #bae6fd; border-radius: 6px;">
+        <summary style="padding: 0.6rem 1rem; cursor: pointer; background: #f0f9ff; font-weight: 600; color: #0369a1; font-size: 0.9rem;">
+          ISSUE_TEMPLATE/ ― Issueテンプレート（7種類）
+        </summary>
+        <div style="padding: 0.8rem 1rem; font-size: 0.82rem; color: #475569; font-family: monospace; line-height: 1.8;">
+          <div>01-feature-request.yml ... 機能要望フォーム</div>
+          <div>02-bug-report.yml ....... バグ報告フォーム</div>
+          <div>03-documentation.yml .... ドキュメント改善</div>
+          <div>agent-task.md ........... エージェント用タスク</div>
+          <div>task.yml ................ 一般タスク</div>
+          <div>config.yml .............. テンプレート設定</div>
+        </div>
+      </details>
+
+      <div style="padding: 0.6rem 1rem; font-size: 0.82rem; color: #475569; font-family: monospace; line-height: 1.8;">
+        <div><span style="color: #0ea5e9;">actions/</span>agent-executor/action.yml ... カスタムAction（エージェント実行）</div>
+        <div>labels.yml / labels-ja.yml ........... 53ラベル定義（英語/日本語）</div>
+        <div>dependabot.yml ....................... 依存関係自動更新</div>
+        <div>FUNDING.yml .......................... スポンサー設定</div>
+        <div>AGENTS.md / GUARDIAN.md .............. エージェント・ガーディアン仕様</div>
+        <div>WORKFLOW_RULES.md .................... ワークフロールール</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== scripts/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 2px solid #10b981; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.3rem;">&#128295;</span> scripts/ ― 60+の運用・自動化スクリプト
+    </summary>
+    <div style="padding: 1.5rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">operations/（12ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">エージェント操作の中核。<br>agentic.ts（起点）、parallel-executor.ts（並列実行）、verify-agents.ts（検証）、label-state-machine.ts等</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">reporting/（12ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">レポート・ダッシュボード生成。<br>weekly-report.ts、dashboard-data.ts、realtime-metrics.ts、session-graph.ts等</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">integrated/（10ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">統合テスト・デモ。<br>integrated-system.ts、water-spider.ts、worktree-manager.ts、feedback-loop.ts等</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">github/（6ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">GitHub操作専用。<br>ai-label-issue.ts、discussion-bot.ts、projects-graphql.ts等</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">security/（3ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">セキュリティ管理。<br>security-manager.ts、security-report.ts、webhook-security.ts</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">setup/（7ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">セットアップ用。<br>github-token-helper.ts、setup-agentic-os.ts、register-claude-plugin.ts等</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">tools/（8ファイル）</div>
+          <div style="color: #475569; font-size: 0.8rem;">メディア生成・ヘッドレス実行。<br>generate-image/speech/video.ts、claude-headless.ts等</div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #059669; margin-bottom: 0.3rem;">migration/ / cicd/ / webhook/</div>
+          <div style="color: #475569; font-size: 0.8rem;">マイグレーション（4ファイル）、CI/CD統合（3ファイル）、Webhook（1ファイル）</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== tests/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 2px solid #ef4444; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#128300;</span> tests/ ― ルートレベルテスト（ユニット + 統合 + E2E）
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+        <div style="background: #fef2f2; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #dc2626; margin-bottom: 0.3rem;">ユニットテスト（10+）</div>
+          <div style="font-size: 0.8rem;">BaseAgent, CodeGen, Coordinator, ReviewAgent, SecurityScanner, DAGManager, github-client 等の個別テスト</div>
+        </div>
+        <div style="background: #fef2f2; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #dc2626; margin-bottom: 0.3rem;">統合テスト（integration/）</div>
+          <div style="font-size: 0.8rem;">agent-verification, github-os-integration, plans-generation, review-command, system 等</div>
+        </div>
+        <div style="background: #fef2f2; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #dc2626; margin-bottom: 0.3rem;">E2Eテスト（e2e/）</div>
+          <div style="font-size: 0.8rem;">Playwrightによるブラウザテスト: dashboard-ui-ux, miyabi-demo 等</div>
+        </div>
+      </div>
+      <div style="margin-top: 0.5rem; font-size: 0.82rem;">
+        <strong>fixtures/</strong>: テスト用のモックデータ（github-responses.ts）<br>
+        <strong>mocks/</strong>: GitHub APIモック（github-api.ts）
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== docs/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 2px solid #f59e0b; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.3rem;">&#128214;</span> docs/ ― 150+のドキュメントファイル
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">アーキテクチャ文書</div>
+          <div style="font-size: 0.8rem;">architecture.md、AGENTIC_OS.md、MASTER_SPEC.md、MIYABI_ARCHITECTURE_V2.md、OMEGA_SYSTEM.md、PARALLEL_WORK_ARCHITECTURE.md</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">ユーザーガイド</div>
+          <div style="font-size: 0.8rem;">GETTING_STARTED.md、USER_GUIDE.md、CLI_USAGE_EXAMPLES.md、SETUP_GUIDE、TERMUX_GUIDE.md、FOR_NON_PROGRAMMERS.md</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">diagrams/（16ファイル）</div>
+          <div style="font-size: 0.8rem;">PlantUMLソース + PNG/SVG出力。システムアーキテクチャ、状態遷移、データフロー、並列実行フロー等の図</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">articles/（6ファイル）</div>
+          <div style="font-size: 0.8rem;">note.com向け記事: 初心者向けガイド、スキル解説、v0.19.0リリース記事等</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">discord/（8ファイル）</div>
+          <div style="font-size: 0.8rem;">Discord関連: サーバー構築ガイド、Botセットアップ、ウェルカムメッセージ、FAQ、ルール</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">community/ / operations/</div>
+          <div style="font-size: 0.8rem;">コミュニティガイドライン、マーケットプレイス仕様、運用マニュアル、デプロイガイド</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">フェーズ文書（Phase A-I）</div>
+          <div style="font-size: 0.8rem;">開発ロードマップの各フェーズ実装記録。Webhook、Discussion、Dashboard、SDK、環境管理、リリース</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #b45309; margin-bottom: 0.3rem;">ランディングページ</div>
+          <div style="font-size: 0.8rem;">index.html、landing.html、product-landing.html、entity-graph.html ― GitHub Pages公開用</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== miyabi_def/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #fbbf24; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1e293b; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#127760;</span> miyabi_def/ ― SWML定義・世界モデル（学術的基盤）
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+      <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> Shunsuke World Model Logic（SWML）の定義。Miyabiの理論的・数学的基盤。Jinja2テンプレート + YAML変数によるコード生成パイプライン。</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+        <div style="background: #fffbeb; padding: 0.6rem; border-radius: 4px;">
+          <div style="font-weight: 600; color: #b45309; font-size: 0.85rem;">templates/（12ファイル）</div>
+          <div style="font-size: 0.78rem;">Jinja2テンプレート: agents, entities, workflows, world_definition, skills, labels等</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.6rem; border-radius: 4px;">
+          <div style="font-weight: 600; color: #b45309; font-size: 0.85rem;">variables/（15ファイル）</div>
+          <div style="font-size: 0.78rem;">YAML変数: agents, entities, workflows, labels, skills, naming_conventions等</div>
+        </div>
+        <div style="background: #fffbeb; padding: 0.6rem; border-radius: 4px;">
+          <div style="font-weight: 600; color: #b45309; font-size: 0.85rem;">diagrams/（12ファイル）</div>
+          <div style="font-size: 0.78rem;">PlantUML図: system_architecture, data_flow, agents, execution_category等</div>
+        </div>
+      </div>
+      <div style="margin-top: 0.5rem; font-size: 0.82rem;">
+        <strong>学術論文</strong>: SWML_PAPER.pdf / .tex（英語・日本語）<br>
+        <strong>コード生成</strong>: generate.py / generate_puml.py（テンプレート→YAML→出力）
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== workflow-automation/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #34d399; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: #1e293b; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#128640;</span> workflow-automation/ ― Pythonワークフロー自動化
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+      <p style="margin-bottom: 0.8rem;"><strong>何をするの？</strong> Python製のワークフロー自動化システム。SEOブログ生成、スクレイピング、SERP分析等のエージェント。TypeScript側とは独立して動作。</p>
+      <div style="background: #f8fafc; border-radius: 6px; padding: 0.8rem; font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+        <div>app.py .................. メインアプリケーション</div>
+        <div><span style="color: #10b981;">agents/</span> ................. content_generator.py, scraper_agent.py, serp_agent.py</div>
+        <div><span style="color: #10b981;">core/</span> ................... entity_mapping.py, workflow_architecture.py, stream_processor.py</div>
+        <div><span style="color: #10b981;">workflows/</span> .............. run_daily_ops.py（日次運用）</div>
+        <div><span style="color: #10b981;">examples/</span> ............... seo_blog_generator.py</div>
+        <div><span style="color: #10b981;">society/core/</span> ........... orchestrator.py（ソサエティオーケストレーター）</div>
+        <div><span style="color: #10b981;">config/</span> ................. workflow_config.yaml</div>
+        <div>requirements.txt ........ Python依存関係</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== templates/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#128203;</span> templates/ ― プロジェクトテンプレート
+    </summary>
+    <div style="padding: 1rem 1.5rem; font-size: 0.88rem; color: #475569;">
+      <p><strong>注</strong>: ルートレベルのtemplatesディレクトリ。packages/cli/templates/と同様、<code>miyabi init</code>で新プロジェクト作成時に使用されるファイルテンプレート群。</p>
+    </div>
+  </details>
+
+  <!-- ==================== assets/ examples/ releases/ ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#127912;</span> assets/ + examples/ + releases/ ― メディア・サンプル・バイナリ
+    </summary>
+    <div style="padding: 1.5rem; font-size: 0.88rem; color: #475569;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
+        <div style="background: #f8fafc; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #334155; margin-bottom: 0.3rem;">assets/（20+ファイル）</div>
+          <div style="font-size: 0.8rem;">note記事用画像、ピラー画像、紹介動画（miyabi-intro.mp4）、テスト画像</div>
+        </div>
+        <div style="background: #f8fafc; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #334155; margin-bottom: 0.3rem;">examples/（3ファイル）</div>
+          <div style="font-size: 0.8rem;">デモ用Issueサンプル（demo-issue.md）、実行レポートJSON、README</div>
+        </div>
+        <div style="background: #f8fafc; padding: 0.8rem; border-radius: 6px;">
+          <div style="font-weight: 600; color: #334155; margin-bottom: 0.3rem;">releases/（4ファイル）</div>
+          <div style="font-size: 0.8rem;">macOS ARM64バイナリ（latest + v0.1.1）、チェックサムファイル</div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== Other hidden dirs ==================== -->
+  <details style="margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff;">
+    <summary style="padding: 1rem 1.5rem; cursor: pointer; background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); color: #fff; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">&#128194;</span> その他の隠しディレクトリ ― .ai, .vscode, .todos_shunsuke
+    </summary>
+    <div style="padding: 1rem 1.5rem; font-size: 0.88rem; color: #475569;">
+      <div style="font-family: monospace; font-size: 0.82rem; line-height: 1.8;">
+        <div><span style="color: #64748b;">.ai/</span>trace-logs/.gitkeep .... AIトレースログの保存場所（空で初期化）</div>
+        <div><span style="color: #64748b;">.vscode/</span>settings.json .... VS Code エディタ設定</div>
+        <div><span style="color: #64748b;">.todos_shunsuke/</span>todos.md  個人用TODOメモ</div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ==================== DEPENDENCY GRAPH ==================== -->
+  <div style="margin-top: 3rem; margin-bottom: 2rem;">
+    <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; text-align: center; margin-bottom: 1.5rem;">
+      パッケージ依存関係グラフ
+    </h3>
+    <p style="text-align: center; color: #64748b; font-size: 0.9rem; margin-bottom: 2rem;">
+      矢印は「依存している」方向。下のパッケージほど基盤的な役割。
+    </p>
+
+    <div style="position: relative; max-width: 900px; margin: 0 auto; min-height: 680px;">
+
+      <!-- Level 3: CLI (top) -->
+      <div style="display: flex; justify-content: center; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; padding: 0.8rem 1.5rem; border-radius: 10px; text-align: center; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(99,102,241,0.3); min-width: 220px;">
+          miyabi (CLI)<br>
+          <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">v0.22.0 &#x2022; 30+ コマンド &#x2022; 公開</span>
+        </div>
+      </div>
+
+      <!-- Arrows from CLI -->
+      <div style="display: flex; justify-content: center; gap: 4rem; margin-bottom: 0.5rem;">
+        <div style="text-align: center; color: #6366f1; font-size: 1.5rem; line-height: 1;">&#8595;</div>
+        <div style="text-align: center; color: #6366f1; font-size: 1.5rem; line-height: 1;">&#8595;</div>
+        <div style="text-align: center; color: #6366f1; font-size: 1.5rem; line-height: 1;">&#8595;</div>
+      </div>
+
+      <!-- Level 2: core + external deps -->
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(124,58,237,0.25);">
+          @agentic-os/core<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">v0.1.0</span>
+        </div>
+        <div style="background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(14,165,233,0.25);">
+          agent-skill-bus<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">npm ^1.2.0</span>
+        </div>
+        <div style="background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(14,165,233,0.25);">
+          miyabi-agent-sdk<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">npm ^0.1.0-alpha.2</span>
+        </div>
+      </div>
+
+      <!-- Arrow from core -->
+      <div style="display: flex; justify-content: center; margin-bottom: 0.5rem;">
+        <div style="text-align: center; color: #7c3aed; font-size: 0.75rem;">re-export &#8595;</div>
+      </div>
+
+      <!-- Level 1: coding-agents -->
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(139,92,246,0.25); min-width: 200px;">
+          @miyabi/coding-agents<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">v0.1.0 &#x2022; 7エージェント</span>
+        </div>
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(245,158,11,0.25);">
+          @agentic-os/github-projects<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">v1.0.0</span>
+        </div>
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(245,158,11,0.25);">
+          @miyabi/task-manager<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">v0.1.0 &#x2022; peer dep</span>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div style="display: flex; justify-content: center; gap: 6rem; margin-bottom: 0.5rem;">
+        <div style="text-align: center; color: #8b5cf6; font-size: 1.5rem; line-height: 1;">&#8595;</div>
+      </div>
+
+      <!-- Level 0: shared-utils -->
+      <div style="display: flex; justify-content: center; margin-bottom: 2.5rem;">
+        <div style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.85rem; box-shadow: 0 3px 8px rgba(16,185,129,0.25);">
+          @miyabi/shared-utils<br>
+          <span style="font-size: 0.7rem; font-weight: 400; opacity: 0.9;">v0.1.0 &#x2022; 外部依存ゼロ</span>
+        </div>
+      </div>
+
+      <!-- Independent packages -->
+      <div style="border-top: 2px dashed #e2e8f0; padding-top: 1.5rem;">
+        <div style="text-align: center; font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; font-weight: 600;">
+          独立パッケージ（他の内部パッケージに依存しない）
+        </div>
+        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+          <div style="background: #f1f5f9; border: 2px solid #cbd5e1; padding: 0.6rem 1rem; border-radius: 8px; text-align: center; font-size: 0.82rem; font-weight: 600; color: #334155;">
+            miyabi-mcp-bundle<br>
+            <span style="font-size: 0.7rem; font-weight: 400; color: #64748b;">v3.8.0 &#x2022; 172ツール &#x2022; 公開</span>
+          </div>
+          <div style="background: #f1f5f9; border: 2px solid #cbd5e1; padding: 0.6rem 1rem; border-radius: 8px; text-align: center; font-size: 0.82rem; font-weight: 600; color: #334155;">
+            @miyabi/web<br>
+            <span style="font-size: 0.7rem; font-weight: 400; color: #64748b;">v1.0.0 &#x2022; Next.js</span>
+          </div>
+          <div style="background: #f1f5f9; border: 2px solid #cbd5e1; padding: 0.6rem 1rem; border-radius: 8px; text-align: center; font-size: 0.82rem; font-weight: 600; color: #334155;">
+            @agentic-os/doc-generator<br>
+            <span style="font-size: 0.7rem; font-weight: 400; color: #64748b;">v1.0.0 &#x2022; ts-morph</span>
+          </div>
+          <div style="background: #f1f5f9; border: 2px solid #cbd5e1; padding: 0.6rem 1rem; border-radius: 8px; text-align: center; font-size: 0.82rem; font-weight: 600; color: #334155;">
+            @miyabi/context-engineering<br>
+            <span style="font-size: 0.7rem; font-weight: 400; color: #64748b;">v0.1.0 &#x2022; FastAPI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== BUILD ORDER ==================== -->
+  <div style="max-width: 900px; margin: 2rem auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+    <h4 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem;">ビルド順序（依存関係に基づく推奨順）</h4>
+    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; font-size: 0.88rem;">
+      <div style="background: #10b981; color: #fff; padding: 0.3rem 0.8rem; border-radius: 6px; font-weight: 600; text-align: center;">Level 0</div>
+      <div style="color: #475569;">shared-utils, miyabi-agent-sdk, context-engineering, doc-generator, mcp-bundle, miyabi-web <span style="color: #64748b;">（並列ビルド可能）</span></div>
+
+      <div style="background: #3b82f6; color: #fff; padding: 0.3rem 0.8rem; border-radius: 6px; font-weight: 600; text-align: center;">Level 1</div>
+      <div style="color: #475569;">coding-agents, github-projects <span style="color: #64748b;">（Level 0に依存）</span></div>
+
+      <div style="background: #8b5cf6; color: #fff; padding: 0.3rem 0.8rem; border-radius: 6px; font-weight: 600; text-align: center;">Level 2</div>
+      <div style="color: #475569;">core, task-manager <span style="color: #64748b;">（Level 1に依存）</span></div>
+
+      <div style="background: #6366f1; color: #fff; padding: 0.3rem 0.8rem; border-radius: 6px; font-weight: 600; text-align: center;">Level 3</div>
+      <div style="color: #475569;">cli <span style="color: #64748b;">（Level 2に依存 ― 最後にビルド）</span></div>
+    </div>
+  </div>
+
+  <!-- ==================== FILE COUNT SUMMARY ==================== -->
+  <div style="max-width: 900px; margin: 2rem auto; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 12px; padding: 1.5rem 2rem; color: #e2e8f0;">
+    <h4 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">プロジェクト数量サマリー</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem;">
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #818cf8;">11</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">TypeScriptパッケージ</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #a78bfa;">23</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">実行可能スキル</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8;">30+</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">CLIコマンド</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #34d399;">215+</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">MCPツール</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #fbbf24;">16</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">GitHub Workflows</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #fb923c;">140+</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">npmスクリプト</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #f87171;">150+</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">ドキュメント</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.08); padding: 0.8rem; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #e879f9;">7</div>
+        <div style="font-size: 0.8rem; color: #94a3b8;">AIエージェント種類</div>
+      </div>
+    </div>
+  </div>
+
+</section>
