@@ -12,7 +12,6 @@
 import ora from 'ora';
 import chalk from 'chalk';
 import { Octokit } from '@octokit/rest';
-// @ts-expect-error - inquirer is an ESM-only module
 import inquirer from 'inquirer';
 
 export interface SprintOptions {

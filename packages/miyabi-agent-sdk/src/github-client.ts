@@ -5,8 +5,8 @@
  * All API calls are automatically wrapped with retry logic for resilience.
  */
 
-import type { GitHubIssue } from './types';
-import { withRetry, type GitHubRetryConfig } from './retry-config';
+import type { GitHubIssue } from './types.js';
+import { withRetry, type GitHubRetryConfig } from './retry-config.js';
 
 /**
  * GitHub client options

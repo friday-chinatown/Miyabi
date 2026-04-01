@@ -1,0 +1,1760 @@
+<!-- ============================================================
+     Part 4: ワークフロー・インフラストラクチャ
+     Miyabi MEGA Document - HTML Fragment
+     ============================================================ -->
+
+<style>
+/* ── Part 4 Scoped Styles ── */
+
+.p4-section {
+  margin-bottom: 5rem;
+}
+
+.p4-section-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 3px solid;
+  border-image: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa) 1;
+}
+
+.p4-section-intro {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 2.5rem;
+  line-height: 1.8;
+  max-width: 800px;
+}
+
+/* ── Flow Pipeline ── */
+.pipeline-wrapper {
+  position: relative;
+  padding: 2rem 0;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: stretch;
+  gap: 2rem;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.pipeline-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 39px;
+  bottom: -2rem;
+  width: 3px;
+  height: 2rem;
+  background: linear-gradient(180deg, #6366f1, #a78bfa);
+}
+
+.pipeline-step:not(:last-child) {
+  margin-bottom: 2rem;
+}
+
+.pipeline-number {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+.pipeline-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.8rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border-left: 4px solid;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pipeline-card:hover {
+  transform: translateX(6px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+}
+
+.pipeline-card h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pipeline-card .agent-name {
+  font-size: 0.85rem;
+  color: #8b5cf6;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.pipeline-card p {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.pipeline-card .step-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.pipeline-card .step-details span {
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  color: #334155;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pipeline-timing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #f0fdf4;
+  color: #15803d;
+  border-radius: 20px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.step-color-1 .pipeline-number { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.step-color-1 .pipeline-card { border-left-color: #3b82f6; }
+.step-color-2 .pipeline-number { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.step-color-2 .pipeline-card { border-left-color: #8b5cf6; }
+.step-color-3 .pipeline-number { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.step-color-3 .pipeline-card { border-left-color: #6366f1; }
+.step-color-4 .pipeline-number { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+.step-color-4 .pipeline-card { border-left-color: #14b8a6; }
+.step-color-5 .pipeline-number { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.step-color-5 .pipeline-card { border-left-color: #f59e0b; }
+.step-color-6 .pipeline-number { background: linear-gradient(135deg, #10b981, #059669); }
+.step-color-6 .pipeline-card { border-left-color: #10b981; }
+.step-color-7 .pipeline-number { background: linear-gradient(135deg, #ec4899, #db2777); }
+.step-color-7 .pipeline-card { border-left-color: #ec4899; }
+.step-color-8 .pipeline-number { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.step-color-8 .pipeline-card { border-left-color: #ef4444; }
+.step-color-9 .pipeline-number { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.step-color-9 .pipeline-card { border-left-color: #22c55e; }
+
+.pipeline-total-bar {
+  margin-top: 2rem;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pipeline-total-bar .total-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.pipeline-total-bar .total-time {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pipeline-progress-track {
+  width: 100%;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.pipeline-progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #14b8a6, #f59e0b, #10b981, #ef4444, #22c55e);
+  background-size: 200% 100%;
+  animation: p4-progress-shift 3s ease-in-out infinite;
+}
+
+@keyframes p4-progress-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ── Workflow Cards Grid ── */
+.workflow-category {
+  margin-bottom: 2.5rem;
+}
+
+.workflow-category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.workflow-category-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: #fff;
+}
+
+.workflow-category-header h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+}
+
+.workflow-category-header .wf-count {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.wf-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.wf-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.wf-card-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.wf-card-desc {
+  font-size: 0.95rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.wf-card-trigger {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.wf-card-trigger::before {
+  content: '\26A1';
+  font-size: 0.7rem;
+}
+
+/* ── MCP Server Cards ── */
+.mcp-server-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mcp-server-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  border-top: 4px solid;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mcp-server-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.mcp-server-card h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mcp-server-card .mcp-tool-count {
+  background: #f1f5f9;
+  border-radius: 20px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.mcp-server-card .mcp-desc {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 0.8rem;
+}
+
+.mcp-tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.mcp-tool-tag {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #475569;
+}
+
+/* ── Bundle mega card ── */
+.mcp-bundle-card {
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  border-radius: 20px;
+  padding: 2.5rem;
+  color: #fff;
+  margin-bottom: 2rem;
+}
+
+.mcp-bundle-card h4 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+}
+
+.mcp-bundle-card .bundle-subtitle {
+  color: #a5b4fc;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.bundle-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.8rem;
+}
+
+.bundle-cat-item {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s;
+}
+
+.bundle-cat-item:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.bundle-cat-name {
+  font-size: 0.85rem;
+  color: #e0e7ff;
+  font-weight: 500;
+}
+
+.bundle-cat-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a78bfa;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 0.15rem 0.5rem;
+}
+
+/* ── Security Shield Layers ── */
+.security-tower {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.security-layer {
+  position: relative;
+  margin-bottom: 0.6rem;
+  border-radius: 14px;
+  padding: 1.5rem 1.8rem 1.5rem 5rem;
+  color: #fff;
+  transition: transform 0.2s;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.security-layer:hover {
+  transform: scale(1.02);
+}
+
+.security-layer .layer-badge {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  backdrop-filter: blur(4px);
+}
+
+.security-layer h5 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem 0;
+}
+
+.security-layer p {
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.security-layer .layer-tool {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  display: inline-block;
+  margin-top: 0.4rem;
+}
+
+.sec-l1 { background: linear-gradient(135deg, #1d4ed8, #2563eb); }
+.sec-l2 { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.sec-l3 { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+.sec-l4 { background: linear-gradient(135deg, #b45309, #d97706); }
+.sec-l5 { background: linear-gradient(135deg, #059669, #10b981); }
+.sec-l6 { background: linear-gradient(135deg, #be185d, #ec4899); }
+
+.security-schedule {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.sec-schedule-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+.sec-schedule-card .sch-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sec-schedule-card .sch-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin-bottom: 0.3rem;
+}
+
+.sec-schedule-card .sch-freq {
+  font-size: 0.8rem;
+  color: #6366f1;
+  font-weight: 600;
+}
+
+/* ── Budget / Circuit Breaker ── */
+.budget-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+
+.budget-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.budget-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+
+.budget-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.budget-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.2rem;
+}
+
+.circuit-breaker-visual {
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cb-zone {
+  padding: 1.3rem 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s;
+}
+
+.cb-zone:hover {
+  transform: scale(1.02);
+}
+
+.cb-zone:first-child {
+  border-radius: 16px 16px 0 0;
+}
+
+.cb-zone:last-child {
+  border-radius: 0 0 16px 16px;
+}
+
+.cb-light {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.cb-zone-info h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.15rem 0;
+  color: #fff;
+}
+
+.cb-zone-info p {
+  font-size: 0.85rem;
+  margin: 0;
+  color: rgba(255,255,255,0.8);
+}
+
+.cb-green {
+  background: linear-gradient(135deg, #166534, #15803d);
+}
+.cb-green .cb-light { background: #4ade80; color: #4ade80; }
+
+.cb-yellow {
+  background: linear-gradient(135deg, #854d0e, #a16207);
+}
+.cb-yellow .cb-light { background: #facc15; color: #facc15; }
+
+.cb-red {
+  background: linear-gradient(135deg, #991b1b, #b91c1c);
+}
+.cb-red .cb-light { background: #f87171; color: #f87171; }
+
+.cb-bar-container {
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+}
+
+.cb-bar-track {
+  height: 28px;
+  background: #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cb-bar-fill {
+  height: 100%;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #22c55e 0%, #22c55e 53%, #eab308 53%, #eab308 67%, #ef4444 67%, #ef4444 100%);
+}
+
+.cb-bar-markers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+  padding: 0 0.3rem;
+}
+
+.recovery-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  max-width: 600px;
+  margin: 1.5rem auto 0;
+}
+
+.recovery-step {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  border-top: 3px solid #6366f1;
+}
+
+.recovery-step .rs-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #6366f1;
+  margin-bottom: 0.3rem;
+}
+
+.recovery-step .rs-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 0.2rem;
+}
+
+.recovery-step .rs-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* ── Docker / Deploy ── */
+.docker-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 650px;
+  margin: 0 auto 2rem;
+}
+
+.docker-stage {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.3rem 1.5rem;
+  background: #fff;
+  border-left: 4px solid;
+  transition: transform 0.2s;
+}
+
+.docker-stage:first-child {
+  border-radius: 14px 14px 0 0;
+}
+
+.docker-stage:last-child {
+  border-radius: 0 0 14px 14px;
+}
+
+.docker-stage:hover {
+  transform: translateX(4px);
+}
+
+.docker-stage:not(:last-child) {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.docker-stage-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.docker-stage-info h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem 0;
+  color: #1e293b;
+}
+
+.docker-stage-info p {
+  font-size: 0.85rem;
+  margin: 0;
+  color: #64748b;
+}
+
+.docker-stage-info .base-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #6366f1;
+  background: #eef2ff;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+
+.ds-1 { border-left-color: #3b82f6; }
+.ds-1 .docker-stage-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.ds-2 { border-left-color: #8b5cf6; }
+.ds-2 .docker-stage-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.ds-3 { border-left-color: #f59e0b; }
+.ds-3 .docker-stage-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.ds-4 { border-left-color: #10b981; }
+.ds-4 .docker-stage-icon { background: linear-gradient(135deg, #10b981, #059669); }
+
+.docker-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.docker-feat {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.docker-feat .df-icon {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.docker-feat .df-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.docker-feat .df-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.deploy-envs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+
+.deploy-env-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  border-top: 4px solid;
+}
+
+.deploy-env-card h5 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem 0;
+  color: #1e293b;
+}
+
+.deploy-env-card .env-mode {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.6rem;
+}
+
+.deploy-env-card .env-badge {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.env-staging { border-top-color: #f59e0b; }
+.env-staging .env-badge { background: #fef3c7; color: #92400e; }
+.env-production { border-top-color: #ef4444; }
+.env-production .env-badge { background: #fee2e2; color: #991b1b; }
+
+/* ── Beginner tips ── */
+.beginner-tip {
+  background: linear-gradient(135deg, #eff6ff, #eef2ff);
+  border-radius: 14px;
+  padding: 1.3rem 1.5rem;
+  margin: 1.5rem 0;
+  border-left: 4px solid #6366f1;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+
+.beginner-tip .tip-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.beginner-tip .tip-text {
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.7;
+}
+
+.beginner-tip .tip-text strong {
+  color: #4338ca;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .pipeline-step {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  .pipeline-step:not(:last-child)::after {
+    left: 39px;
+  }
+  .pipeline-number {
+    width: 60px;
+    height: 60px;
+    font-size: 1.2rem;
+  }
+  .mcp-server-grid,
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+  .bundle-categories-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .security-layer {
+    padding-left: 4rem;
+  }
+  .docker-stages {
+    max-width: 100%;
+  }
+}
+</style>
+
+<!-- ================================================================
+     Section 1: Issue to Production Workflow
+     ================================================================ -->
+<section class="p4-section" id="workflow-pipeline">
+  <h2 class="p4-section-title">&#x1F3ED; ワークフロー：Issueから本番デプロイまで</h2>
+  <p class="p4-section-intro">
+    Miyabiの一番すごいところ：GitHub Issue（お仕事の依頼書）を書くだけで、AIが自動的にコードを書いて、テストして、本番環境に届けてくれます。
+    全部で<strong>9つのステップ</strong>があり、通常<strong>10〜15分</strong>で完了します。
+  </p>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <div class="tip-text">
+      <strong>超初心者向け解説：</strong>
+      「Issue」とは、GitHubにある「お仕事の依頼メモ」のこと。「この機能を追加して」「このバグを直して」と書くだけで、AIが自動で実行してくれます。人間のプログラマーに頼むのと同じ感覚です。
+    </div>
+  </div>
+
+  <div class="pipeline-wrapper">
+
+    <!-- Step 1 -->
+    <div class="pipeline-step step-color-1">
+      <div class="pipeline-number">1</div>
+      <div class="pipeline-card">
+        <h4>Issue 作成 <span class="pipeline-timing">&#x23F1; 〜0分</span></h4>
+        <div class="agent-name">あなた（人間）が操作</div>
+        <p>GitHubで「やりたいこと」を書くだけ。feature（新機能）、bug（バグ修正）、refactor（整理整頓）など7種類の依頼ができます。</p>
+        <div class="step-details">
+          <span>GitHub Issues</span>
+          <span>Octokit REST API</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="pipeline-step step-color-2">
+      <div class="pipeline-number">2</div>
+      <div class="pipeline-card">
+        <h4>AI自動分析 <span class="pipeline-timing">&#x23F1; 〜15秒</span></h4>
+        <div class="agent-name">&#x1F50D; IssueAgent（みつけるん）</div>
+        <p>AIがIssueの内容を読み取り、53種類のラベルから最適なものを自動で付けます。優先度・重要度・担当エージェントも自動決定。</p>
+        <div class="step-details">
+          <span>53ラベル自動分類</span>
+          <span>重複Issue検出</span>
+          <span>セキュリティ検証</span>
+          <span>Claude API</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="pipeline-step step-color-3">
+      <div class="pipeline-number">3</div>
+      <div class="pipeline-card">
+        <h4>タスク分解 <span class="pipeline-timing">&#x23F1; 〜30秒</span></h4>
+        <div class="agent-name">&#x1F3AF; CoordinatorAgent（しきるん）</div>
+        <p>大きな仕事を小さなタスクに分割します。DAG（有向非巡回グラフ）で依存関係を計算し、最大5つの並列実行を計画。</p>
+        <div class="step-details">
+          <span>DAG構築</span>
+          <span>Kahn's Algorithm</span>
+          <span>最大5並列</span>
+          <span>1-3時間タスク分割</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="pipeline-step step-color-4">
+      <div class="pipeline-number">4</div>
+      <div class="pipeline-card">
+        <h4>コード生成＆テスト <span class="pipeline-timing">&#x23F1; 3〜4分</span></h4>
+        <div class="agent-name">&#x1F528; CodeGenAgent（つくるん） + TestAgent（たしかめるん）</div>
+        <p>Claude Sonnet 4がTypeScriptコードを自動生成。同時にVitestテストも自動作成。カバレッジ80%以上が目標です。</p>
+        <div class="step-details">
+          <span>Claude Sonnet 4</span>
+          <span>TypeScript</span>
+          <span>Vitest自動生成</span>
+          <span>JSDocコメント</span>
+          <span>カバレッジ 80%+</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="pipeline-step step-color-5">
+      <div class="pipeline-number">5</div>
+      <div class="pipeline-card">
+        <h4>品質チェック <span class="pipeline-timing">&#x23F1; 〜1分</span></h4>
+        <div class="agent-name">&#x1F440; ReviewAgent（めだまん）</div>
+        <p>100点満点で品質を採点。80点以上で合格、不合格なら最大3回自動修正します。3回失敗したら人間にエスカレーション。</p>
+        <div class="step-details">
+          <span>型安全性 ×0.3</span>
+          <span>テストカバレッジ ×0.3</span>
+          <span>Lint準拠 ×0.2</span>
+          <span>ドキュメント ×0.2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="pipeline-step step-color-6">
+      <div class="pipeline-number">6</div>
+      <div class="pipeline-card">
+        <h4>PR作成 <span class="pipeline-timing">&#x23F1; 〜30秒</span></h4>
+        <div class="agent-name">&#x1F4E6; PRAgent（まとめるん）</div>
+        <p>変更内容をまとめたPull Request（コードの提出書）を自動作成。ブランチ名やコミットメッセージも自動生成されます。</p>
+        <div class="step-details">
+          <span>agent/issue-{番号}-{日時}</span>
+          <span>Conventional Commits</span>
+          <span>ドラフトPR</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="pipeline-step step-color-7">
+      <div class="pipeline-number">7</div>
+      <div class="pipeline-card">
+        <h4>PRマージ <span class="pipeline-timing">&#x23F1; 自動/手動</span></h4>
+        <div class="agent-name">&#x2705; 自動マージ or Guardian承認</div>
+        <p>ReviewAgentが80点以上かつ全テスト合格なら自動マージ。本番デプロイの場合はGuardian（人間の管理者）の承認が必要です。</p>
+        <div class="step-details">
+          <span>CODEOWNERS</span>
+          <span>Branch Protection</span>
+          <span>自動マージ条件</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="pipeline-step step-color-8">
+      <div class="pipeline-number">8</div>
+      <div class="pipeline-card">
+        <h4>デプロイ <span class="pipeline-timing">&#x23F1; 〜5分</span></h4>
+        <div class="agent-name">&#x1F69A; DeploymentAgent（はこぶん）</div>
+        <p>ビルド(60秒) → テスト(120秒) → デプロイ(60秒) → ヘルスチェック(60秒)の4段階。失敗したら自動で前のバージョンに戻します。</p>
+        <div class="step-details">
+          <span>Build 60s</span>
+          <span>Test 120s</span>
+          <span>Deploy 60s</span>
+          <span>Health Check 60s</span>
+          <span>自動ロールバック</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 9 -->
+    <div class="pipeline-step step-color-9">
+      <div class="pipeline-number">9</div>
+      <div class="pipeline-card">
+        <h4>完了＆学習 <span class="pipeline-timing">&#x23F1; 即時</span></h4>
+        <div class="agent-name">&#x1F389; 自動完了処理</div>
+        <p>Issueに「done」ラベルを付けて完了。成功パターンをナレッジベースに蓄積し、次回からさらに賢くなります。</p>
+        <div class="step-details">
+          <span>state:done</span>
+          <span>メトリクス更新</span>
+          <span>LDDログ記録</span>
+          <span>パターン蓄積</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Total time bar -->
+  <div class="pipeline-total-bar">
+    <div>
+      <div class="total-label">合計所要時間（通常）</div>
+      <div style="font-size:0.85rem;color:#64748b;">リトライなし・Staging自動デプロイの場合</div>
+    </div>
+    <div class="total-time">10〜15分</div>
+  </div>
+  <div style="max-width:100%;margin-top:0.8rem;">
+    <div class="pipeline-progress-track">
+      <div class="pipeline-progress-fill" style="width:100%;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#94a3b8;margin-top:0.3rem;padding:0 0.3rem;">
+      <span>0分</span>
+      <span>Issue分析 (15s)</span>
+      <span>タスク分解 (30s)</span>
+      <span>コード生成 (3-4m)</span>
+      <span>品質 (1m)</span>
+      <span>PR (30s)</span>
+      <span>デプロイ (5m)</span>
+      <span>15分</span>
+    </div>
+  </div>
+
+  <div class="beginner-tip" style="margin-top:2rem;">
+    <span class="tip-icon">&#x1F6A8;</span>
+    <div class="tip-text">
+      <strong>失敗しても大丈夫！</strong>
+      各ステップには自動リトライ機能があります。コード生成が品質基準を満たさなければ最大3回やり直し、デプロイが失敗したら自動ロールバック（元に戻す）します。それでもダメなら人間（Guardian）に連絡がいきます。
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     Section 2: 24 GitHub Actions Workflows
+     ================================================================ -->
+<section class="p4-section" id="github-workflows">
+  <h2 class="p4-section-title">&#x2699;&#xFE0F; 24のGitHub Actionsワークフロー</h2>
+  <p class="p4-section-intro">
+    GitHub Actionsは「自動実行される仕事の手順書」です。Miyabiには24個の自動化ワークフローがあり、コードの品質チェック、セキュリティ検査、デプロイなどを全自動で行います。
+  </p>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <div class="tip-text">
+      <strong>GitHub Actionsとは？</strong>
+      「もしIssueが作られたら、自動でラベルを付ける」「もしコードが変更されたら、自動でテストする」のように、
+      「もし〇〇が起きたら、自動で〇〇する」というルールを定義したものです。YAMLファイル（.yml）で書かれています。
+    </div>
+  </div>
+
+  <!-- Core Workflows -->
+  <div class="workflow-category">
+    <div class="workflow-category-header">
+      <div class="workflow-category-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">&#x1F4A0;</div>
+      <div>
+        <h4>コアワークフロー</h4>
+        <span class="wf-count">自律AIの中核を担う4つのワークフロー</span>
+      </div>
+    </div>
+    <div class="workflow-grid">
+      <div class="wf-card">
+        <div class="wf-card-name">ai-auto-label.yml</div>
+        <div class="wf-card-desc">Claude AIによる53ラベル自動分類</div>
+        <div class="wf-card-trigger">Issue作成時に自動実行</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">autonomous-agent.yml</div>
+        <div class="wf-card-desc">コア自律エージェント実行エンジン</div>
+        <div class="wf-card-trigger">ラベル追加 / /agent コマンド / 手動</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">state-machine.yml</div>
+        <div class="wf-card-desc">ラベルベース状態遷移管理</div>
+        <div class="wf-card-trigger">Issue/PRライフサイクル全体</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">webhook-handler.yml</div>
+        <div class="wf-card-desc">中央イベントルーター</div>
+        <div class="wf-card-trigger">全GitHubイベント</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CI/CD Workflows -->
+  <div class="workflow-category">
+    <div class="workflow-category-header">
+      <div class="workflow-category-icon" style="background:linear-gradient(135deg,#10b981,#059669);">&#x1F504;</div>
+      <div>
+        <h4>CI/CD ワークフロー</h4>
+        <span class="wf-count">ビルド・テスト・デプロイの自動化パイプライン</span>
+      </div>
+    </div>
+    <div class="workflow-grid">
+      <div class="wf-card">
+        <div class="wf-card-name">integrated-system-ci.yml</div>
+        <div class="wf-card-desc">5段階CI: lint &#x2192; typecheck &#x2192; unit &#x2192; e2e &#x2192; build</div>
+        <div class="wf-card-trigger">コード変更時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">cli-cross-platform.yml</div>
+        <div class="wf-card-desc">3OS &#xD7; 2Node版テスト（6並行実行）</div>
+        <div class="wf-card-trigger">CLIコード変更時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">docker-build.yml</div>
+        <div class="wf-card-desc">マルチプラットフォームDocker（amd64/arm64）</div>
+        <div class="wf-card-trigger">Dockerファイル変更時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">auto-release.yml</div>
+        <div class="wf-card-desc">バージョンタグ &#x2192; npm publish + GitHub Release</div>
+        <div class="wf-card-trigger">バージョンタグ作成時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">npm-publish.yml</div>
+        <div class="wf-card-desc">npm公開 + OIDC電子署名</div>
+        <div class="wf-card-trigger">リリース公開時</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Workflows -->
+  <div class="workflow-category">
+    <div class="workflow-category-header">
+      <div class="workflow-category-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">&#x1F6E1;</div>
+      <div>
+        <h4>セキュリティワークフロー</h4>
+        <span class="wf-count">6層防御を支える3つの監視ワークフロー</span>
+      </div>
+    </div>
+    <div class="workflow-grid">
+      <div class="wf-card">
+        <div class="wf-card-name">security-audit.yml</div>
+        <div class="wf-card-desc">6層セキュリティスキャン（毎日 + push/PR時）</div>
+        <div class="wf-card-trigger">毎日自動 + コード変更時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">codeql.yml</div>
+        <div class="wf-card-desc">CodeQL静的セキュリティ分析</div>
+        <div class="wf-card-trigger">毎週月曜日</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">gitleaks.yml</div>
+        <div class="wf-card-desc">シークレット（パスワード等）漏洩検出</div>
+        <div class="wf-card-trigger">全push / PR時</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monitoring & Utility Workflows -->
+  <div class="workflow-category">
+    <div class="workflow-category-header">
+      <div class="workflow-category-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">&#x1F4CA;</div>
+      <div>
+        <h4>監視・ユーティリティ</h4>
+        <span class="wf-count">システムの健全性を維持する補助ワークフロー</span>
+      </div>
+    </div>
+    <div class="workflow-grid">
+      <div class="wf-card">
+        <div class="wf-card-name">commit-to-issue.yml</div>
+        <div class="wf-card-desc">#autoタグ付きコミット &#x2192; Issue自動作成</div>
+        <div class="wf-card-trigger">特定コミット検出時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">label-sync.yml</div>
+        <div class="wf-card-desc">labels.yml &#x2192; GitHubラベル同期</div>
+        <div class="wf-card-trigger">ラベル定義変更時</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">mcp-health-check.yml</div>
+        <div class="wf-card-desc">MCPサーバーヘルスチェック</div>
+        <div class="wf-card-trigger">毎日自動実行</div>
+      </div>
+      <div class="wf-card">
+        <div class="wf-card-name">snapshot-test.yml</div>
+        <div class="wf-card-desc">スナップショットテスト一貫性検証</div>
+        <div class="wf-card-trigger">テスト対象変更時</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     Section 3: MCP Server System (180+ Tools)
+     ================================================================ -->
+<section class="p4-section" id="mcp-servers">
+  <h2 class="p4-section-title">&#x1F9E9; MCP サーバー（180+ツール）</h2>
+  <p class="p4-section-intro">
+    MCP（Model Context Protocol）は、AIが外部のツールやデータにアクセスするための仕組みです。
+    Miyabiには<strong>7つのカスタムサーバー</strong>と<strong>172ツールのバンドルサーバー</strong>があり、合計180以上のツールをAIが使えます。
+  </p>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <div class="tip-text">
+      <strong>MCPサーバーとは？</strong>
+      AIは通常「考えるだけ」ですが、MCPサーバーを通じて「ファイルを読む」「GitHubにアクセスする」「コードを実行する」といった実際の操作ができるようになります。
+      スマートフォンにアプリをインストールするようなイメージです。
+    </div>
+  </div>
+
+  <!-- 7 Custom MCP Servers -->
+  <h3 style="font-size:1.4rem;font-weight:700;margin-bottom:1.2rem;color:#1e293b;">7つのカスタムMCPサーバー</h3>
+
+  <div class="mcp-server-grid">
+
+    <div class="mcp-server-card" style="border-top-color:#6366f1;">
+      <h4>&#x1F3AF; Miyabi Integration <span class="mcp-tool-count">12ツール</span></h4>
+      <div class="mcp-desc">Miyabi CLIの全機能をAIから直接操作。プロジェクト作成からデプロイまで。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">miyabi__init</span>
+        <span class="mcp-tool-tag">miyabi__agent_run</span>
+        <span class="mcp-tool-tag">miyabi__auto</span>
+        <span class="mcp-tool-tag">miyabi__deploy</span>
+        <span class="mcp-tool-tag">miyabi__test</span>
+        <span class="mcp-tool-tag">miyabi__status</span>
+        <span class="mcp-tool-tag">miyabi__todos</span>
+        <span class="mcp-tool-tag">+5 more</span>
+      </div>
+    </div>
+
+    <div class="mcp-server-card" style="border-top-color:#10b981;">
+      <h4>&#x1F4BB; GitHub Enhanced <span class="mcp-tool-count">5ツール</span></h4>
+      <div class="mcp-desc">GitHub Issue/PR管理の強化版。自動ラベリングとエージェント連携。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">create_issue_with_labels</span>
+        <span class="mcp-tool-tag">get_agent_tasks</span>
+        <span class="mcp-tool-tag">update_issue_progress</span>
+        <span class="mcp-tool-tag">create_pr_from_agent</span>
+        <span class="mcp-tool-tag">get_pr_review_status</span>
+      </div>
+    </div>
+
+    <div class="mcp-server-card" style="border-top-color:#f59e0b;">
+      <h4>&#x1F4C1; Project Context <span class="mcp-tool-count">5ツール</span></h4>
+      <div class="mcp-desc">プロジェクト構造、依存関係、エージェント設定の分析。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">get_project_structure</span>
+        <span class="mcp-tool-tag">get_dependencies</span>
+        <span class="mcp-tool-tag">analyze_codebase</span>
+        <span class="mcp-tool-tag">get_agent_config</span>
+        <span class="mcp-tool-tag">get_recent_changes</span>
+      </div>
+    </div>
+
+    <div class="mcp-server-card" style="border-top-color:#8b5cf6;">
+      <h4>&#x1F527; IDE Integration <span class="mcp-tool-count">3ツール</span></h4>
+      <div class="mcp-desc">VS Code診断、Jupyterカーネル実行、コードフォーマット。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">get_diagnostics</span>
+        <span class="mcp-tool-tag">execute_code</span>
+        <span class="mcp-tool-tag">format_code</span>
+      </div>
+    </div>
+
+    <div class="mcp-server-card" style="border-top-color:#ec4899;">
+      <h4>&#x1F3A8; Gemini Image/TTS <span class="mcp-tool-count">5ツール</span></h4>
+      <div class="mcp-desc">Gemini 2.5 Flashによる画像生成とテキスト読み上げ（TTS）。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">gemini__generate_image</span>
+        <span class="mcp-tool-tag">gemini__generate_images_batch</span>
+        <span class="mcp-tool-tag">gemini__generate_speech</span>
+        <span class="mcp-tool-tag">gemini__generate_speeches_batch</span>
+        <span class="mcp-tool-tag">gemini__check_api_key</span>
+      </div>
+    </div>
+
+    <div class="mcp-server-card" style="border-top-color:#06b6d4;">
+      <h4>&#x1F916; Context Engineering <span class="mcp-tool-count">AI分析</span></h4>
+      <div class="mcp-desc">AIコンテキスト分析、セマンティック検索。知識の深い理解を実現。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">コンテキスト分析</span>
+        <span class="mcp-tool-tag">セマンティック検索</span>
+        <span class="mcp-tool-tag">Port: 8888 / 9001</span>
+      </div>
+    </div>
+
+    <div class="mcp-server-card" style="border-top-color:#a855f7;">
+      <h4>&#x1F4AC; Discord Integration <span class="mcp-tool-count">7ツール</span></h4>
+      <div class="mcp-desc">Discordへの通知、リリース告知、GitHubイベント連携。</div>
+      <div class="mcp-tools-list">
+        <span class="mcp-tool-tag">discord_send_message</span>
+        <span class="mcp-tool-tag">discord_announce_release</span>
+        <span class="mcp-tool-tag">discord_notify_github_event</span>
+        <span class="mcp-tool-tag">discord_get_stats</span>
+        <span class="mcp-tool-tag">+3 more</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bundle MCP -->
+  <h3 style="font-size:1.4rem;font-weight:700;margin:2rem 0 1.2rem;color:#1e293b;">172ツール バンドルサーバー</h3>
+
+  <div class="mcp-bundle-card">
+    <h4>&#x1F4E6; miyabi-mcp-bundle v3.8.0</h4>
+    <div class="bundle-subtitle">21カテゴリ、172ツールの巨大ツールボックス -- Git操作からKubernetesまで</div>
+    <div class="bundle-categories-grid">
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Git Inspector</span><span class="bundle-cat-count">19</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">GitHub Integration</span><span class="bundle-cat-count">21</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Network Inspector</span><span class="bundle-cat-count">15</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Process Inspector</span><span class="bundle-cat-count">14</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Resource Monitor</span><span class="bundle-cat-count">10</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Docker</span><span class="bundle-cat-count">10</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Tmux Monitor</span><span class="bundle-cat-count">10</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">File Watcher</span><span class="bundle-cat-count">10</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Spec-Kit</span><span class="bundle-cat-count">9</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Claude Code Monitor</span><span class="bundle-cat-count">8</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Log Aggregator</span><span class="bundle-cat-count">7</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Kubernetes</span><span class="bundle-cat-count">6</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Database</span><span class="bundle-cat-count">6</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Docker Compose</span><span class="bundle-cat-count">4</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Time Tools</span><span class="bundle-cat-count">4</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Generator</span><span class="bundle-cat-count">4</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Sequential Thinking</span><span class="bundle-cat-count">3</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Calculator</span><span class="bundle-cat-count">3</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">MCP Discovery</span><span class="bundle-cat-count">3</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Linux systemd</span><span class="bundle-cat-count">3</span></div>
+      <div class="bundle-cat-item"><span class="bundle-cat-name">Windows Event Log</span><span class="bundle-cat-count">2</span></div>
+    </div>
+  </div>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F6E1;</span>
+    <div class="tip-text">
+      <strong>セキュリティも万全：</strong>
+      バンドルサーバーには、コマンドインジェクション防止、パストラバーサル保護、入力長制限（最大1000文字）、PID検証など、悪意のある操作を防ぐ仕組みが組み込まれています。
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     Section 4: 6-Layer Security Defense
+     ================================================================ -->
+<section class="p4-section" id="security-layers">
+  <h2 class="p4-section-title">&#x1F6E1; セキュリティ6層防御</h2>
+  <p class="p4-section-intro">
+    Miyabiは「多層防御（Defense-in-Depth）」の考え方で、6つのセキュリティチェックを重ねています。
+    1つの壁が突破されても、次の壁が守ってくれるので安心です。城の防御のようなイメージです。
+  </p>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <div class="tip-text">
+      <strong>初心者の方へ：</strong>
+      セキュリティは怖いものではありません。Miyabiが自動で守ってくれるので、あなたが特別なことをする必要はありません。
+      ここでは「どうやって守られているか」を紹介します。家の鍵が何重にもかかっていると思ってください。
+    </div>
+  </div>
+
+  <div class="security-tower">
+
+    <div class="security-layer sec-l1">
+      <div class="layer-badge">1</div>
+      <h5>依存関係の脆弱性スキャン</h5>
+      <p>使っているライブラリに既知の危険性がないかチェック</p>
+      <span class="layer-tool">npm audit</span>
+    </div>
+
+    <div class="security-layer sec-l2">
+      <div class="layer-badge">2</div>
+      <h5>シークレット（秘密情報）スキャン</h5>
+      <p>パスワードやAPIキーがコードに混入していないか検出</p>
+      <span class="layer-tool">Gitleaks</span>
+    </div>
+
+    <div class="security-layer sec-l3">
+      <div class="layer-badge">3</div>
+      <h5>カスタムセキュリティスキャナー</h5>
+      <p>Miyabi独自のセキュリティパターン違反を検出</p>
+      <span class="layer-tool">security-manager.ts</span>
+    </div>
+
+    <div class="security-layer sec-l4">
+      <div class="layer-badge">4</div>
+      <h5>静的セキュリティ分析（CodeQL）</h5>
+      <p>OWASP Top 10のパターンをコードから自動検出</p>
+      <span class="layer-tool">CodeQL security-extended</span>
+    </div>
+
+    <div class="security-layer sec-l5">
+      <div class="layer-badge">5</div>
+      <h5>SBOM（ソフトウェア部品表）生成</h5>
+      <p>全部品の一覧表を作成し、サプライチェーン攻撃を防止</p>
+      <span class="layer-tool">サプライチェーン分析</span>
+    </div>
+
+    <div class="security-layer sec-l6">
+      <div class="layer-badge">6</div>
+      <h5>ベストプラクティス評価</h5>
+      <p>OpenSSFスコアカードでリポジトリ全体の安全度を採点</p>
+      <span class="layer-tool">OpenSSF Scorecard</span>
+    </div>
+
+  </div>
+
+  <!-- Scan Schedule -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin:2.5rem 0 1rem;color:#1e293b;text-align:center;">スキャン実行スケジュール</h3>
+  <div class="security-schedule">
+    <div class="sec-schedule-card">
+      <div class="sch-icon">&#x1F4C5;</div>
+      <div class="sch-name">security-audit.yml</div>
+      <div class="sch-freq">毎日 + push/PR時</div>
+    </div>
+    <div class="sec-schedule-card">
+      <div class="sch-icon">&#x1F4CA;</div>
+      <div class="sch-name">codeql.yml</div>
+      <div class="sch-freq">毎週月曜日</div>
+    </div>
+    <div class="sec-schedule-card">
+      <div class="sch-icon">&#x1F510;</div>
+      <div class="sch-name">gitleaks.yml</div>
+      <div class="sch-freq">全push / PR時</div>
+    </div>
+  </div>
+
+  <div class="beginner-tip" style="margin-top:2rem;">
+    <span class="tip-icon">&#x23F0;</span>
+    <div class="tip-text">
+      <strong>脆弱性対応SLA：</strong>
+      セキュリティの問題が見つかったら、<strong>48時間以内</strong>に対応することがルールです。
+      放置せず、素早く修正する体制が整っています。
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     Section 5: Economic Governance
+     ================================================================ -->
+<section class="p4-section" id="economic-governance">
+  <h2 class="p4-section-title">&#x1F4B0; 経済ガバナンス</h2>
+  <p class="p4-section-intro">
+    AIを自律的に動かすと、APIの使用料が膨らむ危険性があります。Miyabiには「サーキットブレーカー」という仕組みがあり、
+    コストが予算を超えそうになると自動的にブレーキをかけます。電気のブレーカーと同じ発想です。
+  </p>
+
+  <!-- Budget Overview -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;color:#1e293b;">月額予算の内訳</h3>
+  <div class="budget-overview">
+    <div class="budget-item">
+      <div class="budget-amount" style="color:#6366f1;">$500</div>
+      <div class="budget-label">月額予算 合計</div>
+    </div>
+    <div class="budget-item">
+      <div class="budget-amount" style="color:#8b5cf6;">$400</div>
+      <div class="budget-label">Anthropic API</div>
+      <div class="budget-sub">Claude Sonnet 4 / 月1000万トークン</div>
+    </div>
+    <div class="budget-item">
+      <div class="budget-amount" style="color:#10b981;">$0</div>
+      <div class="budget-label">GitHub Actions</div>
+      <div class="budget-sub">無料枠を使用</div>
+    </div>
+    <div class="budget-item">
+      <div class="budget-amount" style="color:#f59e0b;">$100</div>
+      <div class="budget-label">Firebase</div>
+      <div class="budget-sub">Hosting / Functions</div>
+    </div>
+  </div>
+
+  <!-- Circuit Breaker Visual -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;color:#1e293b;text-align:center;">サーキットブレーカー（信号機メタファー）</h3>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <div class="tip-text">
+      <strong>サーキットブレーカーとは？</strong>
+      電気のブレーカーが「電気を使いすぎたら自動で落ちる」のと同じように、
+      AIのコストが予算を超えそうになったら自動でストップする安全装置です。信号機のように3段階で警告します。
+    </div>
+  </div>
+
+  <div class="circuit-breaker-visual">
+    <div class="cb-zone cb-green">
+      <div class="cb-light"></div>
+      <div class="cb-zone-info">
+        <h5>&#x1F7E2; 正常（0〜80%）</h5>
+        <p>予算 $0〜$400：通常運転。全ワークフローが稼働中。</p>
+      </div>
+    </div>
+    <div class="cb-zone cb-yellow">
+      <div class="cb-light"></div>
+      <div class="cb-zone-info">
+        <h5>&#x1F7E1; 警告（80%〜100%）</h5>
+        <p>予算 $400〜$500：アラート送信、コスト監視を強化。</p>
+      </div>
+    </div>
+    <div class="cb-zone cb-red">
+      <div class="cb-light"></div>
+      <div class="cb-zone-info">
+        <h5>&#x1F534; 緊急停止（150%超過）</h5>
+        <p>予算 $750超過：ワークフロー自動停止、Sev.1エスカレーション発動。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget bar -->
+  <div class="cb-bar-container">
+    <div class="cb-bar-track">
+      <div class="cb-bar-fill" style="width:100%;"></div>
+    </div>
+    <div class="cb-bar-markers">
+      <span>$0</span>
+      <span>$400 (80%)</span>
+      <span>$500 (100%)</span>
+      <span>$750 (150%)</span>
+    </div>
+  </div>
+
+  <!-- Auto-disabled workflows -->
+  <div style="text-align:center;margin:2rem 0 1rem;">
+    <h4 style="font-size:1.1rem;font-weight:700;color:#dc2626;">&#x1F6A8; 緊急停止で自動無効化されるワークフロー</h4>
+  </div>
+  <div class="recovery-steps" style="max-width:700px;">
+    <div class="recovery-step" style="border-top-color:#ef4444;">
+      <div class="rs-num" style="color:#ef4444;">&#x26D4;</div>
+      <div class="rs-title">agent-runner</div>
+      <div class="rs-desc">エージェント実行を停止してAPI消費を止める</div>
+    </div>
+    <div class="recovery-step" style="border-top-color:#ef4444;">
+      <div class="rs-num" style="color:#ef4444;">&#x26D4;</div>
+      <div class="rs-title">continuous-improvement</div>
+      <div class="rs-desc">継続的改善ループを一時停止</div>
+    </div>
+    <div class="recovery-step" style="border-top-color:#ef4444;">
+      <div class="rs-num" style="color:#ef4444;">&#x26D4;</div>
+      <div class="rs-title">agent-onboarding</div>
+      <div class="rs-desc">新エージェントのセットアップを停止</div>
+    </div>
+  </div>
+
+  <!-- Recovery Protocol -->
+  <div style="text-align:center;margin:2.5rem 0 1rem;">
+    <h4 style="font-size:1.1rem;font-weight:700;color:#1e293b;">復旧に必要な3つの条件</h4>
+  </div>
+  <div class="recovery-steps">
+    <div class="recovery-step">
+      <div class="rs-num">1</div>
+      <div class="rs-title">Guardian承認</div>
+      <div class="rs-desc">管理者(@ShunsukeHayashi)の復旧承認</div>
+    </div>
+    <div class="recovery-step">
+      <div class="rs-num">2</div>
+      <div class="rs-title">根本原因分析</div>
+      <div class="rs-desc">コスト超過の原因を特定し再発防止策を策定</div>
+    </div>
+    <div class="recovery-step">
+      <div class="rs-num">3</div>
+      <div class="rs-title">リソースクリーンアップ</div>
+      <div class="rs-desc">不要リソースの解放と設定見直し</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================
+     Section 6: Docker & Deploy
+     ================================================================ -->
+<section class="p4-section" id="docker-deploy">
+  <h2 class="p4-section-title">&#x1F433; Docker & デプロイ</h2>
+  <p class="p4-section-intro">
+    Dockerは「アプリの箱詰め技術」です。Miyabiはマルチステージビルドという技術で、
+    軽くて安全なコンテナを作成します。まるでロシアの入れ子人形（マトリョーシカ）のように、必要なものだけを最終形に残します。
+  </p>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <div class="tip-text">
+      <strong>Dockerとは？</strong>
+      アプリを動かすために必要なもの（コード、ライブラリ、設定）を全部まとめて「箱（コンテナ）」に入れる技術です。
+      この箱さえあれば、どのサーバーでも同じように動きます。「引っ越し用の段ボール」のようなものです。
+    </div>
+  </div>
+
+  <!-- Multi-stage Build -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:1.2rem;color:#1e293b;text-align:center;">マルチステージビルド（4段階）</h3>
+
+  <div class="docker-stages">
+    <div class="docker-stage ds-1">
+      <div class="docker-stage-icon">&#x1F4E5;</div>
+      <div class="docker-stage-info">
+        <h5>Stage 1: base</h5>
+        <p>土台づくり。Alpine Linux（軽量OS）にgitやSSHなど基本ツールをインストール。</p>
+        <span class="base-label">node:20-alpine</span>
+      </div>
+    </div>
+    <div class="docker-stage ds-2">
+      <div class="docker-stage-icon">&#x1F4E6;</div>
+      <div class="docker-stage-info">
+        <h5>Stage 2: deps</h5>
+        <p>本番に必要なライブラリだけをインストール。開発用ツールは含めない。</p>
+        <span class="base-label">pnpm 9 / production deps only</span>
+      </div>
+    </div>
+    <div class="docker-stage ds-3">
+      <div class="docker-stage-icon">&#x1F528;</div>
+      <div class="docker-stage-info">
+        <h5>Stage 3: builder</h5>
+        <p>全ライブラリをインストールしてTypeScriptをコンパイル（翻訳）。ビルド完了後は不要に。</p>
+        <span class="base-label">全deps + TypeScriptビルド</span>
+      </div>
+    </div>
+    <div class="docker-stage ds-4">
+      <div class="docker-stage-icon">&#x1F680;</div>
+      <div class="docker-stage-info">
+        <h5>Stage 4: runtime（最終形）</h5>
+        <p>実行に必要な成果物だけを集めた最終コンテナ。非rootユーザーで安全に実行。</p>
+        <span class="base-label">非rootユーザー(miyabi:1001) / 最小構成</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="beginner-tip">
+    <span class="tip-icon">&#x1F3AF;</span>
+    <div class="tip-text">
+      <strong>なぜ4段階もあるの？</strong>
+      料理に例えると：材料を買う(base) &#x2192; 必要な調味料を並べる(deps) &#x2192; 料理する(builder) &#x2192; 盛り付けて提供する(runtime)。
+      最終的にお客様に出すのは「盛り付けた料理」だけ。鍋やまな板は不要なので含めません。これにより<strong>コンテナが軽くて安全</strong>になります。
+    </div>
+  </div>
+
+  <!-- Docker Security Features -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin:2rem 0 1rem;color:#1e293b;">セキュリティと運用の特長</h3>
+  <div class="docker-features">
+    <div class="docker-feat">
+      <div class="df-icon">&#x1F512;</div>
+      <div class="df-title">非rootユーザー実行</div>
+      <div class="df-desc">miyabiユーザー(UID:1001)で実行。管理者権限を使わない安全設計。</div>
+    </div>
+    <div class="docker-feat">
+      <div class="df-icon">&#x26F0;</div>
+      <div class="df-title">Alpine Linux基盤</div>
+      <div class="df-desc">5MB程度の超軽量OS。攻撃対象面が極めて小さい。</div>
+    </div>
+    <div class="docker-feat">
+      <div class="df-icon">&#x1F4CB;</div>
+      <div class="df-title">本番deps限定</div>
+      <div class="df-desc">開発用ツールを含めず、脆弱性リスクを最小化。</div>
+    </div>
+    <div class="docker-feat">
+      <div class="df-icon">&#x1F5A5;</div>
+      <div class="df-title">マルチプラットフォーム</div>
+      <div class="df-desc">amd64/arm64両対応。IntelでもM1/M2 Macでも動作。</div>
+    </div>
+    <div class="docker-feat">
+      <div class="df-icon">&#x1F493;</div>
+      <div class="df-title">ヘルスチェック</div>
+      <div class="df-desc">30秒間隔で生存確認。問題があれば自動で検出。</div>
+    </div>
+    <div class="docker-feat">
+      <div class="df-icon">&#x1F4CA;</div>
+      <div class="df-title">リソース制限</div>
+      <div class="df-desc">CPU: 最大2.0 / RAM: 最大2GB。暴走を防止。</div>
+    </div>
+  </div>
+
+  <!-- Deploy Environments -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin:2.5rem 0 1rem;color:#1e293b;">デプロイ環境</h3>
+  <div class="deploy-envs">
+    <div class="deploy-env-card env-staging">
+      <h5>&#x1F7E1; Staging（ステージング）</h5>
+      <div class="env-mode">本番前の最終テスト環境</div>
+      <span class="env-badge">自動デプロイ</span>
+      <p style="font-size:0.85rem;color:#64748b;margin-top:0.6rem;">
+        ReviewAgentが80点以上を付ければ自動的にデプロイされます。本番環境と同じ構成で動作確認ができます。
+      </p>
+    </div>
+    <div class="deploy-env-card env-production">
+      <h5>&#x1F534; Production（本番）</h5>
+      <div class="env-mode">実際のユーザーが使う環境</div>
+      <span class="env-badge">Guardian承認必須</span>
+      <p style="font-size:0.85rem;color:#64748b;margin-top:0.6rem;">
+        Guardian（管理者）の手動承認 + ReviewAgent 80点以上 + 全テスト合格の3条件が必須。失敗時は自動ロールバック。
+      </p>
+    </div>
+  </div>
+
+  <!-- Docker Compose Services -->
+  <h3 style="font-size:1.3rem;font-weight:700;margin:2.5rem 0 1rem;color:#1e293b;">Docker Compose サービス構成</h3>
+  <div class="workflow-grid">
+    <div class="wf-card">
+      <div class="wf-card-name" style="color:#6366f1;">miyabi-agent</div>
+      <div class="wf-card-desc">メインのエージェント実行環境</div>
+      <div class="wf-card-trigger" style="color:#64748b;">CPU: 2.0/0.5 | RAM: 2GB/512MB</div>
+    </div>
+    <div class="wf-card">
+      <div class="wf-card-name" style="color:#3b82f6;">postgres:16-alpine</div>
+      <div class="wf-card-desc">データベース（with-database プロファイル）</div>
+      <div class="wf-card-trigger" style="color:#64748b;">必要に応じて起動</div>
+    </div>
+    <div class="wf-card">
+      <div class="wf-card-name" style="color:#ef4444;">redis:7-alpine</div>
+      <div class="wf-card-desc">キャッシュ（with-cache プロファイル）</div>
+      <div class="wf-card-trigger" style="color:#64748b;">必要に応じて起動</div>
+    </div>
+    <div class="wf-card">
+      <div class="wf-card-name" style="color:#10b981;">context-api</div>
+      <div class="wf-card-desc">コンテキストエンジニアリングAPI</div>
+      <div class="wf-card-trigger" style="color:#64748b;">Port: 8888 / 9001</div>
+    </div>
+  </div>
+
+</section>

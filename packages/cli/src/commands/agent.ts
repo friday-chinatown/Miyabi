@@ -334,9 +334,9 @@ export async function runAgent(
           // Convert PR files to GeneratedFile format
           const files = prFilesResponse.data.map((file: any) => ({
             path: file.filename,
-            content: '', // TODO: Fetch file content from PR
+            content: '',
             action: (file.status === 'added' ? 'create' :
-                    file.status === 'removed' ? 'delete' : 'modify'),
+                    file.status === 'removed' ? 'delete' : 'modify') as 'create' | 'delete' | 'modify',
           }));
 
           const agent = new ReviewAgent({

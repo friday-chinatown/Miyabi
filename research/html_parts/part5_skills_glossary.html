@@ -1,0 +1,901 @@
+<!-- ============================================================
+     PART 5: Skills, Task Management, Data Model, Design Patterns, Glossary
+     ============================================================ -->
+
+<!-- ============================== -->
+<!-- SECTION: 23 Skills             -->
+<!-- ============================== -->
+<section id="skills" class="part5-section" style="padding:80px 20px;background:linear-gradient(135deg,#0a0a1a 0%,#1a1a3e 50%,#0d0d2b 100%);color:#e0e0e0;">
+<style>
+/* ── Part 5 Scoped Styles ── */
+.p5-title{text-align:center;font-size:2.8rem;font-weight:800;margin-bottom:12px;background:linear-gradient(90deg,#00d2ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.02em;}
+.p5-subtitle{text-align:center;font-size:1.15rem;color:#94a3b8;margin-bottom:48px;max-width:680px;margin-left:auto;margin-right:auto;line-height:1.7;}
+.p5-container{max-width:1200px;margin:0 auto;}
+.p5-cat-label{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 14px;border-radius:20px;margin-bottom:18px;}
+.p5-cat-agent{background:#7b2ff7;color:#fff;}
+.p5-cat-platform{background:#0ea5e9;color:#fff;}
+.p5-cat-dev{background:#22c55e;color:#fff;}
+.p5-cat-external{background:#f59e0b;color:#1a1a2e;}
+.p5-cat-gitnexus{background:#ec4899;color:#fff;}
+.p5-grid{display:grid;gap:16px;margin-bottom:48px;}
+.p5-grid-7{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+.p5-grid-3{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));}
+.p5-grid-5{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+.p5-grid-2{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));}
+.p5-grid-6{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+.p5-skill-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:22px 20px;transition:transform .2s,box-shadow .2s,border-color .3s;position:relative;overflow:hidden;}
+.p5-skill-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.4);border-color:rgba(123,47,247,.4);}
+.p5-skill-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.p5-cat-agent-card::before{background:linear-gradient(90deg,#7b2ff7,#a855f7);}
+.p5-cat-platform-card::before{background:linear-gradient(90deg,#0ea5e9,#38bdf8);}
+.p5-cat-dev-card::before{background:linear-gradient(90deg,#22c55e,#4ade80);}
+.p5-cat-external-card::before{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.p5-cat-gitnexus-card::before{background:linear-gradient(90deg,#ec4899,#f472b6);}
+.p5-skill-name{font-size:1.05rem;font-weight:700;color:#f1f5f9;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.p5-skill-name .p5-icon{font-size:1.3rem;}
+.p5-skill-jp{font-size:.82rem;color:#94a3b8;margin-bottom:10px;}
+.p5-skill-desc{font-size:.85rem;color:#cbd5e1;line-height:1.6;margin-bottom:10px;}
+.p5-trigger{display:inline-block;font-size:.7rem;background:rgba(123,47,247,.15);color:#c4b5fd;padding:2px 8px;border-radius:6px;margin:2px 2px 2px 0;border:1px solid rgba(123,47,247,.25);}
+.p5-trigger-platform{background:rgba(14,165,233,.15);color:#7dd3fc;border-color:rgba(14,165,233,.25);}
+.p5-trigger-dev{background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.25);}
+.p5-trigger-ext{background:rgba(245,158,11,.12);color:#fcd34d;border-color:rgba(245,158,11,.25);}
+.p5-trigger-gn{background:rgba(236,72,153,.12);color:#f9a8d4;border-color:rgba(236,72,153,.25);}
+
+/* ── Task Management ── */
+.p5-state-flow{display:flex;flex-direction:column;align-items:center;gap:0;margin:40px auto;max-width:900px;}
+.p5-state-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:4px 0;}
+.p5-state-node{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:12px;font-size:.88rem;font-weight:600;border:2px solid;white-space:nowrap;transition:transform .2s,box-shadow .2s;}
+.p5-state-node:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(0,0,0,.3);}
+.p5-st-draft{background:rgba(148,163,184,.1);border-color:#64748b;color:#94a3b8;}
+.p5-st-pending{background:rgba(14,165,233,.1);border-color:#0ea5e9;color:#7dd3fc;}
+.p5-st-analyzing{background:rgba(139,92,246,.1);border-color:#8b5cf6;color:#c4b5fd;}
+.p5-st-implementing{background:rgba(34,197,94,.1);border-color:#22c55e;color:#86efac;}
+.p5-st-reviewing{background:rgba(245,158,11,.1);border-color:#f59e0b;color:#fcd34d;}
+.p5-st-deploying{background:rgba(236,72,153,.1);border-color:#ec4899;color:#f9a8d4;}
+.p5-st-done{background:rgba(16,185,129,.15);border-color:#10b981;color:#6ee7b7;}
+.p5-st-blocked{background:rgba(239,68,68,.1);border-color:#ef4444;color:#fca5a5;}
+.p5-st-failed{background:rgba(220,38,38,.12);border-color:#dc2626;color:#fca5a5;}
+.p5-st-cancelled{background:rgba(107,114,128,.1);border-color:#6b7280;color:#9ca3af;}
+.p5-arrow{color:#475569;font-size:1.4rem;user-select:none;}
+.p5-arrow-down{display:block;text-align:center;color:#475569;font-size:1.2rem;margin:2px 0;}
+.p5-state-explain{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:36px;max-width:1000px;margin-left:auto;margin-right:auto;}
+.p5-state-explain-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px;}
+.p5-state-explain-card h4{font-size:.9rem;margin:0 0 4px 0;}
+.p5-state-explain-card p{font-size:.8rem;color:#94a3b8;margin:0;line-height:1.5;}
+
+/* ── Data Model ── */
+.p5-dm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1100px;margin:0 auto;}
+.p5-dm-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px;position:relative;}
+.p5-dm-card h3{font-size:1.1rem;font-weight:700;color:#e2e8f0;margin:0 0 4px 0;}
+.p5-dm-card .p5-dm-type{font-size:.72rem;color:#7dd3fc;font-family:monospace;margin-bottom:10px;}
+.p5-dm-card ul{margin:0;padding-left:18px;font-size:.82rem;color:#94a3b8;line-height:1.7;}
+.p5-dm-card ul li code{background:rgba(123,47,247,.15);padding:1px 5px;border-radius:4px;font-size:.78rem;color:#c4b5fd;}
+.p5-dm-rel{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);font-size:.78rem;color:#64748b;}
+.p5-dm-rel span{color:#f472b6;}
+
+/* ── Design Patterns ── */
+.p5-dp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;max-width:1100px;margin:0 auto;}
+.p5-dp-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px 24px;text-align:center;transition:transform .25s,box-shadow .25s;}
+.p5-dp-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.35);}
+.p5-dp-icon{font-size:3rem;margin-bottom:10px;display:block;}
+.p5-dp-name{font-size:1.15rem;font-weight:700;color:#f1f5f9;margin-bottom:2px;}
+.p5-dp-name-jp{font-size:.92rem;color:#a78bfa;margin-bottom:10px;}
+.p5-dp-analogy{font-size:.88rem;color:#fbbf24;font-weight:600;margin-bottom:8px;}
+.p5-dp-desc{font-size:.82rem;color:#94a3b8;line-height:1.65;}
+.p5-dp-where{font-size:.72rem;color:#64748b;margin-top:10px;font-style:italic;}
+
+/* ── Glossary ── */
+.p5-glossary-controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:28px;}
+.p5-glossary-search{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 18px;color:#e2e8f0;font-size:.95rem;width:100%;max-width:420px;outline:none;transition:border-color .2s;}
+.p5-glossary-search:focus{border-color:#7b2ff7;}
+.p5-glossary-search::placeholder{color:#64748b;}
+.p5-gl-filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:20px;}
+.p5-gl-filter-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 14px;color:#94a3b8;font-size:.78rem;cursor:pointer;transition:all .2s;font-weight:600;}
+.p5-gl-filter-btn:hover,.p5-gl-filter-btn.active{background:rgba(123,47,247,.2);border-color:#7b2ff7;color:#c4b5fd;}
+.p5-gl-count{text-align:center;color:#64748b;font-size:.82rem;margin-bottom:16px;}
+.p5-gl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;max-width:1200px;margin:0 auto;}
+.p5-gl-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 18px;transition:border-color .2s;}
+.p5-gl-item:hover{border-color:rgba(123,47,247,.3);}
+.p5-gl-item-term{font-size:.95rem;font-weight:700;color:#e2e8f0;}
+.p5-gl-item-jp{font-size:.78rem;color:#a78bfa;margin-bottom:6px;}
+.p5-gl-item-def{font-size:.8rem;color:#94a3b8;line-height:1.6;}
+.p5-gl-item-cat{display:inline-block;font-size:.65rem;background:rgba(123,47,247,.12);color:#c4b5fd;padding:2px 8px;border-radius:4px;margin-top:6px;}
+.p5-gl-item[style*="display: none"]{display:none!important;}
+
+/* ── Footer ── */
+.p5-footer{text-align:center;padding:60px 20px 40px;border-top:1px solid rgba(255,255,255,.06);margin-top:80px;}
+.p5-footer-logo{font-size:2rem;font-weight:800;background:linear-gradient(90deg,#00d2ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;}
+.p5-footer-desc{color:#64748b;font-size:.88rem;max-width:500px;margin:0 auto 24px;line-height:1.6;}
+.p5-footer-links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+.p5-footer-links a{color:#7dd3fc;text-decoration:none;font-size:.85rem;transition:color .2s;}
+.p5-footer-links a:hover{color:#c4b5fd;}
+.p5-footer-copy{color:#475569;font-size:.75rem;}
+
+/* ── Section Divider ── */
+.p5-divider{width:80px;height:3px;background:linear-gradient(90deg,#7b2ff7,#00d2ff);border-radius:3px;margin:0 auto 48px;opacity:.6;}
+
+@media(max-width:768px){
+  .p5-title{font-size:2rem;}
+  .p5-grid-7,.p5-grid-3,.p5-grid-5,.p5-grid-2,.p5-grid-6{grid-template-columns:1fr;}
+  .p5-dm-grid,.p5-dp-grid,.p5-gl-grid{grid-template-columns:1fr;}
+  .p5-state-row{flex-direction:column;}
+  .p5-state-explain{grid-template-columns:1fr;}
+}
+</style>
+
+<div class="p5-container">
+  <h2 class="p5-title">23 のスキル</h2>
+  <p class="p5-subtitle">Miyabi が持つ 23 のスキルは 5 つのカテゴリに分類されます。各スキルは特定のキーワード（トリガー）で自動的に起動します。</p>
+
+  <!-- Agent Skills (7) -->
+  <span class="p5-cat-label p5-cat-agent">Agent Skills -- 7 スキル</span>
+  <div class="p5-grid p5-grid-7">
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F3AF;</span> Coordinator</div>
+      <div class="p5-skill-jp">しきるん -- 全体を指揮する司令塔</div>
+      <div class="p5-skill-desc">Issue を分析して小さなタスクに分解し、どのエージェントが何をするかを決めて、全体の進行を管理します。</div>
+      <span class="p5-trigger">decompose this issue</span>
+      <span class="p5-trigger">run full pipeline</span>
+      <span class="p5-trigger">coordinate agents</span>
+    </div>
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F50D;</span> Issue Agent</div>
+      <div class="p5-skill-jp">みつけるん -- Issue を分析する探偵</div>
+      <div class="p5-skill-desc">GitHub Issue を読み取り、53 種類のラベルから適切なものを自動で付け、複雑さを評価します。</div>
+      <span class="p5-trigger">analyze this issue</span>
+      <span class="p5-trigger">label issues</span>
+      <span class="p5-trigger">triage new issues</span>
+    </div>
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F4DD;</span> Code Reviewer</div>
+      <div class="p5-skill-jp">100 点満点でコードを採点する審査員</div>
+      <div class="p5-skill-desc">コードを正確さ（30%）、セキュリティ（25%）、性能（20%）、保守性（15%）、テスト（10%）で 100 点満点で採点します。80 点以上で合格。</div>
+      <span class="p5-trigger">review this code</span>
+      <span class="p5-trigger">check this PR</span>
+      <span class="p5-trigger">find bugs</span>
+    </div>
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F517;</span> PR Agent</div>
+      <div class="p5-skill-jp">Pull Request を作成する連絡係</div>
+      <div class="p5-skill-desc">ブランチの命名規則に従い PR を自動作成します。マージには Guardian の承認が必要です。</div>
+      <span class="p5-trigger">create PR</span>
+      <span class="p5-trigger">merge this PR</span>
+    </div>
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F680;</span> Deploy Agent</div>
+      <div class="p5-skill-jp">はこぶん -- 本番環境に届ける配達員</div>
+      <div class="p5-skill-desc">テスト、型チェック、lint、レビュー、セキュリティを全て確認してからデプロイ。失敗時は自動ロールバック。</div>
+      <span class="p5-trigger">deploy to production</span>
+      <span class="p5-trigger">rollback deployment</span>
+    </div>
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F9EA;</span> Test Generator</div>
+      <div class="p5-skill-jp">テストコードを自動で書く職人</div>
+      <div class="p5-skill-desc">Vitest、Playwright、Testing Library を使い、AAA パターン（準備・実行・検証）でテストを生成。カバレッジ 80% 以上が目標。</div>
+      <span class="p5-trigger">write tests</span>
+      <span class="p5-trigger">improve coverage</span>
+      <span class="p5-trigger">test first</span>
+    </div>
+    <div class="p5-skill-card p5-cat-agent-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F916;</span> Autonomous Coding</div>
+      <div class="p5-skill-jp">自律的にコードを書く AI プログラマー</div>
+      <div class="p5-skill-desc">Claude Code CLI を使って、プロンプトからコードを自律的に生成・実行します。入力のサニタイズも行います。</div>
+      <span class="p5-trigger">autonomous coding</span>
+      <span class="p5-trigger">coding agent</span>
+    </div>
+  </div>
+
+  <!-- Platform Skills (3) -->
+  <span class="p5-cat-label p5-cat-platform">Platform Skills -- 3 スキル</span>
+  <div class="p5-grid p5-grid-3">
+    <div class="p5-skill-card p5-cat-platform-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x2699;&#xFE0F;</span> Pipeline</div>
+      <div class="p5-skill-jp">複数の処理をつなげるベルトコンベア</div>
+      <div class="p5-skill-desc">パイプ（|）、AND（&&）、OR（||）、並列（&）の演算子でコマンドを組み合わせます。失敗したステップから再開可能。</div>
+      <span class="p5-trigger p5-trigger-platform">run pipeline</span>
+      <span class="p5-trigger p5-trigger-platform">full cycle</span>
+      <span class="p5-trigger p5-trigger-platform">preset pipeline</span>
+    </div>
+    <div class="p5-skill-card p5-cat-platform-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x2705;</span> Quality Gate</div>
+      <div class="p5-skill-jp">品質の門番 -- 基準に満たないコードは通さない</div>
+      <div class="p5-skill-desc">100 点満点で 6 つの観点から評価。90 点以上で「優秀」、80 点以上で「良好」、60 点未満は自動リトライ（最大 3 回）。</div>
+      <span class="p5-trigger p5-trigger-platform">quality check</span>
+      <span class="p5-trigger p5-trigger-platform">quality gate</span>
+    </div>
+    <div class="p5-skill-card p5-cat-platform-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F3DB;&#xFE0F;</span> GitHub OS</div>
+      <div class="p5-skill-jp">GitHub をオペレーティングシステムとして使う</div>
+      <div class="p5-skill-desc">Issues をタスクキュー、Labels をステートマシン、Projects V2 をデータ層、Actions を実行エンジンとして活用する中核アーキテクチャ。</div>
+      <span class="p5-trigger p5-trigger-platform">github os</span>
+      <span class="p5-trigger p5-trigger-platform">issue-driven</span>
+    </div>
+  </div>
+
+  <!-- Development Skills (5) -->
+  <span class="p5-cat-label p5-cat-dev">Development Skills -- 5 スキル</span>
+  <div class="p5-grid p5-grid-5">
+    <div class="p5-skill-card p5-cat-dev-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F4E6;</span> Commit Helper</div>
+      <div class="p5-skill-jp">コミットメッセージの書き方ガイド</div>
+      <div class="p5-skill-desc">Conventional Commits 形式（feat, fix, docs など）で統一されたコミットメッセージを作成。命令形、50 文字以内。</div>
+      <span class="p5-trigger p5-trigger-dev">commit</span>
+      <span class="p5-trigger p5-trigger-dev">conventional commit</span>
+    </div>
+    <div class="p5-skill-card p5-cat-dev-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F527;</span> Refactor Helper</div>
+      <div class="p5-skill-jp">コードの整理整頓アドバイザー</div>
+      <div class="p5-skill-desc">長い関数、重複コード、複雑な条件分岐などの「コードの臭い」を検出。小さな変更で振る舞いを変えずに改善。</div>
+      <span class="p5-trigger p5-trigger-dev">refactor</span>
+      <span class="p5-trigger p5-trigger-dev">code smell</span>
+    </div>
+    <div class="p5-skill-card p5-cat-dev-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F4DA;</span> Doc Generator</div>
+      <div class="p5-skill-jp">ドキュメントを自動生成する記録係</div>
+      <div class="p5-skill-desc">JSDoc/TSDoc、README、CHANGELOG を自動生成。Keep a Changelog 形式に対応。</div>
+      <span class="p5-trigger p5-trigger-dev">generate docs</span>
+      <span class="p5-trigger p5-trigger-dev">documentation</span>
+    </div>
+    <div class="p5-skill-card p5-cat-dev-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F3ED;</span> Skill Creator</div>
+      <div class="p5-skill-jp">新しいスキルを作る工場</div>
+      <div class="p5-skill-desc">新スキルを .claude/skills/ ディレクトリに kebab-case で作成。claude、anthropic、mcp は禁止名。</div>
+      <span class="p5-trigger p5-trigger-dev">create skill</span>
+      <span class="p5-trigger p5-trigger-dev">new skill</span>
+    </div>
+    <div class="p5-skill-card p5-cat-dev-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F4A1;</span> Agent Skill Use</div>
+      <div class="p5-skill-jp">スキルの効率的な使い方マネージャー</div>
+      <div class="p5-skill-desc">3 層アーキテクチャ（MCP > Skills > Subagents）で段階的にスキルをロード。トークン削減 30% 以上を実現。</div>
+      <span class="p5-trigger p5-trigger-dev">use skill</span>
+      <span class="p5-trigger p5-trigger-dev">skill optimization</span>
+    </div>
+  </div>
+
+  <!-- External Skills (2) -->
+  <span class="p5-cat-label p5-cat-external">External Skills -- 2 スキル</span>
+  <div class="p5-grid p5-grid-2">
+    <div class="p5-skill-card p5-cat-external-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F3AC;</span> CCG - Course Generator</div>
+      <div class="p5-skill-jp">AI でオンラインコースを丸ごと作る</div>
+      <div class="p5-skill-desc">Gemini API を使い、コース構造 &rarr; レッスン台本 &rarr; 音声合成 &rarr; スライド &rarr; 動画レンダリングの全工程を自動化。</div>
+      <span class="p5-trigger p5-trigger-ext">course content</span>
+      <span class="p5-trigger p5-trigger-ext">generate course</span>
+    </div>
+    <div class="p5-skill-card p5-cat-external-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F393;</span> Teachable Creator</div>
+      <div class="p5-skill-jp">Teachable に自動アップロードする助手</div>
+      <div class="p5-skill-desc">CCG で生成したコンテンツを Teachable プラットフォームにブラウザ自動操作で登録します。</div>
+      <span class="p5-trigger p5-trigger-ext">teachable upload</span>
+      <span class="p5-trigger p5-trigger-ext">course upload</span>
+    </div>
+  </div>
+
+  <!-- GitNexus Skills (6) -->
+  <span class="p5-cat-label p5-cat-gitnexus">GitNexus Skills -- 6 スキル</span>
+  <div class="p5-grid p5-grid-6">
+    <div class="p5-skill-card p5-cat-gitnexus-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F4BB;</span> GitNexus CLI</div>
+      <div class="p5-skill-jp">コードベースの地図を作るコマンド</div>
+      <div class="p5-skill-desc">npx gitnexus analyze でインデックス構築。git commit 後に自動で再解析するフック付き。</div>
+      <span class="p5-trigger p5-trigger-gn">gitnexus analyze</span>
+      <span class="p5-trigger p5-trigger-gn">gitnexus status</span>
+    </div>
+    <div class="p5-skill-card p5-cat-gitnexus-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F4D6;</span> GitNexus Guide</div>
+      <div class="p5-skill-jp">コードグラフの使い方案内</div>
+      <div class="p5-skill-desc">query, context, impact, detect_changes, rename, cypher, list_repos の 7 ツールを提供。</div>
+      <span class="p5-trigger p5-trigger-gn">gitnexus guide</span>
+      <span class="p5-trigger p5-trigger-gn">graph schema</span>
+    </div>
+    <div class="p5-skill-card p5-cat-gitnexus-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F50E;</span> Exploring</div>
+      <div class="p5-skill-jp">「この機能はどう動いている？」を調べる</div>
+      <div class="p5-skill-desc">プロジェクト構造や認証の仕組みなど、コードの動きを探索するスキル。</div>
+      <span class="p5-trigger p5-trigger-gn">How does X work?</span>
+      <span class="p5-trigger p5-trigger-gn">project structure</span>
+    </div>
+    <div class="p5-skill-card p5-cat-gitnexus-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x26A0;&#xFE0F;</span> Impact Analysis</div>
+      <div class="p5-skill-jp">「ここを変えたら何が壊れる？」を予測</div>
+      <div class="p5-skill-desc">距離 1 は確実に壊れる、距離 2 は影響あり、距離 3 はテスト要。リスクレベルも表示。</div>
+      <span class="p5-trigger p5-trigger-gn">safe to change?</span>
+      <span class="p5-trigger p5-trigger-gn">what will break?</span>
+    </div>
+    <div class="p5-skill-card p5-cat-gitnexus-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F41B;</span> Debugging</div>
+      <div class="p5-skill-jp">「なぜ動かない？」を追跡する探偵</div>
+      <div class="p5-skill-desc">エラーメッセージ検索 &rarr; コンテキスト取得 &rarr; プロセストレース &rarr; Cypher クエリで原因を特定。</div>
+      <span class="p5-trigger p5-trigger-gn">Why is X failing?</span>
+      <span class="p5-trigger p5-trigger-gn">error from?</span>
+    </div>
+    <div class="p5-skill-card p5-cat-gitnexus-card">
+      <div class="p5-skill-name"><span class="p5-icon">&#x1F504;</span> Refactoring</div>
+      <div class="p5-skill-jp">安全にコードの名前を変える職人</div>
+      <div class="p5-skill-desc">まず dry_run:true で影響範囲を確認し、レビュー後に dry_run:false で実行。find-and-replace は禁止。</div>
+      <span class="p5-trigger p5-trigger-gn">rename safely</span>
+      <span class="p5-trigger p5-trigger-gn">gitnexus rename</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION: Task Management       -->
+<!-- ============================== -->
+<section id="task-management" class="part5-section" style="padding:80px 20px;background:linear-gradient(135deg,#0d0d2b 0%,#1a0a2e 50%,#0a0a1a 100%);color:#e0e0e0;">
+<div class="p5-container">
+  <h2 class="p5-title">タスク管理システム</h2>
+  <p class="p5-subtitle">タスクは 10 の状態を持ち、決められたルールに従って状態が変わります。これを「ステートマシン（状態機械）」と呼びます。</p>
+  <div class="p5-divider"></div>
+
+  <!-- State Flow Visualization -->
+  <div class="p5-state-flow">
+    <!-- Main happy path -->
+    <div class="p5-state-row">
+      <div class="p5-state-node p5-st-draft">&#x1F4DD; draft<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">下書き</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-pending">&#x23F3; pending<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">待機中</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-analyzing">&#x1F50D; analyzing<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">分析中</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-implementing">&#x1F528; implementing<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">実装中</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-reviewing">&#x1F4CB; reviewing<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">レビュー中</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-deploying">&#x1F680; deploying<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">デプロイ中</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-done">&#x2705; done<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">完了</small></div>
+    </div>
+
+    <div class="p5-arrow-down" style="margin:12px 0;">&#x2B07; 途中で問題が起きたら &#x2B07;</div>
+
+    <div class="p5-state-row" style="gap:24px;">
+      <div class="p5-state-node p5-st-blocked">&#x1F6D1; blocked<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">ブロック中</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div class="p5-state-node p5-st-failed">&#x274C; failed<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">失敗</small></div>
+      <span class="p5-arrow">&rarr;</span>
+      <div style="text-align:center;color:#94a3b8;font-size:.82rem;line-height:1.5;">リトライ<br>&#x1F504;<br>pending へ戻る</div>
+    </div>
+
+    <div class="p5-arrow-down" style="margin:8px 0;">&#x2B07;</div>
+
+    <div class="p5-state-row">
+      <div class="p5-state-node p5-st-cancelled">&#x1F6AB; cancelled<br><small style="font-size:.68rem;font-weight:400;opacity:.7;">取消</small></div>
+    </div>
+  </div>
+
+  <!-- State Explanations -->
+  <h3 style="text-align:center;color:#a78bfa;font-size:1.2rem;margin-top:48px;margin-bottom:24px;">各状態のかんたん説明</h3>
+  <div class="p5-state-explain">
+    <div class="p5-state-explain-card"><h4 style="color:#94a3b8;">&#x1F4DD; draft</h4><p>タスクが作られたばかり。まだ誰にも割り当てられていない状態です。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#7dd3fc;">&#x23F3; pending</h4><p>実行の順番を待っている状態。キューに入っています。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#c4b5fd;">&#x1F50D; analyzing</h4><p>Issue Agent が Issue を分析中。ラベル付けと複雑度評価をしています。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#86efac;">&#x1F528; implementing</h4><p>CodeGen Agent がコードを書いている最中です。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#fcd34d;">&#x1F4CB; reviewing</h4><p>Review Agent がコードを 100 点満点で採点中。80 点未満なら差し戻し。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#f9a8d4;">&#x1F680; deploying</h4><p>本番環境にコードを配置中。テスト &rarr; ビルド &rarr; デプロイ &rarr; ヘルスチェック。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#6ee7b7;">&#x2705; done</h4><p>全工程が完了。Issue がクローズされ、PR がマージされます。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#fca5a5;">&#x1F6D1; blocked</h4><p>他のタスクや外部要因で先に進めない状態です。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#fca5a5;">&#x274C; failed</h4><p>処理が失敗しました。pending に戻ってリトライできます。</p></div>
+    <div class="p5-state-explain-card"><h4 style="color:#9ca3af;">&#x1F6AB; cancelled</h4><p>タスクが取り消されました。draft に戻して復活も可能。</p></div>
+  </div>
+
+  <!-- Task Types -->
+  <h3 style="text-align:center;color:#a78bfa;font-size:1.2rem;margin-top:48px;margin-bottom:20px;">タスクの 7 つのタイプ</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:800px;margin:0 auto;">
+    <span style="background:rgba(34,197,94,.15);color:#86efac;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(34,197,94,.25);">feature -- 新機能</span>
+    <span style="background:rgba(239,68,68,.12);color:#fca5a5;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(239,68,68,.25);">bug -- バグ修正</span>
+    <span style="background:rgba(139,92,246,.12);color:#c4b5fd;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(139,92,246,.25);">refactor -- リファクタリング</span>
+    <span style="background:rgba(14,165,233,.12);color:#7dd3fc;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(14,165,233,.25);">docs -- ドキュメント</span>
+    <span style="background:rgba(245,158,11,.12);color:#fcd34d;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(245,158,11,.25);">test -- テスト</span>
+    <span style="background:rgba(236,72,153,.12);color:#f9a8d4;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(236,72,153,.25);">deployment -- デプロイ</span>
+    <span style="background:rgba(107,114,128,.12);color:#9ca3af;padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:600;border:1px solid rgba(107,114,128,.25);">chore -- 雑務</span>
+  </div>
+</div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION: Data Model            -->
+<!-- ============================== -->
+<section id="data-model" class="part5-section" style="padding:80px 20px;background:linear-gradient(135deg,#0a0a1a 0%,#0d1b2a 50%,#0a0a1a 100%);color:#e0e0e0;">
+<div class="p5-container">
+  <h2 class="p5-title">データモデル</h2>
+  <p class="p5-subtitle">Miyabi のシステムで使われる主要なデータの型（かた）を紹介します。それぞれがどうつながっているかを見てみましょう。</p>
+  <div class="p5-divider"></div>
+
+  <div class="p5-dm-grid">
+    <!-- ManagedTask -->
+    <div class="p5-dm-card" style="border-left:3px solid #22c55e;">
+      <h3>&#x1F4CB; ManagedTask</h3>
+      <div class="p5-dm-type">interface -- タスクの全情報</div>
+      <ul>
+        <li><code>currentState</code> -- 今の状態（10 種類）</li>
+        <li><code>type</code> -- タスクの種類（7 種類）</li>
+        <li><code>priority</code> -- 優先度</li>
+        <li><code>assignedAgent</code> -- 担当エージェント</li>
+        <li><code>retryCount</code> -- リトライ回数</li>
+        <li><code>stateHistory</code> -- 状態変更の履歴</li>
+        <li><code>githubIssueNumber</code> -- 紐付く Issue 番号</li>
+      </ul>
+      <div class="p5-dm-rel">&rarr; <span>BaseTask</span> を拡張</div>
+    </div>
+
+    <!-- AgentType -->
+    <div class="p5-dm-card" style="border-left:3px solid #7b2ff7;">
+      <h3>&#x1F916; AgentType</h3>
+      <div class="p5-dm-type">type -- エージェントの種類</div>
+      <ul>
+        <li><code>coordinator</code> -- 司令塔</li>
+        <li><code>codegen</code> -- コード生成</li>
+        <li><code>review</code> -- レビュー</li>
+        <li><code>issue</code> -- Issue 分析</li>
+        <li><code>pr</code> -- PR 管理</li>
+        <li><code>deployment</code> -- デプロイ</li>
+        <li><code>test</code> -- テスト</li>
+      </ul>
+      <div class="p5-dm-rel">&rarr; <span>ManagedTask</span> が参照</div>
+    </div>
+
+    <!-- AgentMessage -->
+    <div class="p5-dm-card" style="border-left:3px solid #0ea5e9;">
+      <h3>&#x1F4E8; AgentMessage</h3>
+      <div class="p5-dm-type">interface -- エージェント間の手紙</div>
+      <ul>
+        <li><code>from</code> -- 送信元エージェント</li>
+        <li><code>to</code> -- 送信先エージェント</li>
+        <li><code>type</code> -- メッセージの種類（8 種）</li>
+        <li><code>priority</code> -- 優先度（0-3）</li>
+        <li><code>payload</code> -- メッセージ本文</li>
+        <li><code>ttl</code> -- 有効期限（ミリ秒）</li>
+      </ul>
+      <div class="p5-dm-rel">&rarr; <span>AgentType</span> を使用</div>
+    </div>
+
+    <!-- ExecutionResult -->
+    <div class="p5-dm-card" style="border-left:3px solid #f59e0b;">
+      <h3>&#x1F4CA; ExecutionResult</h3>
+      <div class="p5-dm-type">interface -- 実行結果の記録</div>
+      <ul>
+        <li><code>taskId</code> -- タスク ID</li>
+        <li><code>success</code> -- 成功したか</li>
+        <li><code>state</code> -- 実行後の状態</li>
+        <li><code>durationMs</code> -- 所要時間</li>
+        <li><code>agentType</code> -- 実行したエージェント</li>
+        <li><code>artifacts</code> -- 成果物のリスト</li>
+      </ul>
+      <div class="p5-dm-rel">&rarr; <span>ManagedTask</span> から生成</div>
+    </div>
+
+    <!-- DAGResult -->
+    <div class="p5-dm-card" style="border-left:3px solid #ec4899;">
+      <h3>&#x1F578;&#xFE0F; DAGResult</h3>
+      <div class="p5-dm-type">interface -- タスク依存関係の地図</div>
+      <ul>
+        <li><code>nodes</code> -- タスクの一覧</li>
+        <li><code>edges</code> -- タスク間のつながり</li>
+        <li><code>levels</code> -- 並列実行できるグループ</li>
+        <li><code>criticalPath</code> -- 最長経路</li>
+        <li><code>estimatedDurationMinutes</code> -- 推定時間</li>
+      </ul>
+      <div class="p5-dm-rel">&rarr; <span>ManagedTask[]</span> を含む</div>
+    </div>
+
+    <!-- Workflow -->
+    <div class="p5-dm-card" style="border-left:3px solid #10b981;">
+      <h3>&#x1F504; Workflow</h3>
+      <div class="p5-dm-type">interface -- ワークフロー定義</div>
+      <ul>
+        <li><code>id</code> -- ワークフロー ID</li>
+        <li><code>name</code> -- 名前</li>
+        <li><code>nodes</code> -- ノード（エージェント等）</li>
+        <li><code>edges</code> -- ノード間の接続</li>
+        <li><code>createdAt</code> -- 作成日時</li>
+      </ul>
+      <div class="p5-dm-rel">&rarr; <span>AgentNodeData</span> 等を含む</div>
+    </div>
+  </div>
+
+  <!-- Relationship Map -->
+  <div style="margin-top:48px;text-align:center;">
+    <h3 style="color:#a78bfa;font-size:1.1rem;margin-bottom:20px;">データモデル間のつながり</h3>
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px;max-width:700px;margin:0 auto;font-family:monospace;font-size:.85rem;line-height:2;color:#94a3b8;text-align:left;">
+      <span style="color:#86efac;">ManagedTask</span> --extends--&gt; <span style="color:#7dd3fc;">BaseTask</span><br>
+      <span style="color:#86efac;">ManagedTask</span> --uses--&gt; <span style="color:#c4b5fd;">AgentType</span><br>
+      <span style="color:#86efac;">ManagedTask</span> --uses--&gt; <span style="color:#fcd34d;">TaskState</span><br>
+      <span style="color:#86efac;">ManagedTask</span> --contains--&gt; <span style="color:#9ca3af;">TaskStateTransition[]</span><br>
+      <span style="color:#f9a8d4;">DAGResult</span> --contains--&gt; <span style="color:#86efac;">ManagedTask[]</span><br>
+      <span style="color:#fcd34d;">ExecutionResult</span> --references--&gt; <span style="color:#86efac;">ManagedTask</span><br>
+      <span style="color:#7dd3fc;">AgentMessage</span> --uses--&gt; <span style="color:#c4b5fd;">AgentType</span><br>
+      <span style="color:#7dd3fc;">AgentMessage</span> --uses--&gt; <span style="color:#e2e8f0;">MessageType</span><br>
+      <span style="color:#6ee7b7;">Workflow</span> --contains--&gt; <span style="color:#c4b5fd;">AgentNodeData</span><br>
+      <span style="color:#c4b5fd;">AgentRegistry</span> --manages--&gt; <span style="color:#e2e8f0;">IAgent[]</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION: Design Patterns       -->
+<!-- ============================== -->
+<section id="design-patterns" class="part5-section" style="padding:80px 20px;background:linear-gradient(135deg,#1a0a2e 0%,#0a0a1a 50%,#0d1b2a 100%);color:#e0e0e0;">
+<div class="p5-container">
+  <h2 class="p5-title">設計パターン</h2>
+  <p class="p5-subtitle">Miyabi で使われている設計パターンを、日常の例えで分かりやすく紹介します。パターンとは「よくある問題の解決策のテンプレート」です。</p>
+  <div class="p5-divider"></div>
+
+  <div class="p5-dp-grid">
+    <!-- Singleton -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F451;</span>
+      <div class="p5-dp-name">Singleton</div>
+      <div class="p5-dp-name-jp">一つだけ存在するもの</div>
+      <div class="p5-dp-analogy">&#x1F3F0; 国に王様は一人だけ</div>
+      <div class="p5-dp-desc">システム全体で 1 つしか存在してはいけないオブジェクトに使います。例えば、ファイル書き込みの窓口が 2 つあると混乱するので、1 つに統一します。</div>
+      <div class="p5-dp-where">使用先: AsyncFileWriter, GitHubClient, AgentRegistry</div>
+    </div>
+
+    <!-- Factory -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F3ED;</span>
+      <div class="p5-dp-name">Factory</div>
+      <div class="p5-dp-name-jp">工場</div>
+      <div class="p5-dp-analogy">&#x1F697; 車の種類を言うだけで工場が作ってくれる</div>
+      <div class="p5-dp-desc">「コードレビューのエージェントが欲しい」と種類を指定するだけで、正しいエージェントを自動で作ってくれる仕組みです。</div>
+      <div class="p5-dp-where">使用先: AgentFactory, register*Command</div>
+    </div>
+
+    <!-- Builder -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F9F1;</span>
+      <div class="p5-dp-name">Builder</div>
+      <div class="p5-dp-name-jp">段階的な組み立て</div>
+      <div class="p5-dp-analogy">&#x1F354; ハンバーガーを一段ずつ組み立てる</div>
+      <div class="p5-dp-desc">複雑なオブジェクトを一度に作るのではなく、パンを置き、パティを乗せ、チーズを加え...と段階的に構築します。</div>
+      <div class="p5-dp-where">使用先: AgentConfig, PipelineContext</div>
+    </div>
+
+    <!-- State Machine -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F6A6;</span>
+      <div class="p5-dp-name">State Machine</div>
+      <div class="p5-dp-name-jp">状態機械</div>
+      <div class="p5-dp-analogy">&#x1F6A6; 信号機は赤 &rarr; 青 &rarr; 黄 の順でしか変わらない</div>
+      <div class="p5-dp-desc">タスクの状態が決められたルール通りにしか変わらないようにします。「下書き」からいきなり「完了」にはできません。</div>
+      <div class="p5-dp-where">使用先: TaskStateMachine（10 状態 28 遷移）</div>
+    </div>
+
+    <!-- Observer -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F514;</span>
+      <div class="p5-dp-name">Observer</div>
+      <div class="p5-dp-name-jp">監視者</div>
+      <div class="p5-dp-analogy">&#x1F4F1; YouTube のチャンネル登録 -- 新着動画が来たら通知</div>
+      <div class="p5-dp-desc">「何か変わったら教えて」と登録しておくと、変更があったときに自動で通知が届く仕組みです。ダッシュボードのリアルタイム更新に使います。</div>
+      <div class="p5-dp-where">使用先: EventEmitter, WebSocket Dashboard</div>
+    </div>
+
+    <!-- Strategy -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F3AF;</span>
+      <div class="p5-dp-name">Strategy</div>
+      <div class="p5-dp-name-jp">戦略の差し替え</div>
+      <div class="p5-dp-analogy">&#x1F4F7; カメラのレンズ交換 -- 状況に合わせてレンズを変える</div>
+      <div class="p5-dp-desc">同じ目的（リトライ、コンフリクト解決など）でも、場面に応じてやり方（戦略）を簡単に切り替えられます。</div>
+      <div class="p5-dp-where">使用先: RetryStrategy, ConflictResolution</div>
+    </div>
+
+    <!-- Facade -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F3E0;</span>
+      <div class="p5-dp-name">Facade</div>
+      <div class="p5-dp-name-jp">窓口（受付）</div>
+      <div class="p5-dp-analogy">&#x1F3E8; ホテルのフロントデスク -- 裏の複雑さを隠す</div>
+      <div class="p5-dp-desc">複雑な内部処理をシンプルな窓口で隠します。「分析して」と一言言うだけで、裏で HTTP 通信やセッション管理が動きます。</div>
+      <div class="p5-dp-where">使用先: ContextEngineering クラス</div>
+    </div>
+
+    <!-- Chain of Responsibility -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x26D3;&#xFE0F;</span>
+      <div class="p5-dp-name">Chain of Responsibility</div>
+      <div class="p5-dp-name-jp">責任の連鎖</div>
+      <div class="p5-dp-analogy">&#x1F3E2; 会社の承認フロー -- 課長 &rarr; 部長 &rarr; 社長</div>
+      <div class="p5-dp-desc">品質チェックを段階的に行います。コード生成 &rarr; レビュー &rarr; 合格？ &rarr; PR 作成。不合格なら前に戻ってやり直し。</div>
+      <div class="p5-dp-where">使用先: Quality Gate チェーン</div>
+    </div>
+
+    <!-- Composite -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F332;</span>
+      <div class="p5-dp-name">Composite</div>
+      <div class="p5-dp-name-jp">入れ子構造</div>
+      <div class="p5-dp-analogy">&#x1F4C1; フォルダの中にフォルダ -- 同じ操作でどちらも扱える</div>
+      <div class="p5-dp-desc">単純なコマンドも、複数のコマンドを組み合わせた複雑なパイプラインも、同じ方法で実行できます。</div>
+      <div class="p5-dp-where">使用先: Pipeline コマンド合成（|, &&, ||, &）</div>
+    </div>
+
+    <!-- Template Method -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F4DC;</span>
+      <div class="p5-dp-name">Template Method</div>
+      <div class="p5-dp-name-jp">テンプレートメソッド</div>
+      <div class="p5-dp-analogy">&#x1F373; レシピの手順 -- 基本は同じ、具材だけ変える</div>
+      <div class="p5-dp-desc">全エージェント共通の「開始 &rarr; 実行 &rarr; 記録 &rarr; 終了」という流れは固定し、「実行」の中身だけ各エージェントが自由に決めます。</div>
+      <div class="p5-dp-where">使用先: BaseAgent.run() -- 7 + 14 エージェント共通</div>
+    </div>
+
+    <!-- Adapter -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F50C;</span>
+      <div class="p5-dp-name">Adapter</div>
+      <div class="p5-dp-name-jp">変換器</div>
+      <div class="p5-dp-analogy">&#x1F50C; 海外旅行の電源変換プラグ</div>
+      <div class="p5-dp-desc">CLI コマンドとして作られた機能を、MCP プロトコル（別の形式）でも使えるように変換します。</div>
+      <div class="p5-dp-where">使用先: MCP Server が CLI コマンドをラップ</div>
+    </div>
+
+    <!-- Command -->
+    <div class="p5-dp-card">
+      <span class="p5-dp-icon">&#x1F4E9;</span>
+      <div class="p5-dp-name">Command</div>
+      <div class="p5-dp-name-jp">命令オブジェクト</div>
+      <div class="p5-dp-analogy">&#x1F4E9; 注文書 -- 「何をするか」を紙に書いて渡す</div>
+      <div class="p5-dp-desc">操作の内容をオブジェクトとして保存するので、キューに入れたり、ログを取ったり、失敗時に途中から再開できます。</div>
+      <div class="p5-dp-where">使用先: CLI 30 コマンド, Pipeline 演算子</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION: Glossary              -->
+<!-- ============================== -->
+<section id="glossary" class="part5-section" style="padding:80px 20px;background:linear-gradient(135deg,#0a0a1a 0%,#1a1a3e 50%,#0d0d2b 100%);color:#e0e0e0;">
+<div class="p5-container">
+  <h2 class="p5-title">用語集</h2>
+  <p class="p5-subtitle">Miyabi プロジェクトで使われる重要な用語を集めました。検索やカテゴリでフィルタリングできます。</p>
+  <div class="p5-divider"></div>
+
+  <!-- Search -->
+  <div class="p5-glossary-controls">
+    <input type="text" class="p5-glossary-search" id="p5GlossarySearch" placeholder="&#x1F50D; 用語を検索..." oninput="p5FilterGlossary()">
+  </div>
+
+  <!-- Category Filters -->
+  <div class="p5-gl-filters" id="p5GlFilters">
+    <button class="p5-gl-filter-btn active" onclick="p5FilterCat(this,'all')">ALL</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'arch')">Architecture</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'agent')">Agent</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'pattern')">Pattern</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'task')">Task</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'security')">Security</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'tool')">Tool</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'data')">Data Model</button>
+    <button class="p5-gl-filter-btn" onclick="p5FilterCat(this,'workflow')">Workflow</button>
+  </div>
+
+  <div class="p5-gl-count" id="p5GlCount">80 件表示中</div>
+
+  <div class="p5-gl-grid" id="p5GlGrid">
+    <!-- Architecture -->
+    <div class="p5-gl-item" data-cat="arch" data-term="Agentic OS" data-jp="エージェンティックOS"><div class="p5-gl-item-term">Agentic OS</div><div class="p5-gl-item-jp">エージェンティックOS</div><div class="p5-gl-item-def">GitHub をオペレーティングシステムとして扱う Miyabi の中核アーキテクチャ。Issues=タスクキュー、Labels=ステートマシン、Actions=実行エンジンとして機能する。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="GitHub as OS" data-jp="GitHubをOSとして利用"><div class="p5-gl-item-term">GitHub as OS</div><div class="p5-gl-item-jp">GitHub をOSとして利用</div><div class="p5-gl-item-def">GitHub の各機能を OS のコンポーネントに見立てるアーキテクチャ。Issues, Labels, Projects V2, Actions, Webhooks, Secrets がそれぞれ OS の機能を担う。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="Monorepo" data-jp="モノレポ"><div class="p5-gl-item-term">Monorepo</div><div class="p5-gl-item-jp">モノレポ（pnpm workspace）</div><div class="p5-gl-item-def">11 パッケージ（cli, core, mcp-bundle 等）を 1 つのリポジトリで統合管理。pnpm-workspace.yaml で宣言。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="Event-Driven Architecture" data-jp="イベント駆動アーキテクチャ"><div class="p5-gl-item-term">Event-Driven Architecture</div><div class="p5-gl-item-jp">イベント駆動アーキテクチャ</div><div class="p5-gl-item-def">Webhooks やメッセージバスを使い、エージェント間を疎結合に接続。Issue のラベル変更がイベントとして伝播し、適切なエージェントが起動する。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="MCP" data-jp="Model Context Protocol"><div class="p5-gl-item-term">MCP (Model Context Protocol)</div><div class="p5-gl-item-jp">モデルコンテキストプロトコル</div><div class="p5-gl-item-def">Claude Desktop/Code から統一プロトコルでアクセス可能なマイクロサービス群。7 サーバー、172 ツール。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="IDD" data-jp="Issue駆動開発"><div class="p5-gl-item-term">IDD (Issue-Driven Development)</div><div class="p5-gl-item-jp">Issue 駆動開発</div><div class="p5-gl-item-def">「全ては Issue から始まる。例外なし。」を大原則とする開発手法。Issue &rarr; Label &rarr; Decompose &rarr; Implement &rarr; Review &rarr; PR &rarr; Deploy &rarr; Close。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="LDD" data-jp="ログ駆動開発"><div class="p5-gl-item-term">LDD (Log-Driven Development)</div><div class="p5-gl-item-jp">ログ駆動開発</div><div class="p5-gl-item-def">エージェントの全行動をログに記録し、事後分析・デバッグ・改善の基盤とする。サイレント変更を構造的に不可能にする。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <div class="p5-gl-item" data-cat="arch" data-term="Progressive Disclosure" data-jp="段階的開示"><div class="p5-gl-item-term">Progressive Disclosure</div><div class="p5-gl-item-jp">段階的開示（3 層コンテキスト最適化）</div><div class="p5-gl-item-def">Layer 1: インデックスのみ（~500 トークン）、Layer 2: メタデータ（~1,000）、Layer 3: フルコンテンツ（~5,000）と段階的にロード。トークン削減 30% 以上。</div><span class="p5-gl-item-cat">Architecture</span></div>
+
+    <!-- Agent -->
+    <div class="p5-gl-item" data-cat="agent" data-term="CoordinatorAgent" data-jp="しきるん"><div class="p5-gl-item-term">CoordinatorAgent（しきるん）</div><div class="p5-gl-item-jp">コーディネーターエージェント</div><div class="p5-gl-item-def">全操作のオーケストレーター。Issue をタスクに分解、DAG 構築、最大 5 並行でエージェント割当。統括権限（赤）。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="CodeGenAgent" data-jp="つくるん"><div class="p5-gl-item-term">CodeGenAgent（つくるん）</div><div class="p5-gl-item-jp">コード生成エージェント</div><div class="p5-gl-item-def">Claude Sonnet 4 でコード、テスト、JSDoc を自動生成。実行権限（緑）。品質 80 点以上、カバレッジ 80% 以上が目標。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="ReviewAgent" data-jp="レビューエージェント"><div class="p5-gl-item-term">ReviewAgent</div><div class="p5-gl-item-jp">コードレビューエージェント</div><div class="p5-gl-item-def">100 点満点でコード品質を採点。正確さ 30%、セキュリティ 25%、性能 20%、保守性 15%、テスト 10%。80 点以上で合格。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="IssueAgent" data-jp="みつけるん"><div class="p5-gl-item-term">IssueAgent（みつけるん）</div><div class="p5-gl-item-jp">Issue 分析エージェント</div><div class="p5-gl-item-def">Issue を分析し 53 ラベル x 10 カテゴリに自動分類。分析権限（青）。分析 15 秒以内、ラベル精度 90% 以上が目標。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="PRAgent" data-jp="PRエージェント"><div class="p5-gl-item-term">PRAgent</div><div class="p5-gl-item-jp">PR 管理エージェント</div><div class="p5-gl-item-def">ブランチ命名規則に従い PR を自動作成。マージには Guardian 承認が必要。Conventional Commits に対応。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="DeploymentAgent" data-jp="はこぶん"><div class="p5-gl-item-term">DeploymentAgent（はこぶん）</div><div class="p5-gl-item-jp">デプロイメントエージェント</div><div class="p5-gl-item-def">4 段階パイプライン: Build(60s) &rarr; Test(120s) &rarr; Deploy(60s) &rarr; Health Check(60s)。失敗時は自動ロールバック。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="BaseAgent" data-jp="ベースエージェント"><div class="p5-gl-item-term">BaseAgent</div><div class="p5-gl-item-jp">ベースエージェント（基底クラス）</div><div class="p5-gl-item-def">全コーディングエージェントの基底クラス。ライフサイクル管理、メトリクス収集、LDD ログ更新を提供する抽象クラス。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="BusinessBaseAgent" data-jp="ビジネスベースエージェント"><div class="p5-gl-item-term">BusinessBaseAgent</div><div class="p5-gl-item-jp">ビジネスベースエージェント</div><div class="p5-gl-item-def">14 のビジネスエージェントの抽象基底クラス。Claude API 呼出、タスクバリデーション、ログ、エラーハンドリングを提供。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="AgentRegistry" data-jp="エージェントレジストリ"><div class="p5-gl-item-term">AgentRegistry</div><div class="p5-gl-item-jp">エージェントレジストリ</div><div class="p5-gl-item-def">Singleton パターンで実装されたエージェント登録・管理機構。タスク要件分析、キャッシュ（15 分 TTL、最大 100 エントリ）を含む。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <div class="p5-gl-item" data-cat="agent" data-term="Guardian" data-jp="ガーディアン"><div class="p5-gl-item-term">Guardian</div><div class="p5-gl-item-jp">ガーディアン（最高権限者）</div><div class="p5-gl-item-def">Miyabi の最高権限者。サーキットブレーカー復旧承認、本番デプロイ承認、憲法改正、エスカレーション対応を担当。</div><span class="p5-gl-item-cat">Agent</span></div>
+
+    <!-- Pattern -->
+    <div class="p5-gl-item" data-cat="pattern" data-term="Singleton Pattern" data-jp="シングルトンパターン"><div class="p5-gl-item-term">Singleton Pattern</div><div class="p5-gl-item-jp">シングルトンパターン</div><div class="p5-gl-item-def">インスタンスを 1 つだけ作る設計パターン。AsyncFileWriter、GitHubClient、AgentRegistry で使用。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="Factory Pattern" data-jp="ファクトリーパターン"><div class="p5-gl-item-term">Factory Pattern</div><div class="p5-gl-item-jp">ファクトリーパターン</div><div class="p5-gl-item-def">オブジェクト生成を集約する設計パターン。AgentFactory で種類を指定するだけでエージェントを生成。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="Observer Pattern" data-jp="オブザーバーパターン"><div class="p5-gl-item-term">Observer Pattern</div><div class="p5-gl-item-jp">オブザーバーパターン</div><div class="p5-gl-item-def">状態変更を自動通知する設計パターン。EventEmitter、WebSocket ダッシュボードで使用。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="Strategy Pattern" data-jp="ストラテジーパターン"><div class="p5-gl-item-term">Strategy Pattern</div><div class="p5-gl-item-jp">ストラテジーパターン</div><div class="p5-gl-item-def">アルゴリズムを交換可能にする設計パターン。RetryStrategy、ConflictResolution で使用。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="State Machine" data-jp="ステートマシン"><div class="p5-gl-item-term">State Machine</div><div class="p5-gl-item-jp">ステートマシン（状態機械）</div><div class="p5-gl-item-def">10 状態と 28 遷移ルールでタスクライフサイクルを厳密管理。不正な状態遷移を型安全に防止する。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="Chain of Responsibility" data-jp="責任の連鎖"><div class="p5-gl-item-term">Chain of Responsibility</div><div class="p5-gl-item-jp">責任の連鎖</div><div class="p5-gl-item-def">品質検証を段階的に行うパターン。CodeGen &rarr; Review &rarr; 合格？ &rarr; PR 作成。最大 3 回自動リトライ。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="Template Method" data-jp="テンプレートメソッド"><div class="p5-gl-item-term">Template Method</div><div class="p5-gl-item-jp">テンプレートメソッド</div><div class="p5-gl-item-def">BaseAgent.run() が固定ライフサイクルを定義し、サブクラスが execute() を実装。21 エージェント共通。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <div class="p5-gl-item" data-cat="pattern" data-term="Circuit Breaker" data-jp="サーキットブレーカー"><div class="p5-gl-item-term">Circuit Breaker</div><div class="p5-gl-item-jp">サーキットブレーカー</div><div class="p5-gl-item-def">コスト 150% 超過でワークフローを自動停止する安全機構。復旧には Guardian 承認と根本原因分析が必要。</div><span class="p5-gl-item-cat">Pattern</span></div>
+
+    <!-- Task -->
+    <div class="p5-gl-item" data-cat="task" data-term="TaskState" data-jp="タスク状態"><div class="p5-gl-item-term">TaskState</div><div class="p5-gl-item-jp">タスク状態（10 種類）</div><div class="p5-gl-item-def">draft, pending, analyzing, implementing, reviewing, deploying, done, blocked, failed, cancelled の 10 状態。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="TaskType" data-jp="タスクタイプ"><div class="p5-gl-item-term">TaskType</div><div class="p5-gl-item-jp">タスクタイプ（7 種類）</div><div class="p5-gl-item-def">feature, bug, refactor, docs, test, deployment, chore の 7 種類のタスク分類。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="ManagedTask" data-jp="管理タスク"><div class="p5-gl-item-term">ManagedTask</div><div class="p5-gl-item-jp">管理タスク（拡張タスク）</div><div class="p5-gl-item-def">BaseTask を拡張し、状態管理、履歴、GitHub Issue 連携、リトライカウント、同期バージョンを追加したインターフェース。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="DAG" data-jp="有向非巡回グラフ"><div class="p5-gl-item-term">DAG (Directed Acyclic Graph)</div><div class="p5-gl-item-jp">有向非巡回グラフ</div><div class="p5-gl-item-def">タスク間の依存関係を表現するグラフ。循環を含まない。Kahn's Algorithm でトポロジカルソートし並列実行順序を算出。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="LLMDecomposer" data-jp="LLMタスク分解"><div class="p5-gl-item-term">LLMDecomposer</div><div class="p5-gl-item-jp">LLM タスク分解</div><div class="p5-gl-item-def">Anthropic API を使って Issue をアトミックなタスクに分解し、DAG を構築するクラス。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="TaskExecutor" data-jp="タスク実行器"><div class="p5-gl-item-term">TaskExecutor</div><div class="p5-gl-item-jp">タスク実行器</div><div class="p5-gl-item-def">エージェントを登録し、タスクを順次・並列で実行するクラス。実行結果（ExecutionResult）を返却する。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="BidirectionalSync" data-jp="双方向同期"><div class="p5-gl-item-term">BidirectionalSync</div><div class="p5-gl-item-jp">双方向同期</div><div class="p5-gl-item-def">ローカルタスク状態と GitHub Issue/Projects V2 を同期。競合戦略: local-wins / github-wins / newest-wins / ask。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <div class="p5-gl-item" data-cat="task" data-term="WorktreeCoordinator" data-jp="ワークツリーコーディネーター"><div class="p5-gl-item-term">WorktreeCoordinator</div><div class="p5-gl-item-jp">ワークツリーコーディネーター</div><div class="p5-gl-item-def">分離された git worktree でタスクを並列実行する仕組み。各タスクが独立した作業領域を持つ。</div><span class="p5-gl-item-cat">Task</span></div>
+
+    <!-- Security -->
+    <div class="p5-gl-item" data-cat="security" data-term="Three Laws of Autonomy" data-jp="自律の三法則"><div class="p5-gl-item-term">Three Laws of Autonomy</div><div class="p5-gl-item-jp">自律の三法則</div><div class="p5-gl-item-def">客観性の法則（データ駆動のみ）、自給自足の法則（人間依存最小化）、追跡可能性の法則（全アクションを記録）。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="Defense in Depth" data-jp="多層防御"><div class="p5-gl-item-term">Defense in Depth</div><div class="p5-gl-item-jp">多層防御（6 層セキュリティスキャン）</div><div class="p5-gl-item-def">npm audit, Gitleaks, security-manager, CodeQL, SBOM, OpenSSF Scorecard の 6 層で防御。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="Quality Gate" data-jp="品質ゲート"><div class="p5-gl-item-term">Quality Gate</div><div class="p5-gl-item-jp">品質ゲート（80 点閾値）</div><div class="p5-gl-item-def">100 点満点スコアリングで 80 点未満は最大 3 回リトライ、それでも不合格なら人間にエスカレーション。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="Escalation" data-jp="エスカレーション"><div class="p5-gl-item-term">Escalation</div><div class="p5-gl-item-jp">エスカレーション</div><div class="p5-gl-item-def">エージェントが解決できない問題を上位に通知。Critical: 24 時間、Constitutional: 7 日、Budget: 即時。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="Zero Surprise Principle" data-jp="ゼロサプライズ原則"><div class="p5-gl-item-term">Zero Surprise Principle</div><div class="p5-gl-item-jp">ゼロサプライズ原則</div><div class="p5-gl-item-def">AI エージェントが人間の知らないところで変更を加えることを防止。全変更は Issue、Label、ログで可視化。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="BUDGET.yml" data-jp="予算設定ファイル"><div class="p5-gl-item-term">BUDGET.yml</div><div class="p5-gl-item-jp">予算設定ファイル</div><div class="p5-gl-item-def">月額 $500 の予算管理。Anthropic API $400、Firebase $100。80% で警告、150% でサーキットブレーカー発動。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="Input Validation" data-jp="入力バリデーション"><div class="p5-gl-item-term">Input Validation</div><div class="p5-gl-item-jp">入力バリデーション</div><div class="p5-gl-item-def">パストラバーサル防止、文字数制限、フォーマット検証など。外部入力を信頼せず境界で厳密に検証する。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <div class="p5-gl-item" data-cat="security" data-term="Gitleaks" data-jp="シークレット検出ツール"><div class="p5-gl-item-term">Gitleaks</div><div class="p5-gl-item-jp">シークレット検出ツール</div><div class="p5-gl-item-def">push/PR 時にソースコード内の秘密情報（API キーやパスワード）の漏洩を自動検出・防止する。</div><span class="p5-gl-item-cat">Security</span></div>
+
+    <!-- Tool -->
+    <div class="p5-gl-item" data-cat="tool" data-term="Vitest" data-jp="テストフレームワーク"><div class="p5-gl-item-term">Vitest</div><div class="p5-gl-item-jp">テストフレームワーク</div><div class="p5-gl-item-def">高速な JavaScript/TypeScript テストフレームワーク。ユニットテストと統合テストに使用。カバレッジ v8 対応。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="Playwright" data-jp="E2Eテストフレームワーク"><div class="p5-gl-item-term">Playwright</div><div class="p5-gl-item-jp">E2E テストフレームワーク</div><div class="p5-gl-item-def">ブラウザ自動操作による E2E テスト。ダッシュボードのテストやユーザーフロー検証に使用。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="Commander.js" data-jp="CLIフレームワーク"><div class="p5-gl-item-term">Commander.js</div><div class="p5-gl-item-jp">CLI フレームワーク</div><div class="p5-gl-item-def">Node.js の CLI フレームワーク。Miyabi CLI の 30 以上のコマンドの基盤として使用。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="ts-morph" data-jp="TypeScriptコード分析"><div class="p5-gl-item-term">ts-morph</div><div class="p5-gl-item-jp">TypeScript コード分析</div><div class="p5-gl-item-def">TypeScript コードの関数・クラス・インターフェースを解析する Doc Generator のエンジン。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="GitNexus" data-jp="コード知能"><div class="p5-gl-item-term">GitNexus</div><div class="p5-gl-item-jp">コード知能（コードベースのグラフ分析）</div><div class="p5-gl-item-def">コードベースをグラフ化して分析。6 スキル: CLI, Guide, Exploring, Impact Analysis, Debugging, Refactoring。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="ESLint" data-jp="コード品質ツール"><div class="p5-gl-item-term">ESLint</div><div class="p5-gl-item-jp">コード品質ツール</div><div class="p5-gl-item-def">JavaScript/TypeScript の静的解析ツール。最大行長 120、循環的複雑度 15 以下、ネスト深度 4 以下などを検証。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="Docker" data-jp="コンテナ化"><div class="p5-gl-item-term">Docker</div><div class="p5-gl-item-jp">コンテナ化プラットフォーム</div><div class="p5-gl-item-def">マルチステージビルド、非 root ユーザー（miyabi:1001）、Alpine ベースで安全に実行。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="GitHub Actions" data-jp="CI/CD実行エンジン"><div class="p5-gl-item-term">GitHub Actions</div><div class="p5-gl-item-jp">CI/CD 実行エンジン</div><div class="p5-gl-item-def">24 ワークフローが定義され、Agentic OS の実行エンジンとして機能する。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="Conventional Commits" data-jp="コンベンショナルコミット"><div class="p5-gl-item-term">Conventional Commits</div><div class="p5-gl-item-jp">コンベンショナルコミット</div><div class="p5-gl-item-def">コミットメッセージの標準化形式。feat, fix, refactor, docs, test, style, perf, chore, ci。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="Claude Sonnet 4" data-jp="AIモデル"><div class="p5-gl-item-term">Claude Sonnet 4</div><div class="p5-gl-item-jp">Anthropic の AI モデル</div><div class="p5-gl-item-def">CodeGenAgent のコード生成と BusinessBaseAgent の推論に使用。Max Tokens: 8,000-8,192。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <div class="p5-gl-item" data-cat="tool" data-term="Gemini API" data-jp="Google AIモデル"><div class="p5-gl-item-term">Gemini API</div><div class="p5-gl-item-jp">Google の AI モデル API</div><div class="p5-gl-item-def">Context Engineering バックエンド、画像生成、TTS 生成に使用。gemini-3-flash-preview 等。</div><span class="p5-gl-item-cat">Tool</span></div>
+
+    <!-- Data Model -->
+    <div class="p5-gl-item" data-cat="data" data-term="AgentMessage" data-jp="エージェントメッセージ"><div class="p5-gl-item-term">AgentMessage</div><div class="p5-gl-item-jp">エージェントメッセージ</div><div class="p5-gl-item-def">UUID v4、送信元/先、メッセージタイプ、優先度、ペイロード、TTL を含むエージェント間通信の標準形式。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="MessageType" data-jp="メッセージタイプ"><div class="p5-gl-item-term">MessageType</div><div class="p5-gl-item-jp">メッセージタイプ（8 種類）</div><div class="p5-gl-item-def">TASK_ASSIGNMENT, STATUS_UPDATE, ESCALATION, RESULT_REPORT, ERROR_REPORT, HEARTBEAT, CAPABILITY_QUERY/RESPONSE。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="ExecutionResult" data-jp="実行結果"><div class="p5-gl-item-term">ExecutionResult</div><div class="p5-gl-item-jp">タスク実行結果</div><div class="p5-gl-item-def">taskId, success, state, output, error, durationMs, agentType, artifacts を含む実行結果。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="DAGResult" data-jp="DAG結果"><div class="p5-gl-item-term">DAGResult</div><div class="p5-gl-item-jp">DAG 構造の結果</div><div class="p5-gl-item-def">nodes, edges, levels（トポロジカルソート済み）、criticalPath, estimatedDurationMinutes を含む。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="AgentConfig" data-jp="エージェント設定"><div class="p5-gl-item-term">AgentConfig</div><div class="p5-gl-item-jp">エージェント設定</div><div class="p5-gl-item-def">name, description, enabled 等を定義する TypeScript インターフェース。Builder パターンで段階的に構築。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="AgentResult" data-jp="エージェント実行結果"><div class="p5-gl-item-term">AgentResult</div><div class="p5-gl-item-jp">エージェント実行結果</div><div class="p5-gl-item-def">status（success/failure/partial/timeout）、message, metrics, artifacts, error を含む結果。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="BusinessResult" data-jp="ビジネス実行結果"><div class="p5-gl-item-term">BusinessResult</div><div class="p5-gl-item-jp">ビジネス実行結果</div><div class="p5-gl-item-def">success, data, insights, recommendations, nextSteps, error を含むビジネスエージェントの実行結果。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="DecompositionResult" data-jp="タスク分解結果"><div class="p5-gl-item-term">DecompositionResult</div><div class="p5-gl-item-jp">タスク分解結果</div><div class="p5-gl-item-def">id, originalPrompt, tasks, dag(DAGResult), metadata, warnings を含む LLM 分解結果。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <div class="p5-gl-item" data-cat="data" data-term="AgentPermissionLevel" data-jp="エージェント権限レベル"><div class="p5-gl-item-term">AgentPermissionLevel</div><div class="p5-gl-item-jp">エージェント権限レベル</div><div class="p5-gl-item-def">leader（赤 - 統括）、executor（緑 - 実行）、analyst（青 - 分析）、support（黄 - サポート）の 4 段階。</div><span class="p5-gl-item-cat">Data Model</span></div>
+
+    <!-- Workflow -->
+    <div class="p5-gl-item" data-cat="workflow" data-term="Pipeline" data-jp="パイプライン"><div class="p5-gl-item-term">Pipeline</div><div class="p5-gl-item-jp">パイプライン</div><div class="p5-gl-item-def">| (pipe), && (AND), || (OR), & (parallel) 演算子でコマンドを組み合わせるワークフロー。チェックポイントから再開可能。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="Auto-Loop Pattern" data-jp="自動ループパターン"><div class="p5-gl-item-term">Auto-Loop Pattern</div><div class="p5-gl-item-jp">自動ループパターン</div><div class="p5-gl-item-def">ReviewAgent スコア 80 点未満で CodeGenAgent にフィードバックし最大 3 回リトライする品質改善ループ。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="Kahn's Algorithm" data-jp="カーンのアルゴリズム"><div class="p5-gl-item-term">Kahn's Algorithm</div><div class="p5-gl-item-jp">カーンのアルゴリズム</div><div class="p5-gl-item-def">トポロジカルソートのアルゴリズム。入次数 0 のノードからキューで処理し DAG の実行順序を算出。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="Webhook" data-jp="ウェブフック"><div class="p5-gl-item-term">Webhook</div><div class="p5-gl-item-jp">ウェブフック（イベントバス）</div><div class="p5-gl-item-def">GitHub イベントを受信して適切なワークフローにルーティングする仕組み。webhook-handler.yml で中央管理。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="Graceful Degradation" data-jp="グレースフルデグラデーション"><div class="p5-gl-item-term">Graceful Degradation</div><div class="p5-gl-item-jp">段階的な品質低下対応</div><div class="p5-gl-item-def">3 回失敗で手動介入に切り替え。完全自動化を目指しつつ、解決不能な問題の無限リトライを防止する。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="Retry with Exponential Backoff" data-jp="指数バックオフリトライ"><div class="p5-gl-item-term">Retry with Exponential Backoff</div><div class="p5-gl-item-jp">指数バックオフリトライ</div><div class="p5-gl-item-def">リトライ間隔を指数的に増加（1s, 2s, 4s...）。maxAttempts: 3、randomize: true でサンダリングハード問題を緩和。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="GitHub Projects V2" data-jp="GitHubプロジェクト"><div class="p5-gl-item-term">GitHub Projects V2</div><div class="p5-gl-item-jp">GitHub プロジェクト管理</div><div class="p5-gl-item-def">データ永続化層。カスタムフィールド: Agent, Duration, Cost, Quality Score, Sprint で管理。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="53 Labels" data-jp="53ラベル"><div class="p5-gl-item-term">53 Labels System</div><div class="p5-gl-item-jp">53 ラベルシステム</div><div class="p5-gl-item-def">10 カテゴリ（priority, type, status, scope, size, agent, quality, risk, automation, release）x 53 ラベルでステートマシンを構成。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="Context Engineering" data-jp="コンテキストエンジニアリング"><div class="p5-gl-item-term">Context Engineering</div><div class="p5-gl-item-jp">コンテキストエンジニアリング</div><div class="p5-gl-item-def">AI プロンプトの品質分析・最適化 SDK。トークン 52% 削減、品質 42% 向上、応答時間 44% 短縮を実現。</div><span class="p5-gl-item-cat">Workflow</span></div>
+
+    <div class="p5-gl-item" data-cat="workflow" data-term="AAA Pattern" data-jp="AAAパターン"><div class="p5-gl-item-term">AAA Pattern</div><div class="p5-gl-item-jp">AAA パターン（Arrange-Act-Assert）</div><div class="p5-gl-item-def">テストの構造化手法。準備（Arrange）、実行（Act）、検証（Assert）の 3 段階でテストを記述する。</div><span class="p5-gl-item-cat">Workflow</span></div>
+  </div>
+</div>
+</section>
+
+<!-- ============================== -->
+<!-- SECTION: Footer                -->
+<!-- ============================== -->
+<footer class="part5-section" style="padding:0 20px;background:#0a0a1a;color:#e0e0e0;">
+<div class="p5-container">
+  <div class="p5-footer">
+    <div class="p5-footer-logo">Miyabi</div>
+    <div class="p5-footer-desc">AI Agentic OS -- GitHub をオペレーティングシステムとして活用する自律型 AI 開発プラットフォーム</div>
+    <div class="p5-footer-links">
+      <a href="#skills">23 のスキル</a>
+      <a href="#task-management">タスク管理</a>
+      <a href="#data-model">データモデル</a>
+      <a href="#design-patterns">設計パターン</a>
+      <a href="#glossary">用語集</a>
+    </div>
+    <div class="p5-footer-links">
+      <a href="https://github.com/ShunsukeHayashi/miyabi" target="_blank" rel="noopener">GitHub Repository</a>
+      <a href="https://www.npmjs.com/package/@anthropic-ai/sdk" target="_blank" rel="noopener">Anthropic SDK</a>
+    </div>
+    <div class="p5-footer-copy">&copy; 2024-2026 Miyabi LLC (合同会社みやび). Apache License 2.0. Built with Claude Sonnet 4.</div>
+  </div>
+</div>
+</footer>
+
+<!-- Glossary Filter Script -->
+<script>
+(function(){
+  var currentCat = 'all';
+
+  window.p5FilterCat = function(btn, cat) {
+    currentCat = cat;
+    var btns = document.querySelectorAll('#p5GlFilters .p5-gl-filter-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+    btn.classList.add('active');
+    p5FilterGlossary();
+  };
+
+  window.p5FilterGlossary = function() {
+    var searchEl = document.getElementById('p5GlossarySearch');
+    var query = (searchEl ? searchEl.value : '').toLowerCase();
+    var items = document.querySelectorAll('#p5GlGrid .p5-gl-item');
+    var visCount = 0;
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var term = (item.getAttribute('data-term') || '').toLowerCase();
+      var jp = (item.getAttribute('data-jp') || '').toLowerCase();
+      var cat = item.getAttribute('data-cat') || '';
+      var defText = (item.querySelector('.p5-gl-item-def') || {}).textContent || '';
+      defText = defText.toLowerCase();
+
+      var matchesCat = (currentCat === 'all' || cat === currentCat);
+      var matchesSearch = !query || term.indexOf(query) !== -1 || jp.indexOf(query) !== -1 || defText.indexOf(query) !== -1;
+
+      if (matchesCat && matchesSearch) {
+        item.style.display = '';
+        visCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    }
+
+    var countEl = document.getElementById('p5GlCount');
+    if (countEl) countEl.textContent = visCount + ' 件表示中';
+  };
+})();
+</script>

@@ -1,0 +1,2439 @@
+<style>
+/* ============================================================ */
+/* Part 2: Agent System - Complete Self-Contained CSS            */
+/* Japanese Aesthetic: Cherry Blossom, Indigo, Gold              */
+/* ============================================================ */
+
+/* ---------- Base & Typography ---------- */
+* { box-sizing: border-box; }
+
+.content-section {
+  font-family: -apple-system, 'Segoe UI', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  color: #2d3748;
+  line-height: 1.8;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  background: #fefcfb;
+}
+
+/* ---------- Section Header ---------- */
+.section-header {
+  text-align: center;
+  padding: 3rem 2rem;
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 40%, #f8b4c8 100%);
+  border-radius: 16px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.section-header::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: rgba(248, 180, 200, 0.15);
+  border-radius: 50%;
+}
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; left: -20px;
+  width: 80px; height: 80px;
+  background: rgba(212, 168, 67, 0.15);
+  border-radius: 50%;
+}
+.section-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  letter-spacing: 0.04em;
+}
+.section-number {
+  display: inline-block;
+  background: rgba(212, 168, 67, 0.35);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.15em 0.7em;
+  border-radius: 20px;
+  margin-right: 0.6rem;
+  vertical-align: middle;
+  letter-spacing: 0.08em;
+}
+.section-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.92;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ---------- Intro Box ---------- */
+.intro-box {
+  background: linear-gradient(135deg, #fff5f7 0%, #fdf2f8 100%);
+  border-left: 5px solid #f8b4c8;
+  border-radius: 0 12px 12px 0;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 12px rgba(248, 180, 200, 0.15);
+}
+.intro-box p { margin: 0.5rem 0; }
+.intro-box strong { color: #1e3a5f; }
+
+/* ---------- Color Legend ---------- */
+.color-legend {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+.legend-description {
+  color: #6b7280;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: #fafafa;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.legend-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.legend-item.legend-red { border-left: 4px solid #e53e3e; }
+.legend-item.legend-green { border-left: 4px solid #38a169; }
+.legend-item.legend-blue { border-left: 4px solid #3182ce; }
+.legend-item.legend-yellow { border-left: 4px solid #d4a843; }
+
+.legend-badge {
+  display: inline-block;
+  padding: 0.25em 0.75em;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.badge-red { background: #e53e3e; }
+.badge-green { background: #38a169; }
+.badge-blue { background: #3182ce; }
+.badge-yellow { background: #d4a843; color: #1a1a1a; }
+
+.legend-emoji { font-size: 1.4rem; flex-shrink: 0; }
+.legend-info { flex: 1; }
+.legend-info strong { display: block; font-size: 0.95rem; margin-bottom: 0.2rem; }
+.legend-info p { margin: 0; font-size: 0.85rem; color: #6b7280; }
+
+/* ---------- Agent Group ---------- */
+.agent-group {
+  margin-bottom: 3rem;
+}
+.group-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #f8b4c8;
+}
+.group-icon { font-size: 1.6rem; }
+.group-description {
+  color: #4a5568;
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+}
+
+/* Team title (sub-group) */
+.team-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d5a8e;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2rem 0 1rem;
+}
+.team-icon { font-size: 1.25rem; }
+
+/* ---------- Agent Cards Grid ---------- */
+.agent-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Agent Card ---------- */
+.agent-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 16px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.agent-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(30, 58, 95, 0.15);
+}
+.agent-card-red { border-top: 4px solid #e53e3e; }
+.agent-card-green { border-top: 4px solid #38a169; }
+.agent-card-blue { border-top: 4px solid #3182ce; }
+.agent-card-yellow { border-top: 4px solid #d4a843; }
+
+/* Card Header */
+.agent-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem 0.75rem;
+  background: linear-gradient(180deg, #f9fafb 0%, #fff 100%);
+}
+.agent-emoji { font-size: 2rem; flex-shrink: 0; }
+.agent-names { flex: 1; min-width: 0; }
+.agent-char-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e3a5f;
+}
+.agent-tech-name {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.02em;
+}
+.agent-badge {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  border-radius: 16px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Card Body */
+.agent-card-body {
+  padding: 0.75rem 1.25rem 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.agent-description {
+  font-size: 0.9rem;
+  color: #4a5568;
+  margin: 0 0 0.75rem;
+  line-height: 1.7;
+}
+.agent-description strong { color: #1e3a5f; }
+
+.agent-details {
+  margin-bottom: 0.75rem;
+}
+.agent-detail-item {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+  align-items: baseline;
+}
+.detail-label {
+  background: #f3f0ff;
+  color: #1e3a5f;
+  padding: 0.15em 0.55em;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.detail-value {
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+/* Performance Tags */
+.agent-performance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+.perf-tag {
+  background: linear-gradient(135deg, #eef2ff, #f3e8ff);
+  color: #1e3a5f;
+  padding: 0.2em 0.6em;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid #e0d4f5;
+}
+
+/* ---------- Subsection Titles ---------- */
+.subsection-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  margin: 2.5rem 0 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid #d4a843;
+}
+.subsection-description {
+  color: #4a5568;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  padding-left: 0.75rem;
+}
+
+/* ---------- Hierarchy Diagram ---------- */
+.agent-hierarchy-section {
+  margin-bottom: 3rem;
+}
+.hierarchy-diagram {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+.hierarchy-layer {
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+}
+.hierarchy-layer-red { background: linear-gradient(135deg, #fff5f5, #fee2e2); border: 1px solid #fecaca; }
+.hierarchy-layer-blue { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; }
+.hierarchy-layer-green { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; }
+.hierarchy-layer-yellow { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; }
+
+.hierarchy-layer-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  color: #1e3a5f;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.hierarchy-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+.hierarchy-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  min-width: 90px;
+  transition: transform 0.2s;
+}
+.hierarchy-node:hover { transform: scale(1.05); }
+.node-red { border: 2px solid #e53e3e; }
+.node-blue { border: 2px solid #3182ce; }
+.node-green { border: 2px solid #38a169; }
+.node-yellow { border: 2px solid #d4a843; }
+.node-emoji { font-size: 1.3rem; }
+.node-name { font-size: 0.8rem; font-weight: 700; color: #1e3a5f; }
+.node-sub { font-size: 0.65rem; color: #9ca3af; }
+
+.hierarchy-connector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  justify-content: center;
+}
+.connector-line {
+  height: 2px;
+  flex: 1;
+  max-width: 60px;
+  background: linear-gradient(90deg, transparent, #d4a843, transparent);
+}
+.connector-label {
+  font-size: 0.75rem;
+  color: #d4a843;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ---------- Communication Flow ---------- */
+.communication-flow-section {
+  margin-bottom: 3rem;
+}
+.comm-flow-diagram {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+  margin-bottom: 1.5rem;
+}
+.comm-flow-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.comm-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f9fafb;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.comm-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.comm-coordinator { border-color: #e53e3e; background: #fff5f5; }
+.comm-agent { border-color: #3182ce; background: #eff6ff; }
+.comm-emoji { font-size: 1.5rem; }
+.comm-label { font-size: 0.85rem; font-weight: 700; color: #1e3a5f; }
+.comm-role { font-size: 0.7rem; color: #9ca3af; }
+
+.comm-arrow-group {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+.comm-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #d4a843;
+}
+.comm-arrow-down::before { content: '\25BC'; font-size: 1.2rem; }
+.comm-arrow-up::before { content: '\25B2'; font-size: 1.2rem; }
+.comm-arrow-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.comm-bus {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+}
+.comm-bus-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+.comm-bus-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+.comm-type {
+  background: rgba(255,255,255,0.15);
+  padding: 0.2em 0.6em;
+  border-radius: 6px;
+  font-size: 0.72rem;
+}
+
+.comm-agents-row { gap: 0.75rem; }
+
+/* ---------- Message Anatomy ---------- */
+.message-anatomy {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+.anatomy-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0 0 1rem;
+}
+.message-card {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+}
+.message-field {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  align-items: center;
+  font-size: 0.85rem;
+}
+.message-field:last-child { border-bottom: none; }
+.field-name {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-weight: 700;
+  color: #7c3aed;
+  font-size: 0.82rem;
+}
+.field-value { color: #1e3a5f; font-weight: 500; }
+.field-explain { color: #9ca3af; font-size: 0.8rem; }
+
+/* ---------- Quality Loop ---------- */
+.quality-gate-section {
+  margin-bottom: 3rem;
+}
+.quality-loop-diagram {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+
+.loop-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+}
+.loop-step-active { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; }
+.loop-step-check { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; }
+.loop-step-success { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fde68a; }
+
+.loop-step-number {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #1e3a5f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.loop-step-content { flex: 1; }
+.loop-step-agent {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+.loop-agent-emoji { font-size: 1.3rem; }
+.loop-agent-name { font-weight: 700; color: #1e3a5f; font-size: 0.95rem; }
+.loop-step-action { font-weight: 600; color: #2d3748; margin-bottom: 0.25rem; }
+.loop-step-detail { font-size: 0.85rem; color: #6b7280; }
+
+.loop-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  color: #d4a843;
+}
+.loop-arrow-forward .loop-arrow-icon { font-size: 1.5rem; font-weight: 800; }
+.loop-arrow-text { font-size: 0.8rem; font-weight: 600; }
+
+/* Score breakdown */
+.loop-score-breakdown { margin-top: 0.75rem; }
+.score-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+.score-category {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4a5568;
+  width: 110px;
+  flex-shrink: 0;
+}
+.score-bar {
+  flex: 1;
+  height: 22px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3182ce, #7c3aed);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+/* Loop Branch */
+.loop-branch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.loop-branch-pass, .loop-branch-retry {
+  padding: 1rem;
+  border-radius: 12px;
+}
+.loop-branch-pass { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.loop-branch-retry { background: #fff5f5; border: 1px solid #fecaca; }
+
+.loop-branch-condition {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+.condition-pass { color: #16a34a; }
+.condition-retry { color: #dc2626; }
+
+.loop-retry-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.retry-icon { font-size: 1.5rem; }
+.retry-text { font-weight: 600; color: #dc2626; font-size: 0.85rem; }
+.retry-detail { font-size: 0.75rem; color: #9ca3af; text-align: center; }
+
+/* Retry Counter */
+.retry-counter {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 10px;
+}
+.retry-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+.retry-attempts {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.retry-attempt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  min-width: 100px;
+}
+.attempt-fail { background: #fee2e2; border: 1px solid #fecaca; }
+.attempt-pass { background: #dcfce7; border: 1px solid #bbf7d0; }
+.attempt-num { font-size: 0.75rem; font-weight: 600; color: #6b7280; }
+.attempt-score { font-size: 1.2rem; font-weight: 800; color: #1e3a5f; }
+.attempt-status { font-size: 0.75rem; font-weight: 600; }
+.attempt-fail .attempt-status { color: #dc2626; }
+.attempt-pass .attempt-status { color: #16a34a; }
+
+/* ---------- Workflow Timeline ---------- */
+.workflow-section {
+  margin-bottom: 3rem;
+}
+.workflow-timeline {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+.workflow-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.workflow-step:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.1);
+}
+.workflow-icon { font-size: 1.8rem; flex-shrink: 0; }
+.workflow-content { flex: 1; }
+.workflow-content h5 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+.workflow-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+.workflow-badge {
+  position: absolute;
+  top: 0.75rem; right: 0.75rem;
+  padding: 0.15em 0.55em;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+.workflow-connector {
+  width: 3px;
+  height: 24px;
+  background: linear-gradient(180deg, #f8b4c8, #d4a843);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* Parallel agents */
+.parallel-agents {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.parallel-agent {
+  background: #dcfce7;
+  padding: 0.3em 0.7em;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #166534;
+}
+
+/* Deploy pipeline */
+.deploy-pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.pipeline-stage {
+  background: linear-gradient(135deg, #1e3a5f, #2d5a8e);
+  color: #fff;
+  padding: 0.4em 0.8em;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+.pipeline-stage small { opacity: 0.8; font-weight: 400; }
+.pipeline-arrow { color: #d4a843; font-weight: 800; font-size: 1rem; }
+
+/* Workflow step variants */
+.workflow-step-start { border-left: 4px solid #1e3a5f; }
+.workflow-step-analyze { border-left: 4px solid #3182ce; }
+.workflow-step-plan { border-left: 4px solid #e53e3e; }
+.workflow-step-parallel { border-left: 4px solid #38a169; }
+.workflow-step-review { border-left: 4px solid #3182ce; }
+.workflow-step-pr { border-left: 4px solid #d4a843; }
+.workflow-step-human { border-left: 4px solid #6b7280; }
+.workflow-step-deploy { border-left: 4px solid #d4a843; }
+.workflow-step-done { border-left: 4px solid #f8b4c8; background: linear-gradient(135deg, #fff5f7, #fdf2f8); }
+
+/* ---------- Naming System ---------- */
+.naming-system-section {
+  margin-bottom: 3rem;
+}
+.naming-rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.naming-rule {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(30, 58, 95, 0.06);
+  border: 1px solid #e8e0f0;
+  transition: transform 0.2s;
+}
+.naming-rule:hover { transform: translateY(-2px); }
+.rule-number {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8b4c8, #e88faa);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.rule-content h5 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+.rule-content p { margin: 0; font-size: 0.85rem; color: #6b7280; }
+
+.naming-examples {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+.examples-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0 0 1.25rem;
+}
+.naming-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.naming-card {
+  background: linear-gradient(135deg, #fdf2f8, #fff5f7);
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid #fce7f3;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.naming-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(248, 180, 200, 0.25);
+}
+.naming-char {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  margin-bottom: 0.2rem;
+}
+.naming-origin {
+  font-size: 0.82rem;
+  color: #d4a843;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+.naming-meaning {
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+/* ---------- SLA Section ---------- */
+.sla-section {
+  margin-bottom: 3rem;
+}
+.sla-tiers {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.sla-tier {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+  transition: transform 0.2s;
+}
+.sla-tier:hover { transform: translateY(-2px); }
+
+.sla-tier-header {
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.sla-tier-critical .sla-tier-header { background: linear-gradient(135deg, #e53e3e, #c53030); color: #fff; }
+.sla-tier-high .sla-tier-header { background: linear-gradient(135deg, #d4a843, #b8922e); color: #fff; }
+.sla-tier-standard .sla-tier-header { background: linear-gradient(135deg, #3182ce, #2563eb); color: #fff; }
+
+.sla-tier-badge {
+  font-weight: 800;
+  font-size: 1rem;
+}
+.sla-tier-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+.sla-tier-agents {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+.sla-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+.sla-metric {
+  text-align: center;
+  padding: 0.5rem;
+}
+.metric-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+.metric-value {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1e3a5f;
+}
+
+/* Common Metrics */
+.common-metrics {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e8e0f0;
+}
+.metrics-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0 0 1.25rem;
+}
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s;
+}
+.metric-card:hover { transform: translateY(-2px); }
+.metric-icon { font-size: 1.5rem; }
+.metric-name { font-size: 0.8rem; color: #6b7280; font-weight: 600; }
+.metric-target {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e3a5f;
+}
+
+/* ---------- Responsive Breakpoints ---------- */
+@media (max-width: 1024px) {
+  .agent-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hierarchy-nodes {
+    gap: 0.5rem;
+  }
+  .hierarchy-node {
+    min-width: 75px;
+    padding: 0.5rem 0.7rem;
+  }
+  .message-field {
+    grid-template-columns: 80px 1fr;
+  }
+  .field-explain {
+    grid-column: 1 / -1;
+    padding-left: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-section {
+    padding: 1rem;
+  }
+  .section-header {
+    padding: 2rem 1.25rem;
+  }
+  .section-title {
+    font-size: 1.6rem;
+  }
+  .agent-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .loop-branch {
+    grid-template-columns: 1fr;
+  }
+  .legend-grid {
+    grid-template-columns: 1fr;
+  }
+  .comm-flow-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  .deploy-pipeline {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-section {
+    padding: 0.75rem;
+  }
+  .section-header {
+    padding: 1.5rem 1rem;
+    border-radius: 10px;
+  }
+  .section-title {
+    font-size: 1.3rem;
+  }
+  .agent-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .agent-card-header {
+    flex-wrap: wrap;
+  }
+  .hierarchy-nodes {
+    flex-direction: column;
+    align-items: center;
+  }
+  .hierarchy-node {
+    width: 100%;
+    max-width: 200px;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  .message-field {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+  .field-explain {
+    padding-left: 0;
+  }
+  .naming-grid {
+    grid-template-columns: 1fr;
+  }
+  .sla-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .retry-attempts {
+    flex-direction: column;
+    align-items: center;
+  }
+  .deploy-pipeline {
+    flex-direction: column;
+    align-items: center;
+  }
+  .pipeline-arrow {
+    transform: rotate(90deg);
+  }
+  .naming-rules {
+    grid-template-columns: 1fr;
+  }
+  .group-title {
+    font-size: 1.3rem;
+  }
+  .intro-box {
+    padding: 1rem 1.25rem;
+  }
+}
+</style>
+
+<!-- ============================================================ -->
+<!-- Part 2: 21 AGENT SYSTEM - Miyabi エージェントシステム         -->
+<!-- ============================================================ -->
+
+<section id="agent-system" class="content-section">
+  <div class="section-header">
+    <h2 class="section-title">
+      <span class="section-number">02</span>
+      21体のAIエージェント
+    </h2>
+    <p class="section-subtitle">Miyabi を支える、個性豊かな21人のなかまたち</p>
+  </div>
+
+  <div class="intro-box">
+    <p>Miyabi には <strong>21体のAIエージェント</strong> がいます。それぞれに<strong>かわいい日本語の名前</strong>と<strong>専門のお仕事</strong>があります。</p>
+    <p>大きく分けると <strong>コーディングチーム（7体）</strong> と <strong>ビジネスチーム（14体）</strong> の2グループ。まるで会社のように、リーダーがいて、実行役がいて、分析役がいて、サポート役がいる -- そんなチームワークで動いています。</p>
+  </div>
+
+  <!-- ============================== -->
+  <!-- カラーバッジの説明               -->
+  <!-- ============================== -->
+  <div class="color-legend">
+    <h3 class="subsection-title">役割カラーシステム</h3>
+    <p class="legend-description">エージェントの色は「どんな役割か」を表しています。信号みたいなものですね。</p>
+    <div class="legend-grid">
+      <div class="legend-item legend-red">
+        <span class="legend-badge badge-red">リーダー</span>
+        <span class="legend-emoji">🔴</span>
+        <div class="legend-info">
+          <strong>赤 = リーダー（2体）</strong>
+          <p>チーム全体をまとめる司令塔。同時に1つしか動けない（排他実行）</p>
+        </div>
+      </div>
+      <div class="legend-item legend-green">
+        <span class="legend-badge badge-green">実行役</span>
+        <span class="legend-emoji">🟢</span>
+        <div class="legend-info">
+          <strong>緑 = 実行役（12体）</strong>
+          <p>実際に手を動かす主力メンバー。最大5体が同時に並列で動ける</p>
+        </div>
+      </div>
+      <div class="legend-item legend-blue">
+        <span class="legend-badge badge-blue">分析役</span>
+        <span class="legend-emoji">🔵</span>
+        <div class="legend-info">
+          <strong>青 = 分析役（5体）</strong>
+          <p>調べたり、チェックしたり、評価したりする頭脳派。並列で動ける</p>
+        </div>
+      </div>
+      <div class="legend-item legend-yellow">
+        <span class="legend-badge badge-yellow">サポート</span>
+        <span class="legend-emoji">🟡</span>
+        <div class="legend-info">
+          <strong>黄 = サポート（3体）</strong>
+          <p>前の工程が終わってから動く縁の下の力持ち（条件付き実行）</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- コーディングエージェント（7体）   -->
+  <!-- ============================== -->
+  <div class="agent-group" id="coding-agents">
+    <h3 class="group-title">
+      <span class="group-icon">💻</span>
+      コーディングチーム（7体）
+    </h3>
+    <p class="group-description">ソフトウェア開発を自動でこなすチーム。Issue（課題）を受け取って、コードを書いて、チェックして、本番環境に届けるまでを担当します。</p>
+
+    <div class="agent-cards-grid">
+
+      <!-- Agent 1: しきるん -->
+      <div class="agent-card agent-card-red" id="agent-shikirn">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🎯</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">しきるん</h4>
+            <span class="agent-tech-name">CoordinatorAgent</span>
+          </div>
+          <span class="agent-badge badge-red">🔴 リーダー</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            コーディングチームの<strong>司令塔</strong>。大きな仕事を小さなタスクに分解して、誰に何をやらせるか決める「仕切り屋さん」。DAG（有向非巡回グラフ）という図を作って、効率的にみんなを動かします。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">タスク分解 / チーム指揮 / 進捗監視</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">すごいところ</span>
+              <span class="detail-value">最大5体を同時に動かせる</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">DAG生成 &lt;30秒</span>
+            <span class="perf-tag">分解精度 &gt;95%</span>
+            <span class="perf-tag">並列効率 &gt;70%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 2: つくるん -->
+      <div class="agent-card agent-card-green" id="agent-tsukurun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🛠️</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">つくるん</h4>
+            <span class="agent-tech-name">CodeGenAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            AIの力でコードを<strong>自動生成</strong>するエンジニア。Claude Sonnet 4を使って、TypeScriptのコードだけでなく、テストコードやドキュメントコメントも一緒に作ってくれます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">コード生成 / テスト自動作成 / 型定義追加</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">使用AI</span>
+              <span class="detail-value">Claude Sonnet 4（最大8,000トークン）</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">生成時間 &lt;60秒</span>
+            <span class="perf-tag">品質 &gt;80/100</span>
+            <span class="perf-tag">テストカバレッジ &gt;80%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 3: めだまん -->
+      <div class="agent-card agent-card-blue" id="agent-medaman">
+        <div class="agent-card-header">
+          <span class="agent-emoji">👁️</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">めだまん</h4>
+            <span class="agent-tech-name">ReviewAgent</span>
+          </div>
+          <span class="agent-badge badge-blue">🔵 分析役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            コードの品質を<strong>100点満点でスコアリング</strong>する「目」の番人。型安全性、テストカバレッジ、lint準拠、ドキュメントの4つの観点で厳しくチェック。80点未満なら「もう一回やり直し！」と差し戻します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">品質チェック / スコアリング / 差し戻し判定</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">採点基準</span>
+              <span class="detail-value">型安全30% + テスト30% + lint20% + ドキュメント20%</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">レビュー &lt;90秒</span>
+            <span class="perf-tag">問題検出率 &gt;90%</span>
+            <span class="perf-tag">偽陽性 &lt;10%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 4: みつけるん -->
+      <div class="agent-card agent-card-blue" id="agent-mitsukerun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🔍</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">みつけるん</h4>
+            <span class="agent-tech-name">IssueAgent</span>
+          </div>
+          <span class="agent-badge badge-blue">🔵 分析役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            GitHub Issueを<strong>読み解いて分類</strong>する探偵役。53種類ものラベルを10カテゴリに自動分類して、チームのみんなが理解しやすいように整理します。重複する課題も見つけてくれます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">Issue分析 / 53ラベル自動分類 / 重複検出</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">分類カテゴリ</span>
+              <span class="detail-value">type, priority, severity, state, agent ほか10種</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">分析 &lt;15秒</span>
+            <span class="perf-tag">ラベル精度 &gt;90%</span>
+            <span class="perf-tag">重複検出 &gt;70%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 5: まとめるん -->
+      <div class="agent-card agent-card-yellow" id="agent-matomerun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">📋</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">まとめるん</h4>
+            <span class="agent-tech-name">PRAgent</span>
+          </div>
+          <span class="agent-badge badge-yellow">🟡 サポート</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            レビューに合格したコードを<strong>Pull Request（PR）にまとめる</strong>取りまとめ役。Conventional Commits形式（feat, fix, refactor...）で整ったPRを自動で作ってくれます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">PR自動作成 / コミットメッセージ生成</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">動く条件</span>
+              <span class="detail-value">めだまん（ReviewAgent）のスコアが80点以上</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">PR作成 &lt;30秒</span>
+            <span class="perf-tag">マージ成功率 &gt;95%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 6: はこぶん -->
+      <div class="agent-card agent-card-yellow" id="agent-hakobun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🚀</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">はこぶん</h4>
+            <span class="agent-tech-name">DeploymentAgent</span>
+          </div>
+          <span class="agent-badge badge-yellow">🟡 サポート</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            できあがったコードを<strong>本番環境に届ける</strong>配達員。Build → Test → Deploy → Health Check の4段階パイプラインで安全にデプロイ。もし問題があれば自動でロールバック（元に戻す）します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">CI/CD自動化 / 本番デプロイ / 自動ロールバック</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">動く条件</span>
+              <span class="detail-value">まとめるん（PRAgent）のPRがマージされた後</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">可用性 99.9%</span>
+            <span class="perf-tag">応答 &lt;10秒(P95)</span>
+            <span class="perf-tag">成功率 &gt;99%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 7: たしかめるん -->
+      <div class="agent-card agent-card-green" id="agent-tashikamerun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">✅</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">たしかめるん</h4>
+            <span class="agent-tech-name">TestAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            コードがちゃんと動くか<strong>テストで確かめる</strong>検査役。テストを実行して、どれくらいの範囲がカバーされているかを分析します。つくるんと並列で動くこともできます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">テスト実行 / カバレッジ分析</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">タイプ</span>
+              <span class="detail-value">オプション（必要に応じて起動）</span>
+            </div>
+          </div>
+          <div class="agent-performance">
+            <span class="perf-tag">テスト実行 &lt;180秒</span>
+            <span class="perf-tag">合格率 &gt;95%</span>
+            <span class="perf-tag">カバレッジ &gt;80%</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /agent-cards-grid -->
+  </div><!-- /coding-agents -->
+
+  <!-- ============================== -->
+  <!-- ビジネスエージェント（14体）      -->
+  <!-- ============================== -->
+  <div class="agent-group" id="business-agents">
+    <h3 class="group-title">
+      <span class="group-icon">💼</span>
+      ビジネスチーム（14体）
+    </h3>
+    <p class="group-description">ビジネスプランの策定からマーケティング、営業、顧客管理まで。ソフトウェア開発以外のビジネス業務を支えるチームです。</p>
+
+    <!-- 戦略・計画チーム -->
+    <h4 class="team-title">
+      <span class="team-icon">🧭</span>
+      戦略・計画チーム（6体）
+    </h4>
+
+    <div class="agent-cards-grid">
+
+      <!-- Agent 8: あきんどさん -->
+      <div class="agent-card agent-card-red" id="agent-akindosan">
+        <div class="agent-card-header">
+          <span class="agent-emoji">👔</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">あきんどさん</h4>
+            <span class="agent-tech-name">AIEntrepreneurAgent</span>
+          </div>
+          <span class="agent-badge badge-red">🔴 リーダー</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            ビジネスチームの<strong>大将</strong>。8段階のビジネスプランを策定し、14体のビジネスエージェント全員をまとめあげる起業家リーダーです。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">8段階ビジネスプラン作成 / ビジネスチーム統括</span>
+            </div>
+            <div class="agent-detail-item">
+              <span class="detail-label">統括範囲</span>
+              <span class="detail-value">ビジネスエージェント全14体</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 9: ひらめきくん -->
+      <div class="agent-card agent-card-green" id="agent-hiramekikun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">💡</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">ひらめきくん</h4>
+            <span class="agent-tech-name">ProductConceptAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            アイデアを<strong>形にする発明家</strong>。MVP（最小限の製品）の設計や、Lean Canvasでビジネスモデルを整理してくれます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">MVP設計 / Lean Canvas作成</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 10: かくん -->
+      <div class="agent-card agent-card-green" id="agent-kakun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🎨</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">かくん</h4>
+            <span class="agent-tech-name">ProductDesignAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            製品の<strong>見た目と使いやすさ</strong>を設計するデザイナー。UI/UX設計やデザインシステムの構築を担当します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">UI/UX設計 / デザインシステム構築</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 11: みちびきくん -->
+      <div class="agent-card agent-card-green" id="agent-michibikikun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🗺️</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">みちびきくん</h4>
+            <span class="agent-tech-name">FunnelDesignAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            お客さまが製品を知ってからファンになるまでの<strong>道筋（カスタマージャーニー）</strong>を設計するガイド役。AARRRフレームワークを活用します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">カスタマージャーニー設計 / AARRR分析</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 12: なりきりん -->
+      <div class="agent-card agent-card-blue" id="agent-narikirin">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🎭</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">なりきりん</h4>
+            <span class="agent-tech-name">PersonaAgent</span>
+          </div>
+          <span class="agent-badge badge-blue">🔵 分析役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            「お客さまはどんな人？」を<strong>ペルソナ（架空の顧客像）</strong>として具体化する、なりきり上手なエージェント。ターゲットの気持ちになって考えます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">ターゲット顧客ペルソナ作成</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 13: じぶんしるん -->
+      <div class="agent-card agent-card-blue" id="agent-jibunshirun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🪞</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">じぶんしるん</h4>
+            <span class="agent-tech-name">SelfAnalysisAgent</span>
+          </div>
+          <span class="agent-badge badge-blue">🔵 分析役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            自分自身の<strong>強みと弱み</strong>を客観的に分析するエージェント。SWOT分析やキャリア計画を通じて、戦略の土台をつくります。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">SWOT分析 / キャリア計画</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /agent-cards-grid -->
+
+    <!-- マーケティングチーム -->
+    <h4 class="team-title">
+      <span class="team-icon">📢</span>
+      マーケティングチーム（5体）
+    </h4>
+
+    <div class="agent-cards-grid">
+
+      <!-- Agent 14: しらべるん -->
+      <div class="agent-card agent-card-blue" id="agent-shiraberun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">📊</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">しらべるん</h4>
+            <span class="agent-tech-name">MarketResearchAgent</span>
+          </div>
+          <span class="agent-badge badge-blue">🔵 分析役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            市場と競合を<strong>徹底的に調べ上げる</strong>リサーチのプロ。「今、何が求められているか」「ライバルは何をしているか」を分析します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">市場調査 / 競合分析</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 15: ひろめるん -->
+      <div class="agent-card agent-card-green" id="agent-hiromerun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">📣</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">ひろめるん</h4>
+            <span class="agent-tech-name">MarketingAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            製品やサービスを<strong>世の中に広める</strong>マーケティング戦略家。しらべるんの調査結果を元に、最適な広め方を考えます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">マーケティング戦略策定</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 16: かくちゃん -->
+      <div class="agent-card agent-card-green" id="agent-kakuchan">
+        <div class="agent-card-header">
+          <span class="agent-emoji">✍️</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">かくちゃん</h4>
+            <span class="agent-tech-name">ContentCreationAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            ブログ記事やSEOコンテンツを<strong>書いてくれる</strong>ライター。読み手に伝わる、魅力的な文章を自動で生成します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">コンテンツ生成（ブログ、SEO記事）</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 17: つぶやきくん -->
+      <div class="agent-card agent-card-green" id="agent-tsubuyakikun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🐦</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">つぶやきくん</h4>
+            <span class="agent-tech-name">SNSStrategyAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            SNS（ソーシャルメディア）の<strong>戦略を練る</strong>スペシャリスト。投稿カレンダーを作成し、最適なタイミングで発信する計画を立てます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">SNS戦略 / 投稿カレンダー作成</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 18: どうがん -->
+      <div class="agent-card agent-card-green" id="agent-dougan">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🎬</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">どうがん</h4>
+            <span class="agent-tech-name">YouTubeAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            YouTube動画の<strong>戦略とSEO最適化</strong>を担当する映像プロデューサー。動画の企画、タイトル、タグ戦略まで提案します。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">YouTube戦略 / 動画SEO最適化</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /agent-cards-grid -->
+
+    <!-- 営業・顧客管理チーム -->
+    <h4 class="team-title">
+      <span class="team-icon">🤝</span>
+      営業・顧客管理チーム（3体）
+    </h4>
+
+    <div class="agent-cards-grid">
+
+      <!-- Agent 19: うりこみくん -->
+      <div class="agent-card agent-card-green" id="agent-urikomikun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">💪</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">うりこみくん</h4>
+            <span class="agent-tech-name">SalesAgent</span>
+          </div>
+          <span class="agent-badge badge-green">🟢 実行役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            SPIN Sellingの手法を使って<strong>営業戦略を立てる</strong>セールスのプロ。お客さまのニーズを引き出し、最適な提案につなげます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">営業戦略策定 / SPIN Selling</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 20: つなぐん -->
+      <div class="agent-card agent-card-yellow" id="agent-tsunagun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">🔗</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">つなぐん</h4>
+            <span class="agent-tech-name">CRMAgent</span>
+          </div>
+          <span class="agent-badge badge-yellow">🟡 サポート</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            お客さまとの<strong>関係を長く大切にする</strong>顧客管理のエキスパート。LTV（顧客生涯価値）を最大化し、リピーターを増やします。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">顧客関係管理 / LTV最大化</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent 21: かぞえるん -->
+      <div class="agent-card agent-card-blue" id="agent-kazoerun">
+        <div class="agent-card-header">
+          <span class="agent-emoji">📈</span>
+          <div class="agent-names">
+            <h4 class="agent-char-name">かぞえるん</h4>
+            <span class="agent-tech-name">AnalyticsAgent</span>
+          </div>
+          <span class="agent-badge badge-blue">🔵 分析役</span>
+        </div>
+        <div class="agent-card-body">
+          <p class="agent-description">
+            数字で<strong>成果を測る</strong>データアナリスト。PDCA（計画→実行→確認→改善）サイクルを回して、ビジネス全体をどんどん良くしていきます。
+          </p>
+          <div class="agent-details">
+            <div class="agent-detail-item">
+              <span class="detail-label">お仕事</span>
+              <span class="detail-value">データ分析 / PDCAサイクル管理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /agent-cards-grid -->
+  </div><!-- /business-agents -->
+
+  <!-- ============================== -->
+  <!-- エージェント階層図               -->
+  <!-- ============================== -->
+  <div class="agent-hierarchy-section" id="agent-hierarchy">
+    <h3 class="subsection-title">エージェントの階層構造</h3>
+    <p class="subsection-description">リーダー → 実行役 → 分析役 → サポートの4つのレイヤーで構成されています。上から下に「指示」が流れ、下から上に「結果」が戻ってきます。</p>
+
+    <div class="hierarchy-diagram">
+      <!-- Layer 1: Leaders -->
+      <div class="hierarchy-layer hierarchy-layer-red">
+        <div class="hierarchy-layer-label">リーダー層</div>
+        <div class="hierarchy-nodes">
+          <div class="hierarchy-node node-red">
+            <span class="node-emoji">🎯</span>
+            <span class="node-name">しきるん</span>
+            <span class="node-sub">コーディング統括</span>
+          </div>
+          <div class="hierarchy-node node-red">
+            <span class="node-emoji">👔</span>
+            <span class="node-name">あきんどさん</span>
+            <span class="node-sub">ビジネス統括</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hierarchy-connector">
+        <div class="connector-line"></div>
+        <div class="connector-label">タスク指示 ↓ / 結果報告 ↑</div>
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Layer 2: Analyzers -->
+      <div class="hierarchy-layer hierarchy-layer-blue">
+        <div class="hierarchy-layer-label">分析層</div>
+        <div class="hierarchy-nodes">
+          <div class="hierarchy-node node-blue">
+            <span class="node-emoji">🔍</span>
+            <span class="node-name">みつけるん</span>
+          </div>
+          <div class="hierarchy-node node-blue">
+            <span class="node-emoji">👁️</span>
+            <span class="node-name">めだまん</span>
+          </div>
+          <div class="hierarchy-node node-blue">
+            <span class="node-emoji">🎭</span>
+            <span class="node-name">なりきりん</span>
+          </div>
+          <div class="hierarchy-node node-blue">
+            <span class="node-emoji">🪞</span>
+            <span class="node-name">じぶんしるん</span>
+          </div>
+          <div class="hierarchy-node node-blue">
+            <span class="node-emoji">📊</span>
+            <span class="node-name">しらべるん</span>
+          </div>
+          <div class="hierarchy-node node-blue">
+            <span class="node-emoji">📈</span>
+            <span class="node-name">かぞえるん</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hierarchy-connector">
+        <div class="connector-line"></div>
+        <div class="connector-label">分析結果 ↓ / フィードバック ↑</div>
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Layer 3: Executors -->
+      <div class="hierarchy-layer hierarchy-layer-green">
+        <div class="hierarchy-layer-label">実行層（最大5並列）</div>
+        <div class="hierarchy-nodes">
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">🛠️</span>
+            <span class="node-name">つくるん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">✅</span>
+            <span class="node-name">たしかめるん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">💡</span>
+            <span class="node-name">ひらめきくん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">🎨</span>
+            <span class="node-name">かくん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">🗺️</span>
+            <span class="node-name">みちびきくん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">📣</span>
+            <span class="node-name">ひろめるん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">✍️</span>
+            <span class="node-name">かくちゃん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">🐦</span>
+            <span class="node-name">つぶやきくん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">🎬</span>
+            <span class="node-name">どうがん</span>
+          </div>
+          <div class="hierarchy-node node-green">
+            <span class="node-emoji">💪</span>
+            <span class="node-name">うりこみくん</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hierarchy-connector">
+        <div class="connector-line"></div>
+        <div class="connector-label">成果物 ↓ / ステータス ↑</div>
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Layer 4: Support -->
+      <div class="hierarchy-layer hierarchy-layer-yellow">
+        <div class="hierarchy-layer-label">サポート層（条件付き実行）</div>
+        <div class="hierarchy-nodes">
+          <div class="hierarchy-node node-yellow">
+            <span class="node-emoji">📋</span>
+            <span class="node-name">まとめるん</span>
+            <span class="node-sub">レビュー合格後</span>
+          </div>
+          <div class="hierarchy-node node-yellow">
+            <span class="node-emoji">🚀</span>
+            <span class="node-name">はこぶん</span>
+            <span class="node-sub">PRマージ後</span>
+          </div>
+          <div class="hierarchy-node node-yellow">
+            <span class="node-emoji">🔗</span>
+            <span class="node-name">つなぐん</span>
+            <span class="node-sub">営業・分析連携後</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- エージェント間の通信フロー        -->
+  <!-- ============================== -->
+  <div class="communication-flow-section" id="agent-communication">
+    <h3 class="subsection-title">エージェント同士の会話のしくみ</h3>
+    <p class="subsection-description">エージェントたちは「メッセージバス」という共通の連絡網で会話します。手紙のやり取りのようなイメージです。</p>
+
+    <div class="comm-flow-diagram">
+      <div class="comm-flow-row">
+        <div class="comm-node comm-coordinator">
+          <span class="comm-emoji">🎯</span>
+          <span class="comm-label">しきるん</span>
+          <span class="comm-role">（司令塔）</span>
+        </div>
+      </div>
+
+      <div class="comm-arrow-group">
+        <div class="comm-arrow comm-arrow-down">
+          <span class="comm-arrow-label">TASK_ASSIGNMENT<br>「このタスクをお願い！」</span>
+        </div>
+      </div>
+
+      <div class="comm-flow-row">
+        <div class="comm-bus">
+          <span class="comm-bus-label">MessageBus（連絡網）</span>
+          <div class="comm-bus-types">
+            <span class="comm-type">タスク割り当て</span>
+            <span class="comm-type">状況報告</span>
+            <span class="comm-type">エスカレーション</span>
+            <span class="comm-type">結果報告</span>
+            <span class="comm-type">エラー報告</span>
+            <span class="comm-type">ヘルスチェック</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="comm-arrow-group">
+        <div class="comm-arrow comm-arrow-down">
+          <span class="comm-arrow-label">メッセージ配信</span>
+        </div>
+      </div>
+
+      <div class="comm-flow-row comm-agents-row">
+        <div class="comm-node comm-agent">
+          <span class="comm-emoji">🛠️</span>
+          <span class="comm-label">つくるん</span>
+        </div>
+        <div class="comm-node comm-agent">
+          <span class="comm-emoji">👁️</span>
+          <span class="comm-label">めだまん</span>
+        </div>
+        <div class="comm-node comm-agent">
+          <span class="comm-emoji">📋</span>
+          <span class="comm-label">まとめるん</span>
+        </div>
+        <div class="comm-node comm-agent">
+          <span class="comm-emoji">🚀</span>
+          <span class="comm-label">はこぶん</span>
+        </div>
+      </div>
+
+      <div class="comm-arrow-group">
+        <div class="comm-arrow comm-arrow-up">
+          <span class="comm-arrow-label">STATUS_UPDATE / RESULT_REPORT<br>「できました！」「問題発生！」</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- メッセージの中身 -->
+    <div class="message-anatomy">
+      <h4 class="anatomy-title">メッセージの中身はこうなっている</h4>
+      <div class="message-card">
+        <div class="message-field">
+          <span class="field-name">id</span>
+          <span class="field-value">一意のID（UUID形式）</span>
+          <span class="field-explain">手紙の管理番号のようなもの</span>
+        </div>
+        <div class="message-field">
+          <span class="field-name">from</span>
+          <span class="field-value">送信者（例: CoordinatorAgent）</span>
+          <span class="field-explain">誰からの手紙か</span>
+        </div>
+        <div class="message-field">
+          <span class="field-name">to</span>
+          <span class="field-value">受信者（例: CodeGenAgent）</span>
+          <span class="field-explain">誰への手紙か</span>
+        </div>
+        <div class="message-field">
+          <span class="field-name">type</span>
+          <span class="field-value">種類（TASK_ASSIGNMENT など）</span>
+          <span class="field-explain">手紙の用件</span>
+        </div>
+        <div class="message-field">
+          <span class="field-name">priority</span>
+          <span class="field-value">0~3（0=最重要）</span>
+          <span class="field-explain">どれくらい急ぎか</span>
+        </div>
+        <div class="message-field">
+          <span class="field-name">payload</span>
+          <span class="field-value">具体的な内容データ</span>
+          <span class="field-explain">手紙の本文</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- 品質ゲートループ                 -->
+  <!-- ============================== -->
+  <div class="quality-gate-section" id="quality-gate">
+    <h3 class="subsection-title">品質ゲート：つくるん ↔ めだまん ループ</h3>
+    <p class="subsection-description">コードの品質を保つ秘密兵器。「作る → チェック → ダメなら作り直し」を最大3回繰り返します。80点以上で合格です。</p>
+
+    <div class="quality-loop-diagram">
+      <!-- Step 1 -->
+      <div class="loop-step loop-step-active">
+        <div class="loop-step-number">1</div>
+        <div class="loop-step-content">
+          <div class="loop-step-agent">
+            <span class="loop-agent-emoji">🛠️</span>
+            <span class="loop-agent-name">つくるん</span>
+          </div>
+          <div class="loop-step-action">コードを生成</div>
+          <div class="loop-step-detail">Claude Sonnet 4でTypeScriptコード + テスト + 型定義を作成</div>
+        </div>
+      </div>
+
+      <div class="loop-arrow loop-arrow-forward">
+        <span class="loop-arrow-icon">→</span>
+        <span class="loop-arrow-text">コード提出</span>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="loop-step loop-step-check">
+        <div class="loop-step-number">2</div>
+        <div class="loop-step-content">
+          <div class="loop-step-agent">
+            <span class="loop-agent-emoji">👁️</span>
+            <span class="loop-agent-name">めだまん</span>
+          </div>
+          <div class="loop-step-action">品質チェック（100点満点）</div>
+          <div class="loop-score-breakdown">
+            <div class="score-item">
+              <span class="score-category">型安全性</span>
+              <div class="score-bar"><div class="score-fill" style="width: 30%;">30%</div></div>
+            </div>
+            <div class="score-item">
+              <span class="score-category">テストカバレッジ</span>
+              <div class="score-bar"><div class="score-fill" style="width: 30%;">30%</div></div>
+            </div>
+            <div class="score-item">
+              <span class="score-category">lint準拠</span>
+              <div class="score-bar"><div class="score-fill" style="width: 20%;">20%</div></div>
+            </div>
+            <div class="score-item">
+              <span class="score-category">ドキュメント</span>
+              <div class="score-bar"><div class="score-fill" style="width: 20%;">20%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Branch: Pass or Retry -->
+      <div class="loop-branch">
+        <div class="loop-branch-pass">
+          <div class="loop-branch-condition condition-pass">80点以上 → 合格!</div>
+          <div class="loop-arrow loop-arrow-forward">
+            <span class="loop-arrow-icon">→</span>
+            <span class="loop-arrow-text">次のステップへ</span>
+          </div>
+          <div class="loop-step loop-step-success">
+            <div class="loop-step-number">3</div>
+            <div class="loop-step-content">
+              <div class="loop-step-agent">
+                <span class="loop-agent-emoji">📋</span>
+                <span class="loop-agent-name">まとめるん</span>
+              </div>
+              <div class="loop-step-action">PR作成</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="loop-branch-retry">
+          <div class="loop-branch-condition condition-retry">80点未満 → やり直し!</div>
+          <div class="loop-retry-arrow">
+            <span class="retry-icon">🔄</span>
+            <span class="retry-text">最大3回リトライ</span>
+            <span class="retry-detail">フィードバックを元に改善して再チャレンジ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retry counter visualization -->
+      <div class="retry-counter">
+        <div class="retry-label">リトライ回数の例</div>
+        <div class="retry-attempts">
+          <div class="retry-attempt attempt-fail">
+            <span class="attempt-num">1回目</span>
+            <span class="attempt-score">65点</span>
+            <span class="attempt-status">不合格</span>
+          </div>
+          <div class="retry-attempt attempt-fail">
+            <span class="attempt-num">2回目</span>
+            <span class="attempt-score">75点</span>
+            <span class="attempt-status">惜しい!</span>
+          </div>
+          <div class="retry-attempt attempt-pass">
+            <span class="attempt-num">3回目</span>
+            <span class="attempt-score">88点</span>
+            <span class="attempt-status">合格!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- コーディングワークフロー全体図     -->
+  <!-- ============================== -->
+  <div class="workflow-section" id="coding-workflow">
+    <h3 class="subsection-title">コーディングワークフロー：Issueから本番デプロイまで</h3>
+    <p class="subsection-description">1つのGitHub Issueが登録されてから、本番環境にデプロイされるまでの流れを見てみましょう。</p>
+
+    <div class="workflow-timeline">
+      <div class="workflow-step workflow-step-start">
+        <div class="workflow-icon">📝</div>
+        <div class="workflow-content">
+          <h5>GitHub Issue 登録</h5>
+          <p>「新機能を追加してほしい」など、課題が登録される</p>
+        </div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-analyze">
+        <div class="workflow-icon">🔍</div>
+        <div class="workflow-content">
+          <h5>みつけるん が分析</h5>
+          <p>Issueを読み解き、53種のラベルで自動分類（&lt;15秒）</p>
+        </div>
+        <div class="workflow-badge badge-blue">分析</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-plan">
+        <div class="workflow-icon">🎯</div>
+        <div class="workflow-content">
+          <h5>しきるん がタスク分解</h5>
+          <p>DAGを構築し、1~3時間のアトミックタスクに分解（&lt;30秒）</p>
+        </div>
+        <div class="workflow-badge badge-red">統括</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-parallel">
+        <div class="workflow-icon">⚡</div>
+        <div class="workflow-content">
+          <h5>並列実行（最大5体同時）</h5>
+          <div class="parallel-agents">
+            <span class="parallel-agent">🛠️ つくるん（コード生成）</span>
+            <span class="parallel-agent">✅ たしかめるん（テスト）</span>
+          </div>
+        </div>
+        <div class="workflow-badge badge-green">実行</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-review">
+        <div class="workflow-icon">👁️</div>
+        <div class="workflow-content">
+          <h5>めだまん が品質チェック</h5>
+          <p>100点満点で採点。80点未満なら自動リトライ（最大3回）</p>
+        </div>
+        <div class="workflow-badge badge-blue">品質ゲート</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-pr">
+        <div class="workflow-icon">📋</div>
+        <div class="workflow-content">
+          <h5>まとめるん がPR作成</h5>
+          <p>Conventional Commits形式でPull Request自動作成（&lt;30秒）</p>
+        </div>
+        <div class="workflow-badge badge-yellow">サポート</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-human">
+        <div class="workflow-icon">👤</div>
+        <div class="workflow-content">
+          <h5>人間がレビュー&マージ</h5>
+          <p>ここだけ人間の出番。PRを確認してマージボタンを押す</p>
+        </div>
+        <div class="workflow-badge" style="background: #6b7280; color: white;">人間</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-deploy">
+        <div class="workflow-icon">🚀</div>
+        <div class="workflow-content">
+          <h5>はこぶん が本番デプロイ</h5>
+          <p>Build → Test → Deploy → Health Check の4段階パイプライン</p>
+          <div class="deploy-pipeline">
+            <span class="pipeline-stage">Build<br><small>60秒</small></span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-stage">Test<br><small>120秒</small></span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-stage">Deploy<br><small>60秒</small></span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-stage">Health<br><small>60秒</small></span>
+          </div>
+        </div>
+        <div class="workflow-badge badge-yellow">サポート</div>
+      </div>
+
+      <div class="workflow-connector"></div>
+
+      <div class="workflow-step workflow-step-done">
+        <div class="workflow-icon">🎉</div>
+        <div class="workflow-content">
+          <h5>完了!</h5>
+          <p>Issue state: done. お疲れさまでした!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- キャラクター命名システム          -->
+  <!-- ============================== -->
+  <div class="naming-system-section" id="naming-system">
+    <h3 class="subsection-title">キャラクター命名システム：名前に込められた意味</h3>
+    <p class="subsection-description">21体のエージェントの名前は、すべて「何をするか」がわかるように工夫されています。非エンジニアでも親しみやすい、日本語ならではのネーミングです。</p>
+
+    <div class="naming-rules">
+      <div class="naming-rule">
+        <div class="rule-number">1</div>
+        <div class="rule-content">
+          <h5>ひらがな・カタカナ優先</h5>
+          <p>漢字は最小限。だれでも読みやすく</p>
+        </div>
+      </div>
+      <div class="naming-rule">
+        <div class="rule-number">2</div>
+        <div class="rule-content">
+          <h5>役割を表現</h5>
+          <p>「つくる」=create、「めだ」=eye（目）、「しきる」=coordinate</p>
+        </div>
+      </div>
+      <div class="naming-rule">
+        <div class="rule-number">3</div>
+        <div class="rule-content">
+          <h5>親しみやすい接尾辞</h5>
+          <p>〜くん、〜ちゃん、〜るん、〜さん で友だちみたいに</p>
+        </div>
+      </div>
+      <div class="naming-rule">
+        <div class="rule-number">4</div>
+        <div class="rule-content">
+          <h5>3~5文字</h5>
+          <p>短くて覚えやすい。声に出して呼びたくなる長さ</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="naming-examples">
+      <h4 class="examples-title">名前の由来クイズ</h4>
+      <div class="naming-grid">
+        <div class="naming-card">
+          <div class="naming-char">しきるん</div>
+          <div class="naming-origin">「仕切る」+ 「るん」</div>
+          <div class="naming-meaning">仕切り屋さん → チームを仕切るリーダー</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">つくるん</div>
+          <div class="naming-origin">「作る」+ 「るん」</div>
+          <div class="naming-meaning">作る人 → コードを作るエンジニア</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">めだまん</div>
+          <div class="naming-origin">「目玉」+ 「まん」</div>
+          <div class="naming-meaning">目を光らせる → コードを見張る審査員</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">みつけるん</div>
+          <div class="naming-origin">「見つける」+ 「るん」</div>
+          <div class="naming-meaning">見つける人 → 課題を見つけ出す探偵</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">はこぶん</div>
+          <div class="naming-origin">「運ぶ」+ 「ぶん」</div>
+          <div class="naming-meaning">運ぶ人 → コードを本番に届ける配達員</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">あきんどさん</div>
+          <div class="naming-origin">「商人（あきんど）」+ 「さん」</div>
+          <div class="naming-meaning">商売人 → ビジネスを統括する起業家</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">つぶやきくん</div>
+          <div class="naming-origin">「つぶやき」+ 「くん」</div>
+          <div class="naming-meaning">つぶやく人 → SNS戦略のプロ</div>
+        </div>
+        <div class="naming-card">
+          <div class="naming-char">なりきりん</div>
+          <div class="naming-origin">「なりきり」+ 「りん」</div>
+          <div class="naming-meaning">なりきる人 → お客さまになりきってペルソナ分析</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== -->
+  <!-- SLA・パフォーマンスまとめ        -->
+  <!-- ============================== -->
+  <div class="sla-section" id="agent-sla">
+    <h3 class="subsection-title">パフォーマンス目標とSLA</h3>
+    <p class="subsection-description">エージェントたちにも「成績表」があります。ちゃんと速く、正確に動いているかを常に計測しています。</p>
+
+    <div class="sla-tiers">
+      <div class="sla-tier sla-tier-critical">
+        <div class="sla-tier-header">
+          <span class="sla-tier-badge">Tier 1: Critical</span>
+          <span class="sla-tier-subtitle">最も重要なエージェント</span>
+        </div>
+        <div class="sla-tier-agents">しきるん、はこぶん</div>
+        <div class="sla-metrics">
+          <div class="sla-metric">
+            <span class="metric-label">可用性</span>
+            <span class="metric-value">99.9%</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">応答時間</span>
+            <span class="metric-value">&lt;10秒</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">成功率</span>
+            <span class="metric-value">&gt;99%</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">復旧時間</span>
+            <span class="metric-value">&lt;5分</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sla-tier sla-tier-high">
+        <div class="sla-tier-header">
+          <span class="sla-tier-badge">Tier 2: High</span>
+          <span class="sla-tier-subtitle">重要なエージェント</span>
+        </div>
+        <div class="sla-tier-agents">つくるん、めだまん、みつけるん、まとめるん</div>
+        <div class="sla-metrics">
+          <div class="sla-metric">
+            <span class="metric-label">可用性</span>
+            <span class="metric-value">99.5%</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">応答時間</span>
+            <span class="metric-value">&lt;30秒</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">成功率</span>
+            <span class="metric-value">&gt;95%</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">復旧時間</span>
+            <span class="metric-value">&lt;15分</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sla-tier sla-tier-standard">
+        <div class="sla-tier-header">
+          <span class="sla-tier-badge">Tier 3: Standard</span>
+          <span class="sla-tier-subtitle">標準エージェント</span>
+        </div>
+        <div class="sla-tier-agents">ビジネスエージェント全般、たしかめるん</div>
+        <div class="sla-metrics">
+          <div class="sla-metric">
+            <span class="metric-label">可用性</span>
+            <span class="metric-value">99.0%</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">応答時間</span>
+            <span class="metric-value">&lt;60秒</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">成功率</span>
+            <span class="metric-value">&gt;90%</span>
+          </div>
+          <div class="sla-metric">
+            <span class="metric-label">復旧時間</span>
+            <span class="metric-value">&lt;30分</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 共通メトリクス -->
+    <div class="common-metrics">
+      <h4 class="metrics-title">全エージェント共通のパフォーマンス基準</h4>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-icon">⏱️</span>
+          <span class="metric-name">実行時間</span>
+          <span class="metric-target">&lt;120秒</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">🎯</span>
+          <span class="metric-name">成功率</span>
+          <span class="metric-target">&gt;90%</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">🔄</span>
+          <span class="metric-name">リトライ回数</span>
+          <span class="metric-target">&lt;2回</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">💾</span>
+          <span class="metric-name">メモリ使用量</span>
+          <span class="metric-target">&lt;512MB</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">🪙</span>
+          <span class="metric-name">タスクあたりコスト</span>
+          <span class="metric-target">&lt;$0.10</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">📊</span>
+          <span class="metric-name">エラー率</span>
+          <span class="metric-target">&lt;5%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section><!-- /agent-system -->

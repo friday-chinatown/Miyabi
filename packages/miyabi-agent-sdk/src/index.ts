@@ -22,17 +22,17 @@ export type {
   HealthCheckConfig,
   RetryConfig,
   EscalationConfig,
-} from './types';
+} from './types.js';
 
 // Export base agent class
-export { AgentBase } from './agent-base';
+export { AgentBase } from './agent-base.js';
 
 // Export legacy GitHub client (fetch-based, {owner, repo, token} constructor)
-export { GitHubClient as LegacyGitHubClient } from './github-client';
-export type { GitHubClientOptions } from './github-client';
+export { GitHubClient as LegacyGitHubClient } from './github-client.js';
+export type { GitHubClientOptions } from './github-client.js';
 
 // Export utilities
-export { createAgentContext, validateContext } from './utils';
+export { createAgentContext, validateContext } from './utils.js';
 
 // Export retry configuration
 export {
@@ -43,17 +43,19 @@ export {
   DEFAULT_RETRY_CONFIG,
   RETRYABLE_ERROR_CODES,
   NON_RETRYABLE_ERROR_CODES,
-} from './retry-config';
-export type { GitHubRetryConfig } from './retry-config';
+} from './retry-config.js';
+export type { GitHubRetryConfig } from './retry-config.js';
 
 // ─── Clients (Octokit-based, used by agents) ───
 export {
   ClaudeCodeClient,
+  CodexClient,
   AnthropicClient,
   GitHubClient,
 } from './clients/index.js';
 export type {
   ClaudeCodeResponse,
+  CodexResponse,
   GitHubIssueData,
   GitHubFile,
   PullRequestInfo,

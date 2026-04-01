@@ -8,7 +8,7 @@ import { runGni, isGniAvailable } from "../utils/gitnexus.js";
 
 function ensureGni(): boolean {
   if (!isGniAvailable()) {
-    console.error(chalk.red("✗ gni (GitNexus) is not available. Check scripts/gni exists."));
+    console.error(chalk.red("✗ gni (GitNexus) is not available. Install with: npm install -g gitnexus"));
     return false;
   }
   return true;

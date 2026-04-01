@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miyabi Gantt Chart</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   CSS Custom Properties — Theming System
+   ═══════════════════════════════════════════════════ */
+:root {
+  /* Miyabi Brand */
+  --cherry: #f8b4c8;
+  --cherry-soft: #fce4ec;
+  --cherry-deep: #e91e63;
+  --indigo: #1e3a5f;
+  --indigo-light: #2c5282;
+  --gold: #d4a843;
+  --gold-soft: #f5e6c8;
+
+  /* Light Mode */
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f5f5f7;
+  --bg-glass: rgba(255, 255, 255, 0.72);
+  --bg-glass-border: rgba(255, 255, 255, 0.5);
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #aeaeb2;
+  --border-color: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-xl: 0 24px 80px rgba(0,0,0,0.1), 0 8px 24px rgba(0,0,0,0.06);
+  --today-line: #e91e63;
+  --critical-color: #ff3b30;
+  --critical-bg: rgba(255, 59, 48, 0.08);
+  --progress-track: #e8e8ed;
+  --row-hover: rgba(30, 58, 95, 0.03);
+  --grid-line: rgba(0, 0, 0, 0.04);
+  --weekend-bg: rgba(0, 0, 0, 0.015);
+  --milestone-color: var(--gold);
+  --arrow-color: #aeaeb2;
+  --tooltip-bg: rgba(29, 29, 31, 0.92);
+  --tooltip-text: #ffffff;
+  --scrollbar-thumb: rgba(0,0,0,0.15);
+  --scrollbar-track: transparent;
+  --header-blur: saturate(180%) blur(20px);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #141416;
+  --bg-tertiary: #1c1c1e;
+  --bg-glass: rgba(28, 28, 30, 0.72);
+  --bg-glass-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f5f5f7;
+  --text-secondary: #98989d;
+  --text-tertiary: #636366;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
+  --shadow-xl: 0 24px 80px rgba(0,0,0,0.5);
+  --today-line: #ff375f;
+  --critical-color: #ff453a;
+  --critical-bg: rgba(255, 69, 58, 0.12);
+  --progress-track: #2c2c2e;
+  --row-hover: rgba(248, 180, 200, 0.04);
+  --grid-line: rgba(255, 255, 255, 0.03);
+  --weekend-bg: rgba(255, 255, 255, 0.01);
+  --milestone-color: var(--gold);
+  --arrow-color: #48484a;
+  --tooltip-bg: rgba(58, 58, 60, 0.95);
+  --tooltip-text: #f5f5f7;
+  --scrollbar-thumb: rgba(255,255,255,0.15);
+}
+
+/* ═══════════════════════════════════════════════════
+   Base & Reset
+   ═══════════════════════════════════════════════════ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb); }
+
+/* ═══════════════════════════════════════════════════
+   Header
+   ═══════════════════════════════════════════════════ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-glass);
+  backdrop-filter: var(--header-blur);
+  -webkit-backdrop-filter: var(--header-blur);
+  border-bottom: 1px solid var(--bg-glass-border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: background 0.5s ease;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--cherry) 0%, var(--indigo) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(248, 180, 200, 0.3);
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--indigo) 0%, var(--cherry-deep) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .logo-text {
+  background: linear-gradient(135deg, var(--cherry) 0%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════
+   Buttons & Controls
+   ═══════════════════════════════════════════════════ */
+.btn {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn.active {
+  background: var(--indigo);
+  color: #ffffff;
+  border-color: var(--indigo);
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.25);
+}
+
+[data-theme="dark"] .btn.active {
+  background: var(--cherry);
+  color: var(--indigo);
+  border-color: var(--cherry);
+  box-shadow: 0 2px 8px rgba(248, 180, 200, 0.2);
+}
+
+.btn-icon {
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.zoom-group {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.zoom-group .btn {
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid var(--border-color);
+}
+
+.zoom-group .btn:last-child { border-right: none; }
+
+.theme-toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--progress-track);
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  padding: 2px;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] .theme-toggle {
+  background: var(--indigo-light);
+}
+
+[data-theme="dark"] .theme-toggle::after {
+  transform: translateX(24px);
+  background: var(--cherry);
+}
+
+.theme-toggle-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.theme-toggle-icon.sun { left: 6px; opacity: 1; }
+.theme-toggle-icon.moon { right: 6px; opacity: 0; }
+
+[data-theme="dark"] .theme-toggle-icon.sun { opacity: 0; }
+[data-theme="dark"] .theme-toggle-icon.moon { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════
+   Stats Bar
+   ═══════════════════════════════════════════════════ */
+.stats-bar {
+  display: flex;
+  gap: 24px;
+  padding: 12px 32px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.stat-label { color: var(--text-secondary); }
+.stat-value { font-weight: 600; color: var(--text-primary); }
+
+/* ═══════════════════════════════════════════════════
+   Gantt Container
+   ═══════════════════════════════════════════════════ */
+.gantt-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: calc(100vh - 140px);
+  position: relative;
+}
+
+.gantt-sidebar {
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  z-index: 10;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  padding: 0 16px;
+  height: 72px;
+  align-items: end;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+}
+
+.sidebar-header span {
+  padding-bottom: 10px;
+}
+
+.sidebar-header span:not(:first-child) {
+  text-align: center;
+}
+
+.gantt-timeline {
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════
+   Timeline Header
+   ═══════════════════════════════════════════════════ */
+.timeline-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timeline-months {
+  display: flex;
+  height: 32px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timeline-month {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.timeline-days {
+  display: flex;
+  height: 40px;
+}
+
+.timeline-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  border-right: 1px solid var(--grid-line);
+  flex-shrink: 0;
+}
+
+.timeline-day.weekend {
+  background: var(--weekend-bg);
+}
+
+.timeline-day.today {
+  color: var(--today-line);
+  font-weight: 700;
+}
+
+.timeline-day-name {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.timeline-day-num {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ═══════════════════════════════════════════════════
+   Task Rows
+   ═══════════════════════════════════════════════════ */
+.task-list { position: relative; }
+
+.task-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px;
+  align-items: center;
+  padding: 0 16px;
+  height: 48px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.task-row:hover {
+  background: var(--row-hover);
+}
+
+.task-row.group-header {
+  background: var(--bg-tertiary);
+  font-weight: 600;
+}
+
+.task-row.group-header:hover {
+  background: var(--bg-tertiary);
+}
+
+.task-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.task-indent {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.group-toggle {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.group-toggle:hover {
+  background: var(--border-color);
+}
+
+.group-toggle.collapsed {
+  transform: rotate(-90deg);
+}
+
+.task-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.task-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-duration, .task-progress-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.task-row.critical .task-label {
+  color: var(--critical-color);
+}
+
+.task-row.milestone .task-label {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.task-row.hidden-child {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════
+   Timeline Body & Bars
+   ═══════════════════════════════════════════════════ */
+.timeline-body {
+  position: relative;
+}
+
+.timeline-grid-row {
+  height: 48px;
+  position: relative;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+}
+
+.timeline-grid-cell {
+  flex-shrink: 0;
+  border-right: 1px solid var(--grid-line);
+  height: 100%;
+}
+
+.timeline-grid-cell.weekend {
+  background: var(--weekend-bg);
+}
+
+.task-bar-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.task-bar {
+  position: absolute;
+  top: 12px;
+  height: 24px;
+  border-radius: 6px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.3s ease;
+  overflow: hidden;
+  min-width: 8px;
+}
+
+.task-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  transition: opacity 0.15s ease;
+}
+
+.task-bar:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.task-bar:hover::before {
+  opacity: 1;
+}
+
+.task-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-bar-label {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Bar Color Variations */
+.task-bar.color-indigo {
+  background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-light) 100%);
+}
+.task-bar.color-indigo .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.color-cherry {
+  background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
+}
+.task-bar.color-cherry .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.color-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, #e6be5a 100%);
+}
+.task-bar.color-gold .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.color-teal {
+  background: linear-gradient(135deg, #00897b 0%, #26a69a 100%);
+}
+.task-bar.color-teal .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.color-purple {
+  background: linear-gradient(135deg, #7b1fa2 0%, #ab47bc 100%);
+}
+.task-bar.color-purple .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.color-slate {
+  background: linear-gradient(135deg, #546e7a 0%, #78909c 100%);
+}
+.task-bar.color-slate .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.color-coral {
+  background: linear-gradient(135deg, #e64a19 0%, #ff7043 100%);
+}
+.task-bar.color-coral .task-bar-fill {
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.task-bar.critical-path {
+  box-shadow: 0 0 0 2px var(--critical-color), var(--shadow-sm);
+}
+
+.task-bar.critical-path::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  border: 2px solid var(--critical-color);
+  animation: critical-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes critical-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════
+   Milestone Diamond
+   ═══════════════════════════════════════════════════ */
+.milestone-marker {
+  position: absolute;
+  top: 12px;
+  width: 24px;
+  height: 24px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.milestone-marker:hover {
+  transform: scale(1.2);
+}
+
+.milestone-diamond {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, var(--gold) 0%, #e6be5a 100%);
+  transform: rotate(45deg) translate(6px, -2px);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(212, 168, 67, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════
+   Today Line
+   ═══════════════════════════════════════════════════ */
+.today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--today-line);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.today-line::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--today-line);
+  box-shadow: 0 0 8px rgba(233, 30, 99, 0.4);
+}
+
+.today-line::after {
+  content: '今日';
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--today-line);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+/* ═══════════════════════════════════════════════════
+   Dependency Arrows (SVG)
+   ═══════════════════════════════════════════════════ */
+.dependency-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.dependency-layer path {
+  fill: none;
+  stroke: var(--arrow-color);
+  stroke-width: 1.5;
+  transition: stroke 0.2s ease;
+}
+
+.dependency-layer path.critical {
+  stroke: var(--critical-color);
+  stroke-width: 2;
+  stroke-dasharray: 6 3;
+  animation: dash-flow 1s linear infinite;
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -9; }
+}
+
+.dependency-layer polygon {
+  fill: var(--arrow-color);
+  transition: fill 0.2s ease;
+}
+
+.dependency-layer polygon.critical {
+  fill: var(--critical-color);
+}
+
+/* ═══════════════════════════════════════════════════
+   Tooltip
+   ═══════════════════════════════════════════════════ */
+.tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: var(--tooltip-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--tooltip-text);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  max-width: 280px;
+  box-shadow: var(--shadow-lg);
+  line-height: 1.6;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tooltip-label { color: rgba(255,255,255,0.6); }
+.tooltip-value { font-weight: 500; }
+
+.tooltip-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.tooltip-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--cherry) 0%, var(--gold) 100%);
+  transition: width 0.4s ease;
+}
+
+/* ═══════════════════════════════════════════════════
+   Legend
+   ═══════════════════════════════════════════════════ */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 32px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-bar {
+  width: 20px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.legend-diamond {
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+}
+
+.legend-line {
+  width: 20px;
+  height: 2px;
+}
+
+/* ═══════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.task-bar {
+  animation: barGrow 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  transform-origin: left center;
+}
+
+.task-row {
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* Stagger animations */
+.task-row:nth-child(1) { animation-delay: 0.02s; }
+.task-row:nth-child(2) { animation-delay: 0.04s; }
+.task-row:nth-child(3) { animation-delay: 0.06s; }
+.task-row:nth-child(4) { animation-delay: 0.08s; }
+.task-row:nth-child(5) { animation-delay: 0.10s; }
+.task-row:nth-child(6) { animation-delay: 0.12s; }
+.task-row:nth-child(7) { animation-delay: 0.14s; }
+.task-row:nth-child(8) { animation-delay: 0.16s; }
+.task-row:nth-child(9) { animation-delay: 0.18s; }
+.task-row:nth-child(10) { animation-delay: 0.20s; }
+.task-row:nth-child(11) { animation-delay: 0.22s; }
+.task-row:nth-child(12) { animation-delay: 0.24s; }
+
+.task-bar:nth-child(1) { animation-delay: 0.1s; }
+.task-bar:nth-child(2) { animation-delay: 0.15s; }
+.task-bar:nth-child(3) { animation-delay: 0.2s; }
+.task-bar:nth-child(4) { animation-delay: 0.25s; }
+.task-bar:nth-child(5) { animation-delay: 0.3s; }
+.task-bar:nth-child(6) { animation-delay: 0.35s; }
+.task-bar:nth-child(7) { animation-delay: 0.4s; }
+.task-bar:nth-child(8) { animation-delay: 0.45s; }
+.task-bar:nth-child(9) { animation-delay: 0.5s; }
+.task-bar:nth-child(10) { animation-delay: 0.55s; }
+
+/* ═══════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .gantt-container {
+    grid-template-columns: 200px 1fr;
+  }
+  .header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+  .header-subtitle { display: none; }
+  .stats-bar { padding: 10px 16px; gap: 16px; flex-wrap: wrap; }
+  .sidebar-header { grid-template-columns: 1fr; }
+  .sidebar-header span:not(:first-child) { display: none; }
+  .task-row { grid-template-columns: 1fr; }
+  .task-duration, .task-progress-text { display: none; }
+  .legend { padding: 10px 16px; }
+}
+
+@media (max-width: 480px) {
+  .gantt-container {
+    grid-template-columns: 160px 1fr;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   Print Styles
+   ═══════════════════════════════════════════════════ */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .header { position: static; background: #fff !important; backdrop-filter: none; }
+  .theme-toggle, .header-controls { display: none !important; }
+  .gantt-container { display: block; }
+  .gantt-sidebar { border: 1px solid #ccc; }
+  .task-bar { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .today-line { background: #e91e63 !important; }
+  .tooltip { display: none !important; }
+  @page { margin: 1cm; size: landscape; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     Header
+     ═══════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-mark">雅</div>
+      <span class="logo-text">Miyabi</span>
+    </div>
+    <span class="header-subtitle">開発パイプライン — ガントチャート</span>
+  </div>
+  <div class="header-controls">
+    <div class="zoom-group">
+      <button class="btn" data-zoom="day" onclick="setZoom('day')">日</button>
+      <button class="btn active" data-zoom="week" onclick="setZoom('week')">週</button>
+      <button class="btn" data-zoom="month" onclick="setZoom('month')">月</button>
+    </div>
+    <button class="btn" onclick="expandAll()">全展開</button>
+    <button class="btn" onclick="collapseAll()">全折り</button>
+    <button class="btn" id="criticalPathBtn" onclick="toggleCriticalPath()">
+      <span style="color:var(--critical-color);">&#9679;</span> クリティカルパス
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="テーマ切替">
+      <span class="theme-toggle-icon sun">&#9728;</span>
+      <span class="theme-toggle-icon moon">&#9790;</span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+     Stats Bar
+     ═══════════════════════════════════════════════════ -->
+<div class="stats-bar" id="statsBar"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     Gantt Chart
+     ═══════════════════════════════════════════════════ -->
+<div class="gantt-container">
+  <div class="gantt-sidebar">
+    <div class="sidebar-header">
+      <span>タスク名</span>
+      <span>期間</span>
+      <span>進捗</span>
+    </div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+  <div class="gantt-timeline" id="ganttTimeline">
+    <div class="timeline-header" id="timelineHeader"></div>
+    <div class="timeline-body" id="timelineBody"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     Legend
+     ═══════════════════════════════════════════════════ -->
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-bar" style="background: linear-gradient(135deg, var(--indigo) 0%, var(--indigo-light) 100%);"></div>
+    <span>タスク</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-bar" style="background: var(--critical-color); box-shadow: 0 0 0 1px var(--critical-color);"></div>
+    <span>クリティカルパス</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-diamond" style="background: linear-gradient(135deg, var(--gold) 0%, #e6be5a 100%);"></div>
+    <span>マイルストーン</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-line" style="background: var(--today-line);"></div>
+    <span>今日</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-bar" style="background: var(--weekend-bg); border: 1px solid var(--border-color);"></div>
+    <span>週末</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     Tooltip
+     ═══════════════════════════════════════════════════ -->
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   Data Model — Miyabi Development Pipeline
+   ═══════════════════════════════════════════════════ */
+const PROJECT_START = new Date(2026, 2, 16); // 2026-03-16 Mon
+
+const tasks = [
+  {
+    id: 'group-pipeline',
+    name: 'Miyabi 開発パイプライン',
+    nameEn: 'Miyabi Dev Pipeline',
+    isGroup: true,
+    collapsed: false,
+    children: ['phase1','phase2','phase3','phase4','phase5','phase6','phase7','milestone-v1'],
+    icon: '🏗️',
+    color: 'indigo'
+  },
+  {
+    id: 'phase1',
+    name: 'Issue分析',
+    nameEn: 'Issue Analysis',
+    agent: 'IssueAgent',
+    startDay: 0,
+    duration: 2,
+    progress: 100,
+    color: 'cherry',
+    icon: '🔍',
+    critical: true,
+    group: 'group-pipeline',
+    deps: []
+  },
+  {
+    id: 'phase2',
+    name: 'タスク分解',
+    nameEn: 'Task Decomposition',
+    agent: 'CoordinatorAgent',
+    startDay: 2,
+    duration: 1,
+    progress: 100,
+    color: 'indigo',
+    icon: '🧩',
+    critical: true,
+    group: 'group-pipeline',
+    deps: ['phase1']
+  },
+  {
+    id: 'phase3',
+    name: 'コード生成',
+    nameEn: 'Code Generation',
+    agent: 'CodeGenAgent',
+    startDay: 3,
+    duration: 5,
+    progress: 65,
+    color: 'teal',
+    icon: '⚙️',
+    critical: true,
+    group: 'group-pipeline',
+    deps: ['phase2']
+  },
+  {
+    id: 'phase4',
+    name: 'テスト作成',
+    nameEn: 'Test Writing',
+    agent: 'TestAgent',
+    startDay: 3,
+    duration: 3,
+    progress: 40,
+    color: 'purple',
+    icon: '🧪',
+    critical: false,
+    group: 'group-pipeline',
+    deps: ['phase2']
+  },
+  {
+    id: 'phase5',
+    name: 'コードレビュー',
+    nameEn: 'Code Review',
+    agent: 'ReviewAgent',
+    startDay: 8,
+    duration: 2,
+    progress: 0,
+    color: 'gold',
+    icon: '👀',
+    critical: true,
+    group: 'group-pipeline',
+    deps: ['phase3','phase4']
+  },
+  {
+    id: 'phase6',
+    name: 'PR作成',
+    nameEn: 'PR Creation',
+    agent: 'PRAgent',
+    startDay: 10,
+    duration: 1,
+    progress: 0,
+    color: 'coral',
+    icon: '📦',
+    critical: true,
+    group: 'group-pipeline',
+    deps: ['phase5']
+  },
+  {
+    id: 'phase7',
+    name: 'デプロイ',
+    nameEn: 'Deployment',
+    agent: 'DeploymentAgent',
+    startDay: 11,
+    duration: 1,
+    progress: 0,
+    color: 'slate',
+    icon: '🚀',
+    critical: true,
+    group: 'group-pipeline',
+    deps: ['phase6']
+  },
+  {
+    id: 'milestone-v1',
+    name: 'v1.0 リリース',
+    nameEn: 'v1.0 Release',
+    isMilestone: true,
+    startDay: 12,
+    duration: 0,
+    progress: 0,
+    color: 'gold',
+    icon: '🎯',
+    critical: true,
+    group: 'group-pipeline',
+    deps: ['phase7']
+  }
+];
+
+/* ═══════════════════════════════════════════════════
+   State
+   ═══════════════════════════════════════════════════ */
+let currentZoom = 'week';
+let showCriticalPath = false;
+let cellWidth = 48; // px per day
+
+const ZOOM_WIDTHS = { day: 64, week: 48, month: 16 };
+const DAY_NAMES_JA = ['日','月','火','水','木','金','土'];
+const MONTH_NAMES_JA = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+/* ═══════════════════════════════════════════════════
+   Helpers
+   ═══════════════════════════════════════════════════ */
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function daysBetween(a, b) {
+  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+}
+
+function formatDate(d) {
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function isWeekend(d) {
+  const day = d.getDay();
+  return day === 0 || day === 6;
+}
+
+function isToday(d) {
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+
+function getTaskDate(task, type) {
+  if (type === 'start') return addDays(PROJECT_START, task.startDay);
+  return addDays(PROJECT_START, task.startDay + (task.duration || 0));
+}
+
+/* ═══════════════════════════════════════════════════
+   Timeline Generation
+   ═══════════════════════════════════════════════════ */
+function getTimelineDays() {
+  const totalDays = 18; // enough to cover all tasks + buffer
+  const days = [];
+  for (let i = -2; i < totalDays; i++) {
+    days.push(addDays(PROJECT_START, i));
+  }
+  return days;
+}
+
+function renderTimelineHeader() {
+  const header = document.getElementById('timelineHeader');
+  const days = getTimelineDays();
+  cellWidth = ZOOM_WIDTHS[currentZoom];
+
+  // Month row
+  let monthsHTML = '';
+  let currentMonth = -1;
+  let monthSpan = 0;
+  let monthStart = '';
+
+  days.forEach((d, i) => {
+    const m = d.getMonth();
+    if (m !== currentMonth) {
+      if (currentMonth !== -1) {
+        monthsHTML += `<div class="timeline-month" style="width:${monthSpan * cellWidth}px">${MONTH_NAMES_JA[currentMonth]} ${d.getFullYear()}</div>`;
+      }
+      currentMonth = m;
+      monthSpan = 1;
+    } else {
+      monthSpan++;
+    }
+    if (i === days.length - 1) {
+      monthsHTML += `<div class="timeline-month" style="width:${monthSpan * cellWidth}px">${MONTH_NAMES_JA[currentMonth]} ${d.getFullYear()}</div>`;
+    }
+  });
+
+  // Day row
+  let daysHTML = '';
+  days.forEach(d => {
+    const we = isWeekend(d) ? 'weekend' : '';
+    const td = isToday(d) ? 'today' : '';
+    if (currentZoom === 'month') {
+      // only show every 7th day
+      daysHTML += `<div class="timeline-day ${we} ${td}" style="width:${cellWidth}px">
+        <span class="timeline-day-num">${d.getDate()}</span>
+      </div>`;
+    } else {
+      daysHTML += `<div class="timeline-day ${we} ${td}" style="width:${cellWidth}px">
+        <span class="timeline-day-name">${DAY_NAMES_JA[d.getDay()]}</span>
+        <span class="timeline-day-num">${d.getDate()}</span>
+      </div>`;
+    }
+  });
+
+  header.innerHTML = `<div class="timeline-months">${monthsHTML}</div><div class="timeline-days">${daysHTML}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   Sidebar Rendering
+   ═══════════════════════════════════════════════════ */
+function renderSidebar() {
+  const list = document.getElementById('taskList');
+  let html = '';
+
+  tasks.forEach(task => {
+    const isChild = !!task.group;
+    const parentTask = isChild ? tasks.find(t => t.id === task.group) : null;
+    const hidden = parentTask && parentTask.collapsed ? 'hidden-child' : '';
+    const critClass = task.critical && showCriticalPath ? 'critical' : '';
+    const msClass = task.isMilestone ? 'milestone' : '';
+    const groupClass = task.isGroup ? 'group-header' : '';
+
+    let durationText = '';
+    if (task.isMilestone) {
+      durationText = '—';
+    } else if (task.isGroup) {
+      const children = tasks.filter(t => t.group === task.id && !t.isMilestone);
+      const minStart = Math.min(...children.map(c => c.startDay));
+      const maxEnd = Math.max(...children.map(c => c.startDay + c.duration));
+      durationText = `${maxEnd - minStart}日`;
+    } else {
+      durationText = `${task.duration}日`;
+    }
+
+    const progressText = task.isGroup ? '' : (task.isMilestone ? '' : `${task.progress}%`);
+
+    let nameContent = '';
+    if (task.isGroup) {
+      nameContent = `
+        <button class="group-toggle ${task.collapsed ? 'collapsed' : ''}" onclick="toggleGroup('${task.id}', event)">&#9660;</button>
+        <div class="task-icon" style="background: ${getIconBg(task.color)}">${task.icon}</div>
+        <span class="task-label">${task.name}</span>`;
+    } else {
+      nameContent = `
+        <span class="task-indent" style="width:24px"></span>
+        <div class="task-icon" style="background: ${getIconBg(task.color)}">${task.icon}</div>
+        <span class="task-label">${task.name}</span>`;
+      if (task.agent) {
+        nameContent += `<span style="font-size:10px;color:var(--text-tertiary);flex-shrink:0;">${task.agent}</span>`;
+      }
+    }
+
+    html += `<div class="task-row ${groupClass} ${critClass} ${msClass} ${hidden}" data-task-id="${task.id}">
+      <div class="task-name">${nameContent}</div>
+      <div class="task-duration">${durationText}</div>
+      <div class="task-progress-text">${progressText}</div>
+    </div>`;
+  });
+
+  list.innerHTML = html;
+}
+
+function getIconBg(color) {
+  const map = {
+    indigo: 'rgba(30,58,95,0.1)',
+    cherry: 'rgba(233,30,99,0.1)',
+    gold: 'rgba(212,168,67,0.1)',
+    teal: 'rgba(0,137,123,0.1)',
+    purple: 'rgba(123,31,162,0.1)',
+    slate: 'rgba(84,110,122,0.1)',
+    coral: 'rgba(230,74,25,0.1)'
+  };
+  return map[color] || map.indigo;
+}
+
+/* ═══════════════════════════════════════════════════
+   Timeline Body Rendering
+   ═══════════════════════════════════════════════════ */
+function renderTimelineBody() {
+  const body = document.getElementById('timelineBody');
+  const days = getTimelineDays();
+  const totalWidth = days.length * cellWidth;
+  const offsetDays = 2; // we start 2 days before PROJECT_START
+
+  // Grid rows
+  let gridHTML = '';
+  tasks.forEach(task => {
+    const isChild = !!task.group;
+    const parentTask = isChild ? tasks.find(t => t.id === task.group) : null;
+    const hidden = parentTask && parentTask.collapsed;
+    const display = hidden ? 'display:none;' : '';
+
+    let cells = '';
+    days.forEach(d => {
+      const we = isWeekend(d) ? 'weekend' : '';
+      cells += `<div class="timeline-grid-cell ${we}" style="width:${cellWidth}px;flex-shrink:0;"></div>`;
+    });
+
+    gridHTML += `<div class="timeline-grid-row" data-row-id="${task.id}" style="${display}">${cells}</div>`;
+  });
+
+  // Bars
+  let barsHTML = '<div class="task-bar-container">';
+  let rowIndex = 0;
+
+  tasks.forEach((task, i) => {
+    if (task.isGroup) { rowIndex++; return; }
+
+    const isChild = !!task.group;
+    const parentTask = isChild ? tasks.find(t => t.id === task.group) : null;
+    const hidden = parentTask && parentTask.collapsed;
+    if (hidden) { rowIndex++; return; }
+
+    const left = (task.startDay + offsetDays) * cellWidth;
+    const top = rowIndex * 48;
+    const critClass = task.critical && showCriticalPath ? 'critical-path' : '';
+
+    if (task.isMilestone) {
+      barsHTML += `<div class="milestone-marker" style="left:${left}px; top:${top + 12}px;"
+        data-task-index="${i}"
+        onmouseenter="showTooltip(event, ${i})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
+        <div class="milestone-diamond"></div>
+      </div>`;
+    } else {
+      const width = task.duration * cellWidth;
+      barsHTML += `<div class="task-bar color-${task.color} ${critClass}" style="left:${left}px; top:${top + 12}px; width:${width}px; animation-delay:${0.1 + i * 0.05}s;"
+        data-task-index="${i}"
+        onmouseenter="showTooltip(event, ${i})" onmouseleave="hideTooltip()" onmousemove="moveTooltip(event)">
+        <div class="task-bar-fill" style="width:${task.progress}%"></div>
+        ${width > 60 ? `<span class="task-bar-label">${task.name}</span>` : ''}
+      </div>`;
+    }
+
+    rowIndex++;
+  });
+
+  barsHTML += '</div>';
+
+  // Today line
+  const today = new Date();
+  const todayOffset = daysBetween(addDays(PROJECT_START, -offsetDays), today);
+  let todayHTML = '';
+  if (todayOffset >= 0 && todayOffset < days.length) {
+    todayHTML = `<div class="today-line" style="left:${todayOffset * cellWidth + cellWidth / 2}px;"></div>`;
+  }
+
+  // SVG dependencies
+  let svgHTML = renderDependencies(offsetDays);
+
+  body.innerHTML = gridHTML + barsHTML + todayHTML + svgHTML;
+  body.style.width = totalWidth + 'px';
+  body.style.position = 'relative';
+}
+
+/* ═══════════════════════════════════════════════════
+   Dependency Arrows
+   ═══════════════════════════════════════════════════ */
+function renderDependencies(offsetDays) {
+  const visibleTasks = [];
+  let rowIndex = 0;
+  tasks.forEach(task => {
+    const isChild = !!task.group;
+    const parentTask = isChild ? tasks.find(t => t.id === task.group) : null;
+    const hidden = parentTask && parentTask.collapsed;
+    if (!hidden) {
+      visibleTasks.push({ ...task, rowIndex });
+    }
+    rowIndex++;
+  });
+
+  let paths = '';
+  visibleTasks.forEach(task => {
+    if (!task.deps || task.deps.length === 0) return;
+
+    task.deps.forEach(depId => {
+      const depTask = visibleTasks.find(t => t.id === depId);
+      if (!depTask) return;
+
+      const depVisualIndex = visibleTasks.indexOf(depTask);
+      const taskVisualIndex = visibleTasks.indexOf(task);
+
+      // From end of dependency to start of task
+      const x1 = (depTask.startDay + (depTask.duration || 0) + offsetDays) * cellWidth;
+      const y1 = depVisualIndex * 48 + 24;
+      const x2 = (task.startDay + offsetDays) * cellWidth;
+      const y2 = taskVisualIndex * 48 + 24;
+
+      const isCrit = depTask.critical && task.critical && showCriticalPath;
+      const critClass = isCrit ? 'critical' : '';
+
+      // Bezier path
+      const midX = x1 + (x2 - x1) / 2;
+      const path = `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+
+      // Arrowhead
+      const arrowSize = 5;
+      const arrow = `${x2},${y2} ${x2-arrowSize},${y2-arrowSize} ${x2-arrowSize},${y2+arrowSize}`;
+
+      paths += `<path d="${path}" class="${critClass}" marker-end="none"/>`;
+      paths += `<polygon points="${arrow}" class="${critClass}"/>`;
+    });
+  });
+
+  const days = getTimelineDays();
+  const totalWidth = days.length * cellWidth;
+  const totalHeight = visibleTasks.length * 48;
+
+  return `<svg class="dependency-layer" width="${totalWidth}" height="${totalHeight}" style="position:absolute;top:0;left:0;">${paths}</svg>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   Stats Bar
+   ═══════════════════════════════════════════════════ */
+function renderStats() {
+  const bar = document.getElementById('statsBar');
+  const realTasks = tasks.filter(t => !t.isGroup && !t.isMilestone);
+  const totalProgress = Math.round(realTasks.reduce((s, t) => s + t.progress, 0) / realTasks.length);
+  const completed = realTasks.filter(t => t.progress === 100).length;
+  const inProgress = realTasks.filter(t => t.progress > 0 && t.progress < 100).length;
+  const notStarted = realTasks.filter(t => t.progress === 0).length;
+  const criticalCount = realTasks.filter(t => t.critical).length;
+
+  const minStart = Math.min(...realTasks.map(t => t.startDay));
+  const maxEnd = Math.max(...realTasks.map(t => t.startDay + t.duration));
+  const totalDays = maxEnd - minStart;
+
+  bar.innerHTML = `
+    <div class="stat">
+      <div class="stat-dot" style="background: var(--teal);"></div>
+      <span class="stat-label">全体進捗</span>
+      <span class="stat-value">${totalProgress}%</span>
+    </div>
+    <div class="stat">
+      <div class="stat-dot" style="background: #34c759;"></div>
+      <span class="stat-label">完了</span>
+      <span class="stat-value">${completed}</span>
+    </div>
+    <div class="stat">
+      <div class="stat-dot" style="background: var(--gold);"></div>
+      <span class="stat-label">進行中</span>
+      <span class="stat-value">${inProgress}</span>
+    </div>
+    <div class="stat">
+      <div class="stat-dot" style="background: var(--text-tertiary);"></div>
+      <span class="stat-label">未着手</span>
+      <span class="stat-value">${notStarted}</span>
+    </div>
+    <div class="stat">
+      <div class="stat-dot" style="background: var(--critical-color);"></div>
+      <span class="stat-label">クリティカル</span>
+      <span class="stat-value">${criticalCount}</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">総期間</span>
+      <span class="stat-value">${totalDays}日</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">開始</span>
+      <span class="stat-value">${formatDate(PROJECT_START)}</span>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════
+   Tooltip
+   ═══════════════════════════════════════════════════ */
+function showTooltip(e, idx) {
+  const task = tasks[idx];
+  const tip = document.getElementById('tooltip');
+
+  const start = getTaskDate(task, 'start');
+  const end = getTaskDate(task, 'end');
+
+  let content = `<div class="tooltip-title">${task.icon} ${task.name}</div>`;
+
+  if (task.isMilestone) {
+    content += `<div class="tooltip-row"><span class="tooltip-label">日付</span><span class="tooltip-value">${formatDate(start)}</span></div>`;
+  } else {
+    content += `
+      <div class="tooltip-row"><span class="tooltip-label">開始</span><span class="tooltip-value">${formatDate(start)}</span></div>
+      <div class="tooltip-row"><span class="tooltip-label">終了</span><span class="tooltip-value">${formatDate(end)}</span></div>
+      <div class="tooltip-row"><span class="tooltip-label">期間</span><span class="tooltip-value">${task.duration}日</span></div>
+      <div class="tooltip-row"><span class="tooltip-label">進捗</span><span class="tooltip-value">${task.progress}%</span></div>
+      <div class="tooltip-progress-bar"><div class="tooltip-progress-fill" style="width:${task.progress}%"></div></div>`;
+  }
+
+  if (task.agent) {
+    content += `<div class="tooltip-row" style="margin-top:4px;"><span class="tooltip-label">エージェント</span><span class="tooltip-value">${task.agent}</span></div>`;
+  }
+
+  if (task.critical) {
+    content += `<div style="margin-top:6px;font-size:11px;color:#ff6b6b;font-weight:600;">クリティカルパス</div>`;
+  }
+
+  if (task.deps && task.deps.length > 0) {
+    const depNames = task.deps.map(id => {
+      const dt = tasks.find(t => t.id === id);
+      return dt ? dt.name : id;
+    }).join(', ');
+    content += `<div class="tooltip-row" style="margin-top:4px;"><span class="tooltip-label">依存</span><span class="tooltip-value" style="font-size:11px;">${depNames}</span></div>`;
+  }
+
+  tip.innerHTML = content;
+  tip.classList.add('visible');
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  const tip = document.getElementById('tooltip');
+  const pad = 12;
+  let x = e.clientX + pad;
+  let y = e.clientY + pad;
+  const rect = tip.getBoundingClientRect();
+  if (x + 280 > window.innerWidth) x = e.clientX - 280 - pad;
+  if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - pad;
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').classList.remove('visible');
+}
+
+/* ═══════════════════════════════════════════════════
+   Interactions
+   ═══════════════════════════════════════════════════ */
+function setZoom(zoom) {
+  currentZoom = zoom;
+  document.querySelectorAll('.zoom-group .btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.zoom === zoom);
+  });
+  render();
+}
+
+function toggleGroup(groupId, e) {
+  e.stopPropagation();
+  const group = tasks.find(t => t.id === groupId);
+  if (group) {
+    group.collapsed = !group.collapsed;
+    render();
+  }
+}
+
+function expandAll() {
+  tasks.forEach(t => { if (t.isGroup) t.collapsed = false; });
+  render();
+}
+
+function collapseAll() {
+  tasks.forEach(t => { if (t.isGroup) t.collapsed = true; });
+  render();
+}
+
+function toggleCriticalPath() {
+  showCriticalPath = !showCriticalPath;
+  document.getElementById('criticalPathBtn').classList.toggle('active', showCriticalPath);
+  render();
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('miyabi-theme', isDark ? 'light' : 'dark');
+}
+
+/* ═══════════════════════════════════════════════════
+   Synchronized Scrolling
+   ═══════════════════════════════════════════════════ */
+function setupScrollSync() {
+  const sidebar = document.querySelector('.gantt-sidebar');
+  const timeline = document.getElementById('ganttTimeline');
+
+  let syncing = false;
+
+  sidebar.addEventListener('scroll', () => {
+    if (syncing) return;
+    syncing = true;
+    timeline.scrollTop = sidebar.scrollTop;
+    requestAnimationFrame(() => syncing = false);
+  });
+
+  timeline.addEventListener('scroll', () => {
+    if (syncing) return;
+    syncing = true;
+    sidebar.scrollTop = timeline.scrollTop;
+    requestAnimationFrame(() => syncing = false);
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   Master Render
+   ═══════════════════════════════════════════════════ */
+function render() {
+  renderStats();
+  renderSidebar();
+  renderTimelineHeader();
+  renderTimelineBody();
+}
+
+/* ═══════════════════════════════════════════════════
+   Init
+   ═══════════════════════════════════════════════════ */
+function init() {
+  // Theme
+  const saved = localStorage.getItem('miyabi-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+
+  render();
+  setupScrollSync();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '1') setZoom('day');
+    if (e.key === '2') setZoom('week');
+    if (e.key === '3') setZoom('month');
+    if (e.key === 'c' || e.key === 'C') toggleCriticalPath();
+    if (e.key === 'd' || e.key === 'D') toggleTheme();
+  });
+
+  // Scroll today into view
+  setTimeout(() => {
+    const todayLine = document.querySelector('.today-line');
+    if (todayLine) {
+      const timeline = document.getElementById('ganttTimeline');
+      const lineLeft = parseInt(todayLine.style.left);
+      timeline.scrollLeft = Math.max(0, lineLeft - timeline.clientWidth / 2);
+    }
+  }, 100);
+}
+
+init();
+</script>
+</body>
+</html>

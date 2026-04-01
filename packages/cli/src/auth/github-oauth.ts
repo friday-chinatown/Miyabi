@@ -16,7 +16,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Octokit } from '@octokit/rest';
 
-// @ts-expect-error - open is an ESM-only module
 import open from 'open';
 
 // GitHub OAuth App credentials
