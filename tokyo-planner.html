@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東京観光プランナー - 3ヶ月自動生成</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
+
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 24px 32px; border-bottom: 2px solid #e94560; }
+.header h1 { font-size: 28px; color: #fff; display: flex; align-items: center; gap: 12px; }
+.header h1 .accent { color: #e94560; }
+.header p { color: #8892b0; margin-top: 6px; font-size: 14px; }
+
+.controls { display: flex; gap: 12px; padding: 16px 32px; background: #1a1a2e; border-bottom: 1px solid #2a2a4a; flex-wrap: wrap; align-items: center; }
+.controls label { color: #8892b0; font-size: 13px; }
+.controls input, .controls select { background: #0f0f1a; border: 1px solid #2a2a4a; color: #e0e0e0; padding: 8px 12px; border-radius: 6px; font-size: 14px; }
+.controls input:focus, .controls select:focus { outline: none; border-color: #e94560; }
+.btn { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-primary:hover { background: #c73652; }
+.btn-secondary { background: #2a2a4a; color: #e0e0e0; }
+.btn-secondary:hover { background: #3a3a5a; }
+.btn-sm { padding: 4px 12px; font-size: 12px; }
+
+.main { display: flex; height: calc(100vh - 140px); }
+
+.calendar-panel { width: 320px; min-width: 320px; background: #1a1a2e; border-right: 1px solid #2a2a4a; overflow-y: auto; padding: 16px; }
+.month-header { color: #e94560; font-size: 16px; font-weight: 700; padding: 12px 0 8px; border-bottom: 1px solid #2a2a4a; margin-bottom: 8px; }
+.day-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+.day-item:hover { background: #2a2a4a; }
+.day-item.active { background: #e94560; color: #fff; }
+.day-item .date { font-size: 13px; font-weight: 600; min-width: 80px; }
+.day-item .area-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #2a2a4a; color: #8892b0; }
+.day-item.active .area-tag { background: rgba(255,255,255,0.2); color: #fff; }
+.day-item .dow { font-size: 11px; color: #555; min-width: 20px; }
+.day-item.active .dow { color: rgba(255,255,255,0.7); }
+.day-item.weekend .dow { color: #e94560; }
+.day-item.active.weekend .dow { color: #ffb3c1; }
+
+.detail-panel { flex: 1; overflow-y: auto; padding: 24px 32px; }
+.detail-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.detail-subtitle { font-size: 14px; color: #8892b0; margin-bottom: 20px; }
+.detail-area-badge { display: inline-block; padding: 4px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #2a2a4a; }
+.tl-item { position: relative; margin-bottom: 20px; }
+.tl-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #2a2a4a; background: #1a1a2e; }
+.tl-item.meal::before { background: #e94560; border-color: #e94560; }
+.tl-item.spot::before { background: #0f3460; border-color: #4a90d9; }
+.tl-item.transport::before { background: #2a2a4a; border-color: #555; width: 8px; height: 8px; left: -22px; top: 8px; }
+
+.tl-time { font-size: 12px; color: #e94560; font-weight: 700; margin-bottom: 2px; }
+.tl-card { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px; padding: 14px 18px; }
+.tl-card h3 { font-size: 15px; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.tl-card p { font-size: 13px; color: #8892b0; line-height: 1.5; }
+.tl-card .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 8px; margin-right: 4px; margin-top: 6px; }
+.tag-meal { background: #3d1a2e; color: #e94560; }
+.tag-spot { background: #1a2a3d; color: #4a90d9; }
+.tag-budget { background: #1a3d2a; color: #4ad97a; }
+.tag-transport { background: #2a2a3d; color: #8892b0; }
+
+.meal-card { border-left: 3px solid #e94560; }
+.spot-card { border-left: 3px solid #4a90d9; }
+
+.stats-bar { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 10px; padding: 12px 18px; min-width: 120px; }
+.stat .label { font-size: 11px; color: #8892b0; text-transform: uppercase; }
+.stat .value { font-size: 20px; font-weight: 700; color: #fff; }
+.stat .value .unit { font-size: 12px; color: #8892b0; }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #555; }
+.empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+.empty-state p { font-size: 16px; }
+
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { padding: 4px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; border: 1px solid #2a2a4a; background: transparent; color: #8892b0; transition: all 0.15s; }
+.chip.active { background: #e94560; color: #fff; border-color: #e94560; }
+.chip:hover { border-color: #e94560; }
+
+@media (max-width: 768px) {
+  .main { flex-direction: column; height: auto; }
+  .calendar-panel { width: 100%; min-width: 100%; max-height: 300px; }
+  .detail-panel { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🗼 東京観光プランナー <span class="accent">90Days</span></h1>
+  <p>3ヶ月分の観光プラン・飯屋を自動生成。毎日の時間割をワンクリックで確認。</p>
+</div>
+
+<div class="controls">
+  <div>
+    <label>開始日</label><br>
+    <input type="date" id="startDate">
+  </div>
+  <div>
+    <label>スタイル</label><br>
+    <select id="travelStyle">
+      <option value="balanced">バランス型</option>
+      <option value="gourmet">グルメ重視</option>
+      <option value="culture">文化・歴史重視</option>
+      <option value="active">アクティブ</option>
+      <option value="chill">のんびり</option>
+    </select>
+  </div>
+  <div>
+    <label>予算感</label><br>
+    <select id="budgetLevel">
+      <option value="low">節約 (~5,000円/日)</option>
+      <option value="mid" selected>普通 (~10,000円/日)</option>
+      <option value="high">贅沢 (~20,000円/日)</option>
+    </select>
+  </div>
+  <div style="display:flex;align-items:flex-end;">
+    <button class="btn btn-primary" onclick="generate()">🎲 プラン生成</button>
+  </div>
+  <div style="display:flex;align-items:flex-end;">
+    <button class="btn btn-secondary" onclick="exportPlan()">📥 CSV出力</button>
+  </div>
+  <div style="flex:1;"></div>
+  <div class="filter-chips" id="areaFilter"></div>
+</div>
+
+<div class="main">
+  <div class="calendar-panel" id="calendarPanel">
+    <div class="empty-state"><div class="icon">📅</div><p>プランを生成してください</p></div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="empty-state"><div class="icon">🗺️</div><p>左のカレンダーから日付を選択</p></div>
+  </div>
+</div>
+
+<script>
+// ===== データベース =====
+const AREAS = [
+  { id: 'asakusa', name: '浅草・上野', color: '#e94560', icon: '⛩️' },
+  { id: 'shibuya', name: '渋谷・原宿', color: '#4a90d9', icon: '🏙️' },
+  { id: 'shinjuku', name: '新宿・歌舞伎町', color: '#9b59b6', icon: '🌃' },
+  { id: 'ginza', name: '銀座・日本橋', color: '#f1c40f', icon: '💎' },
+  { id: 'akihabara', name: '秋葉原・神田', color: '#2ecc71', icon: '🎮' },
+  { id: 'odaiba', name: 'お台場・豊洲', color: '#1abc9c', icon: '🌊' },
+  { id: 'roppongi', name: '六本木・麻布', color: '#e67e22', icon: '🍸' },
+  { id: 'ikebukuro', name: '池袋・巣鴨', color: '#3498db', icon: '🦉' },
+  { id: 'tokyo_st', name: '東京駅・丸の内', color: '#e74c3c', icon: '🚂' },
+  { id: 'shimokita', name: '下北沢・吉祥寺', color: '#1dd1a1', icon: '🎸' },
+  { id: 'yanaka', name: '谷中・根津・千駄木', color: '#cd6133', icon: '🐈' },
+  { id: 'tsukiji', name: '築地・月島', color: '#0abde3', icon: '🐟' },
+  { id: 'ueno', name: '上野公園・谷根千', color: '#6ab04c', icon: '🎨' },
+  { id: 'meguro', name: '目黒・中目黒', color: '#f8a5c2', icon: '🌸' },
+  { id: 'kichijoji', name: '吉祥寺・三鷹', color: '#78e08f', icon: '🌳' },
+];
+
+const SPOTS = {
+  asakusa: [
+    { name: '浅草寺・雷門', desc: '東京最古の寺院。仲見世通りで食べ歩き', duration: 90, type: 'temple' },
+    { name: '東京スカイツリー', desc: '634mの展望タワー。天望デッキからの絶景', duration: 120, type: 'view' },
+    { name: '合羽橋道具街', desc: 'プロ用調理器具と食品サンプルの商店街', duration: 60, type: 'shopping' },
+    { name: '隅田川クルーズ', desc: '水上バスで浅草からお台場へ', duration: 60, type: 'activity' },
+    { name: '花やしき', desc: '日本最古の遊園地。レトロな雰囲気', duration: 90, type: 'activity' },
+  ],
+  shibuya: [
+    { name: 'スクランブル交差点', desc: '世界一有名な交差点。SHIBUYA SKYから一望', duration: 30, type: 'view' },
+    { name: 'SHIBUYA SKY', desc: '渋谷スクランブルスクエア屋上の展望施設', duration: 60, type: 'view' },
+    { name: '明治神宮', desc: '都心の森に鎮座する荘厳な神社', duration: 90, type: 'temple' },
+    { name: '竹下通り', desc: '原宿カルチャーの中心地', duration: 60, type: 'shopping' },
+    { name: '代々木公園', desc: '広大な都市公園。週末はフリマやイベント', duration: 60, type: 'park' },
+    { name: 'キャットストリート', desc: '裏原宿のおしゃれストリート', duration: 45, type: 'shopping' },
+  ],
+  shinjuku: [
+    { name: '都庁展望室', desc: '無料で楽しめる地上202mの展望台', duration: 45, type: 'view' },
+    { name: '新宿御苑', desc: '58ヘクタールの広大な庭園', duration: 90, type: 'park' },
+    { name: '歌舞伎町・新宿ゴールデン街', desc: 'ディープな飲み屋横丁', duration: 60, type: 'nightlife' },
+    { name: '思い出横丁', desc: '昭和レトロな飲み屋街', duration: 60, type: 'nightlife' },
+    { name: 'バスタ新宿', desc: '日本最大のバスターミナル周辺散策', duration: 30, type: 'walk' },
+  ],
+  ginza: [
+    { name: '銀座中央通り', desc: '高級ブランド街を散策', duration: 60, type: 'shopping' },
+    { name: '歌舞伎座', desc: '日本の伝統芸能を鑑賞', duration: 120, type: 'culture' },
+    { name: '築地本願寺', desc: 'インド風の独特な建築の寺院', duration: 30, type: 'temple' },
+    { name: '日本橋', desc: '東京の道路の起点。老舗百貨店巡り', duration: 60, type: 'walk' },
+    { name: 'GINZA SIX', desc: '銀座最大の商業施設。屋上庭園あり', duration: 60, type: 'shopping' },
+  ],
+  akihabara: [
+    { name: '秋葉原電気街', desc: 'アニメ・ゲーム・電子部品の聖地', duration: 90, type: 'shopping' },
+    { name: '神田明神', desc: 'IT情報安全のご利益がある神社', duration: 30, type: 'temple' },
+    { name: 'mAAch ecute 神田万世橋', desc: '旧万世橋駅を再利用した商業施設', duration: 45, type: 'shopping' },
+    { name: 'メイドカフェ体験', desc: '秋葉原名物のテーマカフェ', duration: 60, type: 'activity' },
+    { name: '3331 Arts Chiyoda', desc: '旧中学校を改修したアートセンター', duration: 45, type: 'culture' },
+  ],
+  odaiba: [
+    { name: 'チームラボボーダレス', desc: '没入型デジタルアートミュージアム', duration: 120, type: 'culture' },
+    { name: 'ダイバーシティ東京(ガンダム)', desc: '実物大ユニコーンガンダム立像', duration: 60, type: 'shopping' },
+    { name: 'レインボーブリッジ遊歩道', desc: '東京湾を歩いて渡る絶景ルート', duration: 60, type: 'walk' },
+    { name: '大江戸温泉物語', desc: '都市型温泉テーマパーク', duration: 120, type: 'activity' },
+    { name: '豊洲市場見学', desc: 'マグロの競りと場内グルメ', duration: 90, type: 'activity' },
+  ],
+  roppongi: [
+    { name: '六本木ヒルズ展望台', desc: '東京シティビュー＆森美術館', duration: 90, type: 'view' },
+    { name: '国立新美術館', desc: '黒川紀章設計の波打つガラス建築', duration: 90, type: 'culture' },
+    { name: '東京ミッドタウン', desc: 'デザイン＆アートの複合施設', duration: 60, type: 'shopping' },
+    { name: '麻布十番商店街', desc: '老舗と新店が混在する下町風商店街', duration: 60, type: 'walk' },
+    { name: '毛利庭園', desc: '六本木ヒルズ内の日本庭園', duration: 30, type: 'park' },
+  ],
+  ikebukuro: [
+    { name: 'サンシャイン60展望台', desc: 'てんぼうパーク。空と緑の展望台', duration: 60, type: 'view' },
+    { name: 'サンシャイン水族館', desc: '空飛ぶペンギンが有名', duration: 90, type: 'activity' },
+    { name: '雑司ヶ谷鬼子母神', desc: '安産・子育ての神様', duration: 30, type: 'temple' },
+    { name: '乙女ロード', desc: '女性向けアニメ・漫画の聖地', duration: 60, type: 'shopping' },
+    { name: '巣鴨地蔵通り商店街', desc: 'おばあちゃんの原宿。赤パンツが名物', duration: 60, type: 'walk' },
+  ],
+  tokyo_st: [
+    { name: '東京駅丸の内駅舎', desc: '1914年築の赤レンガ駅舎', duration: 30, type: 'walk' },
+    { name: '皇居外苑・二重橋', desc: '皇居周辺の散策コース', duration: 90, type: 'park' },
+    { name: 'KITTE', desc: '旧東京中央郵便局を再開発した商業施設', duration: 45, type: 'shopping' },
+    { name: '三菱一号館美術館', desc: '19世紀末西洋美術を中心に展示', duration: 60, type: 'culture' },
+    { name: '東京キャラクターストリート', desc: '一番街のキャラクターショップ群', duration: 45, type: 'shopping' },
+  ],
+  shimokita: [
+    { name: '下北沢古着巡り', desc: '個性的な古着屋が密集するエリア', duration: 90, type: 'shopping' },
+    { name: '本多劇場周辺', desc: '小劇場文化の中心地', duration: 60, type: 'culture' },
+    { name: 'BONUS TRACK', desc: '下北線路街の新しい商業施設', duration: 45, type: 'shopping' },
+    { name: '世田谷公園', desc: 'SLが展示されている緑豊かな公園', duration: 45, type: 'park' },
+  ],
+  yanaka: [
+    { name: '谷中銀座商店街', desc: '夕やけだんだんから続く下町商店街', duration: 60, type: 'walk' },
+    { name: '根津神社', desc: 'つつじまつりで有名な古社', duration: 45, type: 'temple' },
+    { name: '谷中霊園', desc: '桜の名所。歴史的著名人の墓所', duration: 30, type: 'walk' },
+    { name: 'SCAI THE BATHHOUSE', desc: '銭湯を改装した現代美術ギャラリー', duration: 30, type: 'culture' },
+  ],
+  tsukiji: [
+    { name: '築地場外市場', desc: '新鮮な海鮮と食べ歩きグルメの宝庫', duration: 90, type: 'shopping' },
+    { name: '月島もんじゃストリート', desc: 'もんじゃ焼きの聖地', duration: 30, type: 'walk' },
+    { name: '浜離宮恩賜庭園', desc: '潮入の池と都会のコントラスト', duration: 60, type: 'park' },
+    { name: '勝どき橋', desc: '隅田川に架かる重要文化財の橋', duration: 15, type: 'walk' },
+  ],
+  ueno: [
+    { name: '上野動物園', desc: 'ジャイアントパンダに会える', duration: 120, type: 'activity' },
+    { name: '東京国立博物館', desc: '日本最古の博物館。国宝多数', duration: 120, type: 'culture' },
+    { name: '上野恩賜公園', desc: '不忍池と桜の名所', duration: 60, type: 'park' },
+    { name: 'アメ横', desc: '活気あふれる商店街。食べ歩きも', duration: 60, type: 'shopping' },
+    { name: '国立西洋美術館', desc: 'ル・コルビュジエ設計の世界遺産', duration: 90, type: 'culture' },
+  ],
+  meguro: [
+    { name: '目黒川沿い散歩', desc: '桜の時期は必見。カフェも充実', duration: 60, type: 'walk' },
+    { name: '中目黒高架下', desc: 'おしゃれショップ＆レストラン', duration: 60, type: 'shopping' },
+    { name: '東京都庭園美術館', desc: 'アール・デコ建築の旧朝香宮邸', duration: 90, type: 'culture' },
+    { name: '目黒不動尊', desc: '関東最古の不動霊場', duration: 30, type: 'temple' },
+  ],
+  kichijoji: [
+    { name: '井の頭恩賜公園', desc: 'ボート池と自然文化園', duration: 90, type: 'park' },
+    { name: 'ジブリ美術館', desc: '宮崎駿監督の世界観を体感', duration: 120, type: 'culture' },
+    { name: '吉祥寺サンロード', desc: '活気ある商店街でショッピング', duration: 60, type: 'shopping' },
+    { name: 'ハモニカ横丁', desc: '昭和レトロな飲み屋街', duration: 45, type: 'nightlife' },
+  ],
+};
+
+const RESTAURANTS = {
+  asakusa: {
+    breakfast: [
+      { name: 'ペリカンカフェ', genre: 'パン・カフェ', budget: '~1,000円', desc: '老舗パン屋のカフェ。トーストが絶品', rating: 4.3 },
+      { name: '珈琲天国', genre: '喫茶', budget: '~800円', desc: 'ホットケーキが名物の昭和喫茶', rating: 4.1 },
+      { name: 'フェブラリーカフェ', genre: 'カフェ', budget: '~1,200円', desc: 'スカイツリーを眺めながらモーニング', rating: 4.0 },
+    ],
+    lunch: [
+      { name: '尾張屋', genre: 'そば', budget: '~1,500円', desc: '明治3年創業。天ぷらそばが名物', rating: 4.2 },
+      { name: '大黒家天麩羅', genre: '天ぷら', budget: '~2,000円', desc: '明治20年創業の天丼の名店', rating: 4.4 },
+      { name: '浅草むぎとろ', genre: 'とろろ', budget: '~2,500円', desc: 'むぎとろ定食が名物。駒形橋たもと', rating: 4.1 },
+      { name: '色川', genre: 'うなぎ', budget: '~3,500円', desc: '文化年間創業のうなぎ屋', rating: 4.5 },
+      { name: '染太郎', genre: 'もんじゃ・お好み焼き', budget: '~1,500円', desc: '昭和12年創業。文化人も通った名店', rating: 4.0 },
+    ],
+    dinner: [
+      { name: '神谷バー', genre: 'バー・洋食', budget: '~3,000円', desc: '日本初のバー。デンキブランが有名', rating: 4.3 },
+      { name: '駒形どぜう', genre: 'どじょう', budget: '~4,000円', desc: '200年以上続くどじょう料理専門店', rating: 4.2 },
+      { name: '浅草今半', genre: 'すき焼き', budget: '~8,000円', desc: '明治28年創業のすき焼きの名店', rating: 4.6 },
+      { name: 'ホッピー通り', genre: '居酒屋', budget: '~2,500円', desc: '昼飲みの聖地。もつ煮込みが定番', rating: 4.0 },
+    ],
+  },
+  shibuya: {
+    breakfast: [
+      { name: 'bills 表参道', genre: 'パンケーキ', budget: '~2,000円', desc: '世界一の朝食と称されるリコッタパンケーキ', rating: 4.2 },
+      { name: 'CIBI 代官山', genre: 'カフェ', budget: '~1,500円', desc: 'メルボルン発のカフェ。穏やかな朝を', rating: 4.1 },
+      { name: 'パンとエスプレッソと', genre: 'ベーカリー', budget: '~1,000円', desc: '食パン「ムー」が大人気', rating: 4.3 },
+    ],
+    lunch: [
+      { name: 'AFURI 原宿', genre: 'ラーメン', budget: '~1,200円', desc: '柚子塩らーめんが人気', rating: 4.3 },
+      { name: '渋谷 鳥竹', genre: '焼鳥', budget: '~1,500円', desc: '巨大な焼鳥が名物の老舗', rating: 4.0 },
+      { name: 'LUKE\'S LOBSTER', genre: 'ロブスターロール', budget: '~1,800円', desc: '表参道のロブスターロール専門店', rating: 4.1 },
+      { name: 'まい泉 青山本店', genre: 'とんかつ', budget: '~2,000円', desc: 'ヒレかつサンドで有名', rating: 4.4 },
+    ],
+    dinner: [
+      { name: '道玄坂 魚がし', genre: '海鮮居酒屋', budget: '~4,000円', desc: '新鮮な刺身盛りが自慢', rating: 4.2 },
+      { name: '渋谷のんべい横丁', genre: '横丁', budget: '~3,000円', desc: '昭和の面影を残す飲み屋横丁', rating: 4.0 },
+      { name: 'ダルマット', genre: 'イタリアン', budget: '~6,000円', desc: '恵比寿の予約必須イタリアン', rating: 4.5 },
+    ],
+  },
+  shinjuku: {
+    breakfast: [
+      { name: 'PAUL 新宿', genre: 'フレンチベーカリー', budget: '~1,200円', desc: 'パリ発のベーカリーカフェ', rating: 4.0 },
+      { name: 'ベルク', genre: 'ビアカフェ', budget: '~600円', desc: '新宿駅構内の名物カフェ', rating: 4.3 },
+      { name: 'サラベス', genre: 'カフェ', budget: '~2,000円', desc: 'NYの朝食の女王', rating: 4.1 },
+    ],
+    lunch: [
+      { name: '風雲児', genre: 'つけ麺', budget: '~1,200円', desc: '行列必至のつけ麺店', rating: 4.5 },
+      { name: '新宿中村屋', genre: 'カレー', budget: '~1,800円', desc: '大正時代から続く純印度式カリー', rating: 4.3 },
+      { name: '天ぷら つな八', genre: '天ぷら', budget: '~2,500円', desc: '昭和5年創業の天ぷら専門店', rating: 4.2 },
+      { name: '鼎泰豊 新宿', genre: '小籠包', budget: '~2,000円', desc: '世界10大レストランの小籠包', rating: 4.4 },
+    ],
+    dinner: [
+      { name: '思い出横丁(各店)', genre: '焼き鳥・もつ焼き', budget: '~2,500円', desc: '戦後から続くディープな横丁', rating: 4.1 },
+      { name: 'ゴールデン街(各店)', genre: 'バー', budget: '~3,000円', desc: '200軒以上の小さなバーが密集', rating: 4.0 },
+      { name: 'ロボットレストラン', genre: 'エンタメ', budget: '~8,000円', desc: '巨大ロボットが踊る衝撃のショー', rating: 3.8 },
+      { name: '新宿うな鐵', genre: 'うなぎ', budget: '~4,000円', desc: 'うなぎ串焼きが名物', rating: 4.3 },
+    ],
+  },
+  ginza: {
+    breakfast: [
+      { name: '木村屋總本店', genre: 'パン', budget: '~800円', desc: 'あんぱん発祥の店', rating: 4.2 },
+      { name: 'Laduree 銀座', genre: 'フレンチカフェ', budget: '~2,000円', desc: 'マカロンで有名なパリの老舗', rating: 4.0 },
+    ],
+    lunch: [
+      { name: '銀座 篝', genre: 'ラーメン', budget: '~1,200円', desc: '鶏白湯SOBAが絶品', rating: 4.5 },
+      { name: '煉瓦亭', genre: '洋食', budget: '~2,000円', desc: 'オムライス発祥の店', rating: 4.3 },
+      { name: 'すきやばし次郎', genre: '寿司', budget: '~40,000円', desc: '世界一有名な寿司店', rating: 4.8 },
+      { name: '銀座 天國', genre: '天ぷら', budget: '~3,000円', desc: '明治18年創業の天ぷら老舗', rating: 4.2 },
+    ],
+    dinner: [
+      { name: '俺のフレンチ 銀座', genre: 'フレンチ', budget: '~5,000円', desc: '立ち食いで高級フレンチをリーズナブルに', rating: 4.1 },
+      { name: '銀座ライオン', genre: 'ビアホール', budget: '~4,000円', desc: '日本最古のビアホール', rating: 4.0 },
+      { name: '鮨 さいとう', genre: '寿司', budget: '~30,000円', desc: '三ツ星の予約困難寿司店', rating: 4.9 },
+    ],
+  },
+  akihabara: {
+    breakfast: [
+      { name: 'マンセイ(万世)', genre: '肉', budget: '~1,000円', desc: '肉ビルの朝食。排骨拉麺が名物', rating: 3.9 },
+      { name: 'CAFE MOCO', genre: 'カフェ', budget: '~800円', desc: 'レトロな純喫茶', rating: 4.0 },
+    ],
+    lunch: [
+      { name: '青島食堂', genre: 'ラーメン', budget: '~900円', desc: '新潟長岡の生姜醤油ラーメン', rating: 4.4 },
+      { name: 'カレーノトリコ', genre: 'カレー', budget: '~1,200円', desc: 'あいがけカレーが大人気', rating: 4.3 },
+      { name: '牛かつ もと村', genre: '牛かつ', budget: '~1,500円', desc: 'レアな牛かつを石板で焼いて食べる', rating: 4.2 },
+      { name: '万世 排骨拉麺', genre: 'ラーメン', budget: '~1,200円', desc: '排骨（パーコー）が乗った名物ラーメン', rating: 4.0 },
+    ],
+    dinner: [
+      { name: '肉の万世 本店', genre: 'ステーキ', budget: '~5,000円', desc: '万世ビル全10階の肉の殿堂', rating: 4.1 },
+      { name: 'AKIBAバル', genre: 'バル', budget: '~3,500円', desc: 'ワインと料理が楽しめるスペインバル', rating: 4.0 },
+      { name: '鳥つね自然洞', genre: '親子丼', budget: '~2,000円', desc: '究極の親子丼。ランチも人気', rating: 4.6 },
+    ],
+  },
+  odaiba: {
+    breakfast: [
+      { name: 'bills お台場', genre: 'パンケーキ', budget: '~2,000円', desc: 'レインボーブリッジを眺めながら', rating: 4.2 },
+      { name: 'Eggs\'n Things', genre: 'パンケーキ', budget: '~1,500円', desc: 'ハワイ発のパンケーキ店', rating: 4.0 },
+    ],
+    lunch: [
+      { name: '豊洲市場 大和寿司', genre: '寿司', budget: '~3,500円', desc: '市場直結の新鮮寿司', rating: 4.4 },
+      { name: '豊洲市場 茂助だんご', genre: '和菓子', budget: '~500円', desc: '築地から続く老舗だんご', rating: 4.1 },
+      { name: 'THE OVEN', genre: 'バーベキュー', budget: '~3,000円', desc: '海を眺めながらBBQ', rating: 4.0 },
+    ],
+    dinner: [
+      { name: '響 お台場', genre: '和食', budget: '~6,000円', desc: 'レインボーブリッジの夜景と共に', rating: 4.2 },
+      { name: '1129 by Ogawa', genre: '焼肉', budget: '~8,000円', desc: 'A5黒毛和牛の焼肉', rating: 4.5 },
+    ],
+  },
+  roppongi: {
+    breakfast: [
+      { name: 'Lauderdale', genre: 'カフェ', budget: '~1,500円', desc: '六本木ヒルズのおしゃれカフェ', rating: 4.0 },
+      { name: 'ブリコラージュ', genre: 'ブーランジェリー', budget: '~1,200円', desc: '六本木の人気ベーカリーカフェ', rating: 4.3 },
+    ],
+    lunch: [
+      { name: 'ラス', genre: 'フレンチ', budget: '~3,000円', desc: 'ミッドタウン近くの隠れ家フレンチ', rating: 4.4 },
+      { name: 'ジャンボ', genre: 'ステーキ', budget: '~2,500円', desc: '六本木の老舗ステーキハウス', rating: 4.1 },
+      { name: 'つるとんたん', genre: 'うどん', budget: '~1,500円', desc: '巨大な器で有名なうどん店', rating: 4.2 },
+    ],
+    dinner: [
+      { name: '龍吟', genre: '日本料理', budget: '~30,000円', desc: 'ミシュラン三ツ星の日本料理', rating: 4.8 },
+      { name: '麻布 かどわき', genre: '日本料理', budget: '~25,000円', desc: 'ミシュラン二ツ星。トリュフご飯が名物', rating: 4.7 },
+      { name: 'GONPACHI 六本木', genre: '和食', budget: '~5,000円', desc: 'キル・ビルのモデルになった店', rating: 4.0 },
+    ],
+  },
+  ikebukuro: {
+    breakfast: [
+      { name: 'タカセ', genre: 'パーラー', budget: '~800円', desc: '大正9年創業の老舗パーラー', rating: 4.0 },
+      { name: 'No.18', genre: 'カフェ', budget: '~1,000円', desc: 'サードウェーブコーヒー', rating: 4.1 },
+    ],
+    lunch: [
+      { name: '蒙古タンメン中本', genre: 'ラーメン', budget: '~1,000円', desc: '激辛の聖地。北極ラーメンに挑戦', rating: 4.2 },
+      { name: 'すずめや', genre: 'どら焼き', budget: '~300円', desc: '行列必至のどら焼き専門店', rating: 4.5 },
+      { name: 'ときわ食堂', genre: '定食', budget: '~900円', desc: '巣鴨の大衆食堂。家庭の味', rating: 4.1 },
+      { name: '東池袋大勝軒', genre: 'つけ麺', budget: '~1,000円', desc: 'つけ麺の元祖', rating: 4.3 },
+    ],
+    dinner: [
+      { name: '池袋 焼肉叙々苑', genre: '焼肉', budget: '~8,000円', desc: '高級焼肉チェーンの老舗', rating: 4.3 },
+      { name: '赤羽 まるます家', genre: '居酒屋', budget: '~2,000円', desc: '朝9時から飲める大衆酒場', rating: 4.1 },
+    ],
+  },
+  tokyo_st: {
+    breakfast: [
+      { name: 'GRANSTA 丸の内', genre: 'カフェ', budget: '~1,000円', desc: '東京駅構内のカフェで朝食', rating: 4.0 },
+      { name: 'R Baker', genre: 'ベーカリー', budget: '~800円', desc: '丸の内の人気ベーカリー', rating: 4.1 },
+    ],
+    lunch: [
+      { name: '東京ラーメンストリート', genre: 'ラーメン', budget: '~1,200円', desc: '6店舗集結のラーメン横丁', rating: 4.2 },
+      { name: '牛たん ねぎし', genre: '牛タン', budget: '~1,800円', desc: '仙台牛タンの人気チェーン', rating: 4.1 },
+      { name: 'インデアンカレー', genre: 'カレー', budget: '~900円', desc: '大阪発の甘辛カレー', rating: 4.3 },
+    ],
+    dinner: [
+      { name: '丸の内 TOKIA', genre: '各種', budget: '~5,000円', desc: '多彩なレストランが入る複合施設', rating: 4.0 },
+      { name: '新丸ビル 7F', genre: '各種', budget: '~6,000円', desc: '東京駅を見下ろすレストラン街', rating: 4.2 },
+    ],
+  },
+  shimokita: {
+    breakfast: [
+      { name: 'CITY COUNTRY CITY', genre: 'カフェ', budget: '~1,000円', desc: '2階のレコードカフェ', rating: 4.2 },
+    ],
+    lunch: [
+      { name: 'カレーの惑星', genre: 'カレー', budget: '~1,200円', desc: '下北沢カレーフェスの人気店', rating: 4.3 },
+      { name: '珉亭', genre: '中華', budget: '~800円', desc: '名物チャーハンが有名な老舗', rating: 4.0 },
+      { name: 'ミカンの木の下で', genre: 'ベーカリー', budget: '~600円', desc: '有名パン職人の店', rating: 4.4 },
+    ],
+    dinner: [
+      { name: 'BONUS TRACK内 各店', genre: '各種', budget: '~3,000円', desc: '個性的な飲食店が集まる新スポット', rating: 4.1 },
+      { name: '鉄鍋餃子 餃子のたっちゃん', genre: '餃子', budget: '~2,000円', desc: 'パリパリ鉄鍋餃子が名物', rating: 4.2 },
+    ],
+  },
+  yanaka: {
+    breakfast: [
+      { name: 'カヤバ珈琲', genre: '喫茶', budget: '~800円', desc: '大正5年創業のレトロ喫茶', rating: 4.4 },
+    ],
+    lunch: [
+      { name: '根津 釜竹', genre: 'うどん', budget: '~1,500円', desc: '蔵を改装したうどん店', rating: 4.5 },
+      { name: 'HAGI CAFE', genre: 'カフェ', budget: '~1,000円', desc: 'アートスペースに併設のカフェ', rating: 4.1 },
+      { name: '谷中メンチ', genre: 'テイクアウト', budget: '~300円', desc: '食べ歩きの定番メンチカツ', rating: 4.0 },
+    ],
+    dinner: [
+      { name: '鬼はそと 福はうち', genre: '居酒屋', budget: '~3,000円', desc: '谷中の隠れ家居酒屋', rating: 4.2 },
+      { name: '根津 宮本', genre: '焼鳥', budget: '~3,500円', desc: '地元に愛される焼鳥店', rating: 4.3 },
+    ],
+  },
+  tsukiji: {
+    breakfast: [
+      { name: '築地 きつねや', genre: '牛丼', budget: '~700円', desc: 'ホルモン丼が名物。早朝から営業', rating: 4.2 },
+      { name: '築地 井上', genre: 'ラーメン', budget: '~800円', desc: '場外市場の朝ラーメン', rating: 4.0 },
+    ],
+    lunch: [
+      { name: '築地 すし大', genre: '寿司', budget: '~3,000円', desc: '場外の人気寿司店', rating: 4.3 },
+      { name: '月島 近どう', genre: 'もんじゃ', budget: '~1,500円', desc: '昭和25年創業のもんじゃ老舗', rating: 4.4 },
+      { name: '築地 さのきや', genre: 'たい焼き', budget: '~300円', desc: 'まぐろの形のたい焼き', rating: 4.0 },
+    ],
+    dinner: [
+      { name: '月島 おかめ', genre: 'もんじゃ', budget: '~2,500円', desc: '地元民が通うもんじゃの名店', rating: 4.3 },
+      { name: '築地 虎杖', genre: '海鮮', budget: '~4,000円', desc: '元祖海鮮ひつまぶし', rating: 4.2 },
+    ],
+  },
+  ueno: {
+    breakfast: [
+      { name: 'うさぎやカフェ', genre: '和カフェ', budget: '~1,000円', desc: 'どら焼き名店のカフェ版', rating: 4.4 },
+    ],
+    lunch: [
+      { name: 'アメ横 大統領', genre: '居酒屋', budget: '~1,500円', desc: '昼飲みの聖地。モツ煮込みが名物', rating: 4.0 },
+      { name: '上野 伊豆栄', genre: 'うなぎ', budget: '~4,000円', desc: '江戸末期創業のうなぎ老舗', rating: 4.3 },
+      { name: 'みはし', genre: 'あんみつ', budget: '~700円', desc: '上野名物のあんみつ専門店', rating: 4.2 },
+    ],
+    dinner: [
+      { name: '韻松亭', genre: '日本料理', budget: '~5,000円', desc: '明治8年創業。上野公園内の日本料理', rating: 4.4 },
+      { name: '上野 薮そば', genre: 'そば', budget: '~1,500円', desc: '老舗の手打ちそば', rating: 4.1 },
+    ],
+  },
+  meguro: {
+    breakfast: [
+      { name: 'ブルーボトルコーヒー 中目黒', genre: 'カフェ', budget: '~800円', desc: 'サードウェーブコーヒーの代表格', rating: 4.1 },
+    ],
+    lunch: [
+      { name: 'AFURI 中目黒', genre: 'ラーメン', budget: '~1,200円', desc: '柚子塩らーめんの本店', rating: 4.4 },
+      { name: 'トラットリア・デル・チェーロ', genre: 'イタリアン', budget: '~2,000円', desc: '地元で愛されるイタリアン', rating: 4.3 },
+    ],
+    dinner: [
+      { name: '目黒 とんき', genre: 'とんかつ', budget: '~2,000円', desc: '昭和14年創業の名物とんかつ', rating: 4.6 },
+      { name: '権之助坂 各店', genre: '各種', budget: '~3,500円', desc: '個性的な飲食店が並ぶ', rating: 4.0 },
+    ],
+  },
+  kichijoji: {
+    breakfast: [
+      { name: '多奈加亭', genre: 'カフェ', budget: '~900円', desc: '井の頭公園近くのレトロ喫茶', rating: 4.1 },
+    ],
+    lunch: [
+      { name: 'さとう', genre: 'メンチカツ', budget: '~500円', desc: '行列が絶えない元祖丸メンチカツ', rating: 4.4 },
+      { name: 'いせや', genre: '焼き鳥', budget: '~1,000円', desc: '公園目の前の煙モクモク焼き鳥', rating: 4.0 },
+      { name: 'ハモニカキッチン', genre: '洋食', budget: '~1,200円', desc: 'ハモニカ横丁のおしゃれランチ', rating: 4.2 },
+    ],
+    dinner: [
+      { name: 'ハモニカ横丁 各店', genre: '居酒屋', budget: '~2,500円', desc: '昭和レトロな飲み屋横丁をハシゴ', rating: 4.2 },
+      { name: 'クレヨンハウス', genre: 'オーガニック', budget: '~3,000円', desc: 'オーガニックブッフェレストラン', rating: 4.1 },
+    ],
+  },
+};
+
+const TRANSPORT_TIPS = {
+  'asakusa-shibuya': '銀座線で表参道経由、約30分',
+  'asakusa-shinjuku': '浅草線→新宿線、または銀座線→丸ノ内線、約40分',
+  'shibuya-shinjuku': 'JR山手線で2駅、約7分',
+  'shibuya-roppongi': '日比谷線で2駅、約5分',
+  'shinjuku-ikebukuro': 'JR山手線で3駅、約10分',
+  'ginza-tsukiji': '徒歩10分、または日比谷線1駅',
+  'akihabara-ueno': 'JR山手線で1駅、約3分',
+  'ueno-yanaka': '徒歩15分。散策しながらがおすすめ',
+  'tokyo_st-ginza': '丸ノ内線1駅、または徒歩15分',
+  'shibuya-shimokita': '京王井の頭線で3駅、約5分',
+  'shinjuku-kichijoji': 'JR中央線快速で約15分',
+  'meguro-shibuya': 'JR山手線で2駅、約5分',
+};
+
+// ===== プラン生成エンジン =====
+let plans = [];
+let selectedDay = 0;
+let activeAreaFilters = new Set();
+
+function seededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+function shuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickN(arr, n, rng) {
+  return shuffle(arr, rng).slice(0, n);
+}
+
+function pick(arr, rng) {
+  return arr[Math.floor(rng() * arr.length)];
+}
+
+function generatePlan() {
+  const startStr = document.getElementById('startDate').value;
+  const style = document.getElementById('travelStyle').value;
+  const budget = document.getElementById('budgetLevel').value;
+  const startDate = startStr ? new Date(startStr) : new Date();
+  const seed = startDate.getTime();
+  const rng = seededRandom(seed);
+
+  plans = [];
+  const areaIds = Object.keys(SPOTS);
+
+  for (let d = 0; d < 90; d++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + d);
+    const dow = date.getDay();
+
+    // エリアを回転 + 少しランダム性
+    const areaIdx = (d + Math.floor(rng() * 3)) % areaIds.length;
+    const areaId = areaIds[areaIdx];
+    const area = AREAS.find(a => a.id === areaId);
+    const spots = SPOTS[areaId] || [];
+    const restaurants = RESTAURANTS[areaId] || { breakfast: [], lunch: [], dinner: [] };
+
+    // スタイルに応じたスポット選択
+    let selectedSpots = [];
+    if (style === 'culture') {
+      const cultural = spots.filter(s => ['culture', 'temple'].includes(s.type));
+      const others = spots.filter(s => !['culture', 'temple'].includes(s.type));
+      selectedSpots = [...pickN(cultural, Math.min(2, cultural.length), rng), ...pickN(others, 1, rng)];
+    } else if (style === 'active') {
+      const active = spots.filter(s => ['activity', 'walk', 'park'].includes(s.type));
+      const others = spots.filter(s => !['activity', 'walk', 'park'].includes(s.type));
+      selectedSpots = [...pickN(active, Math.min(2, active.length), rng), ...pickN(others, 1, rng)];
+    } else if (style === 'chill') {
+      selectedSpots = pickN(spots, 2, rng);
+    } else {
+      selectedSpots = pickN(spots, Math.min(3, spots.length), rng);
+    }
+
+    // 予算フィルタ
+    const filterByBudget = (list) => {
+      if (budget === 'low') return list.filter(r => !r.budget.includes('10,000') && !r.budget.includes('20,000') && !r.budget.includes('30,000') && !r.budget.includes('40,000'));
+      if (budget === 'high') return list.length > 0 ? list : list;
+      return list;
+    };
+
+    const bfList = filterByBudget(restaurants.breakfast || []);
+    const lnList = filterByBudget(restaurants.lunch || []);
+    const dnList = filterByBudget(restaurants.dinner || []);
+
+    const bf = bfList.length > 0 ? pick(bfList, rng) : (restaurants.breakfast && restaurants.breakfast.length > 0 ? pick(restaurants.breakfast, rng) : null);
+    const ln = lnList.length > 0 ? pick(lnList, rng) : null;
+    const dn = dnList.length > 0 ? pick(dnList, rng) : null;
+
+    // タイムライン構築
+    const timeline = [];
+    const isWeekend = dow === 0 || dow === 6;
+    const startHour = isWeekend ? 9 : 8;
+
+    if (bf) {
+      timeline.push({
+        time: `${String(startHour).padStart(2,'0')}:00`,
+        type: 'meal',
+        title: `朝食 — ${bf.name}`,
+        desc: bf.desc,
+        tags: [{ text: bf.genre, cls: 'tag-meal' }, { text: bf.budget, cls: 'tag-budget' }],
+        rating: bf.rating,
+      });
+    }
+
+    let hour = startHour + 1;
+    for (const spot of selectedSpots) {
+      if (hour >= 11 && hour < 12 && !timeline.find(t => t.title.startsWith('昼食'))) {
+        // ランチ挿入
+        if (ln) {
+          timeline.push({
+            time: '11:30',
+            type: 'meal',
+            title: `昼食 — ${ln.name}`,
+            desc: ln.desc,
+            tags: [{ text: ln.genre, cls: 'tag-meal' }, { text: ln.budget, cls: 'tag-budget' }],
+            rating: ln.rating,
+          });
+          hour = 13;
+        }
+      }
+
+      const h = String(hour).padStart(2, '0');
+      timeline.push({
+        time: `${h}:00`,
+        type: 'spot',
+        title: spot.name,
+        desc: spot.desc,
+        tags: [{ text: `${spot.duration}分`, cls: 'tag-spot' }],
+      });
+      hour += Math.ceil(spot.duration / 60);
+    }
+
+    // ランチがまだなら追加
+    if (ln && !timeline.find(t => t.title.startsWith('昼食'))) {
+      timeline.splice(Math.min(2, timeline.length), 0, {
+        time: '12:00',
+        type: 'meal',
+        title: `昼食 — ${ln.name}`,
+        desc: ln.desc,
+        tags: [{ text: ln.genre, cls: 'tag-meal' }, { text: ln.budget, cls: 'tag-budget' }],
+        rating: ln.rating,
+      });
+    }
+
+    // グルメ重視の場合、午後にカフェ/軽食追加
+    if (style === 'gourmet') {
+      const extras = [...(restaurants.lunch || [])].filter(r => r !== ln);
+      if (extras.length > 0) {
+        const cafe = pick(extras, rng);
+        timeline.push({
+          time: '15:00',
+          type: 'meal',
+          title: `午後の寄り道 — ${cafe.name}`,
+          desc: cafe.desc,
+          tags: [{ text: cafe.genre, cls: 'tag-meal' }, { text: cafe.budget, cls: 'tag-budget' }],
+          rating: cafe.rating,
+        });
+      }
+    }
+
+    // ディナー
+    if (dn) {
+      timeline.push({
+        time: isWeekend ? '18:30' : '18:00',
+        type: 'meal',
+        title: `夕食 — ${dn.name}`,
+        desc: dn.desc,
+        tags: [{ text: dn.genre, cls: 'tag-meal' }, { text: dn.budget, cls: 'tag-budget' }],
+        rating: dn.rating,
+      });
+    }
+
+    // ソート
+    timeline.sort((a, b) => a.time.localeCompare(b.time));
+
+    // 予算概算
+    const estimateBudget = (r) => {
+      if (!r) return 0;
+      const m = r.budget.match(/[\d,]+/);
+      return m ? parseInt(m[0].replace(',', '')) : 1000;
+    };
+    const totalBudget = estimateBudget(bf) + estimateBudget(ln) + estimateBudget(dn) + 1000; // 交通費
+
+    plans.push({
+      date,
+      area,
+      areaId,
+      timeline,
+      totalBudget,
+      spots: selectedSpots.length,
+      meals: [bf, ln, dn].filter(Boolean).length,
+    });
+  }
+
+  return plans;
+}
+
+// ===== UI レンダリング =====
+function renderCalendar() {
+  const panel = document.getElementById('calendarPanel');
+  const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+  let html = '';
+  let currentMonth = -1;
+
+  for (let i = 0; i < plans.length; i++) {
+    const p = plans[i];
+    const m = p.date.getMonth();
+    const dow = p.date.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+
+    // エリアフィルタ
+    if (activeAreaFilters.size > 0 && !activeAreaFilters.has(p.areaId)) continue;
+
+    if (m !== currentMonth) {
+      currentMonth = m;
+      html += `<div class="month-header">${p.date.getFullYear()}年${m + 1}月</div>`;
+    }
+
+    const dateStr = `${p.date.getMonth()+1}/${p.date.getDate()}`;
+    html += `<div class="day-item ${i === selectedDay ? 'active' : ''} ${isWeekend ? 'weekend' : ''}" onclick="selectDay(${i})">
+      <span class="dow">${dowNames[dow]}</span>
+      <span class="date">${dateStr}</span>
+      <span class="area-tag">${p.area.icon} ${p.area.name}</span>
+    </div>`;
+  }
+
+  panel.innerHTML = html;
+}
+
+function renderDetail() {
+  const panel = document.getElementById('detailPanel');
+  if (selectedDay < 0 || selectedDay >= plans.length) {
+    panel.innerHTML = '<div class="empty-state"><div class="icon">🗺️</div><p>日付を選択してください</p></div>';
+    return;
+  }
+
+  const p = plans[selectedDay];
+  const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+  const dateStr = `${p.date.getFullYear()}年${p.date.getMonth()+1}月${p.date.getDate()}日(${dowNames[p.date.getDay()]})`;
+
+  let html = `
+    <div class="detail-title">Day ${selectedDay + 1} — ${dateStr}</div>
+    <div class="detail-subtitle">${p.area.icon} ${p.area.name}エリア</div>
+    <div class="detail-area-badge" style="background:${p.area.color}22;color:${p.area.color};border:1px solid ${p.area.color}44;">
+      ${p.area.icon} ${p.area.name}
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="label">スポット</div>
+        <div class="value">${p.spots}<span class="unit"> 箇所</span></div>
+      </div>
+      <div class="stat">
+        <div class="label">食事</div>
+        <div class="value">${p.meals}<span class="unit"> 食</span></div>
+      </div>
+      <div class="stat">
+        <div class="label">予算目安</div>
+        <div class="value">¥${p.totalBudget.toLocaleString()}</div>
+      </div>
+    </div>
+
+    <div class="timeline">
+  `;
+
+  for (const item of p.timeline) {
+    const cardClass = item.type === 'meal' ? 'meal-card' : 'spot-card';
+    const stars = item.rating ? ` ⭐ ${item.rating}` : '';
+    html += `
+      <div class="tl-item ${item.type}">
+        <div class="tl-time">${item.time}</div>
+        <div class="tl-card ${cardClass}">
+          <h3>${item.type === 'meal' ? '🍽️' : '📍'} ${item.title}${stars}</h3>
+          <p>${item.desc}</p>
+          <div>${item.tags.map(t => `<span class="tag ${t.cls}">${t.text}</span>`).join('')}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += '</div>';
+  panel.innerHTML = html;
+}
+
+function renderAreaFilter() {
+  const container = document.getElementById('areaFilter');
+  container.innerHTML = AREAS.map(a =>
+    `<span class="chip ${activeAreaFilters.has(a.id) ? 'active' : ''}" onclick="toggleAreaFilter('${a.id}')">${a.icon} ${a.name}</span>`
+  ).join('');
+}
+
+// ===== イベントハンドラ =====
+function generate() {
+  generatePlan();
+  selectedDay = 0;
+  activeAreaFilters.clear();
+  renderCalendar();
+  renderDetail();
+  renderAreaFilter();
+}
+
+function selectDay(idx) {
+  selectedDay = idx;
+  renderCalendar();
+  renderDetail();
+}
+
+function toggleAreaFilter(id) {
+  if (activeAreaFilters.has(id)) activeAreaFilters.delete(id);
+  else activeAreaFilters.add(id);
+  renderCalendar();
+  renderAreaFilter();
+}
+
+function exportPlan() {
+  if (plans.length === 0) { alert('先にプランを生成してください'); return; }
+  const rows = [['日付', '曜日', 'エリア', '時間', '種類', 'タイトル', '説明', '予算']];
+  const dowNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+  for (const p of plans) {
+    const dateStr = `${p.date.getFullYear()}/${p.date.getMonth()+1}/${p.date.getDate()}`;
+    const dow = dowNames[p.date.getDay()];
+    for (const item of p.timeline) {
+      const budgetTag = item.tags.find(t => t.cls === 'tag-budget');
+      rows.push([dateStr, dow, p.area.name, item.time, item.type === 'meal' ? '食事' : '観光', item.title, item.desc, budgetTag ? budgetTag.text : '']);
+    }
+  }
+
+  const bom = '\uFEFF';
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tokyo-plan-90days.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== 初期化 =====
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  document.getElementById('startDate').value = today.toISOString().split('T')[0];
+  generate();
+});
+</script>
+</body>
+</html>
