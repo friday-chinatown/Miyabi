@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TaskRouter Fallback Flow — Miyabi APIフリー</title>
+<style>
+:root{
+  --bg:#0a0814; --panel:#161023; --panel2:#1e1730; --ink:#f5e9d6; --ink-dim:#a89884;
+  --sakura:#ff7aa2; --gold:#e4b04a; --line:#3a2f4f; --sumi:#2a2235;
+  --claude:#c98bff; --codex:#6cc4a1; --api:#ff9d6e; --mock:#a89884;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(ellipse at top,#1a0f28,#0a0814);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;line-height:1.65}
+header.top{padding:36px 40px 24px;border-bottom:1px solid var(--line)}
+header.top h1{margin:0 0 6px;font-size:30px;color:var(--sakura)}
+header.top p{margin:4px 0;color:var(--ink-dim);font-size:13px}
+header.top .savings{display:inline-block;margin-top:10px;padding:6px 14px;background:var(--sumi);border:1px solid var(--gold);border-radius:20px;color:var(--gold);font-weight:700}
+.cascade{padding:30px 40px;background:#0f0a1a;border-bottom:1px solid var(--line)}
+.cascade svg{width:100%;max-width:1200px;display:block;margin:auto}
+main{max-width:1400px;margin:auto;padding:30px 40px;display:flex;flex-direction:column;gap:24px}
+.block{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+.block h2{margin:0 0 10px;color:var(--sakura);font-size:20px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.block h3{color:var(--gold);margin:18px 0 8px;font-size:16px}
+.block h4{color:var(--sakura);margin:12px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.block p{margin:6px 0;font-size:13.5px}
+.block ul,.block ol{font-size:13px;padding-left:22px}
+.block li{margin:3px 0}
+.block code{background:#0a0814;color:var(--gold);padding:1px 6px;border-radius:4px;font-family:"SF Mono",Menlo,monospace;font-size:12px}
+.block pre{background:#0a0814;border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto;font-size:11.5px;color:var(--ink);font-family:"SF Mono",Menlo,monospace}
+.block pre code{background:none;padding:0}
+.note{padding:10px 14px;background:var(--sumi);border-left:3px solid var(--gold);border-radius:4px;margin:10px 0}
+table.routing,table.mini{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+table.routing th,table.routing td,table.mini th,table.mini td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+table.routing th,table.mini th{background:var(--sumi);color:var(--sakura);font-size:12px}
+.p-claude{color:var(--claude);font-weight:700}
+.p-codex{color:var(--codex);font-weight:700}
+.p-api{color:var(--api);font-weight:700}
+tr td.hl{color:var(--gold)}
+.fallback-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
+.fb-card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px}
+.fb-card h3{margin:0 0 8px;font-size:13px;color:var(--gold)}
+.fb-card .chain{font-family:"SF Mono",Menlo,monospace;font-size:12px;color:var(--ink)}
+.provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px;margin-top:14px}
+.provider{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:18px 20px;border-top:4px solid}
+.p-claude-card{border-top-color:var(--claude)}
+.p-codex-card{border-top-color:var(--codex)}
+.p-api-card{border-top-color:var(--api)}
+.provider header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;border:none;padding:0;background:none}
+.provider h3{margin:0;color:var(--ink);font-size:16px}
+.provider .cost{font-size:11px;padding:2px 8px;border-radius:10px;background:#0a3a20;color:#6cc4a1;border:1px solid #6cc4a1}
+.provider .cost.paid{background:#3a1a0a;color:#ff9d6e;border-color:#ff9d6e}
+.provider .badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--sumi);color:var(--ink-dim);border:1px solid var(--line)}
+.modes{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.mode{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px 16px;border-left:4px solid}
+.mode.m0{border-left-color:var(--codex)}
+.mode.m1{border-left-color:var(--claude)}
+.mode.m2{border-left-color:var(--api)}
+.mode.m3{border-left-color:var(--mock)}
+.mode-h{display:flex;gap:12px;align-items:center;margin-bottom:6px;font-weight:700}
+.mode-h .num{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--sumi);color:var(--gold)}
+.mode-h .lines{margin-left:auto;font-size:11px;color:var(--ink-dim);font-weight:400;font-family:"SF Mono",Menlo,monospace}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:10px}
+.cfg{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.cfg h3{margin:0 0 6px;font-size:13px;color:var(--gold)}
+footer{padding:30px 40px;text-align:center;color:var(--ink-dim);font-size:12px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header class="top">
+<h1>🔀 TaskRouter — APIフリー 4層フォールバックフロー</h1>
+<p>Miyabi の経済的自立化（$400/月 → $0）を支える3層プロバイダカスケード + 各 Agent 内 4 層フォールバック実装</p>
+<p>実装: <code>packages/miyabi-agent-sdk/src/clients/TaskRouter.ts</code> (806行 — SDK最大ファイル)</p>
+<div class="savings">💰 月額 $400 → $0 (CLIさえあれば完全無料)</div>
+</header>
+
+<section class="cascade">
+<svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff7aa2"/></marker>
+<marker id="ar-fail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff6b6b"/></marker>
+</defs>
+<g font-family="sans-serif" font-size="13" fill="#f5e9d6" text-anchor="middle">
+<text x="600" y="22" fill="#ff7aa2" font-size="15" font-weight="700">Agent.generateCode() 呼び出し</text>
+<rect x="80" y="50" width="200" height="70" rx="10" fill="#1e1730" stroke="#6cc4a1" stroke-width="2"/>
+<text x="180" y="78" fill="#6cc4a1" font-weight="700">Mode 0</text>
+<text x="180" y="98" fill="#f5e9d6" font-size="13">Codex CLI</text>
+<text x="180" y="113" fill="#a89884" font-size="10">$0 / コーディング特化</text>
+<rect x="320" y="50" width="200" height="70" rx="10" fill="#1e1730" stroke="#c98bff" stroke-width="2"/>
+<text x="420" y="78" fill="#c98bff" font-weight="700">Mode 1</text>
+<text x="420" y="98" fill="#f5e9d6" font-size="13">Claude Code CLI</text>
+<text x="420" y="113" fill="#a89884" font-size="10">$0 / 司令塔</text>
+<rect x="560" y="50" width="200" height="70" rx="10" fill="#1e1730" stroke="#ff9d6e" stroke-width="2"/>
+<text x="660" y="78" fill="#ff9d6e" font-weight="700">Mode 2</text>
+<text x="660" y="98" fill="#f5e9d6" font-size="13">Anthropic API</text>
+<text x="660" y="113" fill="#a89884" font-size="10">有料 / フォールバック</text>
+<rect x="800" y="50" width="200" height="70" rx="10" fill="#1e1730" stroke="#a89884" stroke-width="2" stroke-dasharray="4,3"/>
+<text x="900" y="78" fill="#a89884" font-weight="700">Mode 3</text>
+<text x="900" y="98" fill="#f5e9d6" font-size="13">Mock テンプレート</text>
+<text x="900" y="113" fill="#a89884" font-size="10">必ず成功</text>
+<line x1="280" y1="85" x2="320" y2="85" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar-fail)"/>
+<text x="300" y="78" fill="#ff6b6b" font-size="9">fail</text>
+<line x1="520" y1="85" x2="560" y2="85" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar-fail)"/>
+<text x="540" y="78" fill="#ff6b6b" font-size="9">fail</text>
+<line x1="760" y1="85" x2="800" y2="85" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar-fail)"/>
+<text x="780" y="78" fill="#ff6b6b" font-size="9">fail</text>
+<text x="180" y="145" fill="#a89884" font-size="11">try/catch</text>
+<text x="180" y="160" fill="#a89884" font-size="11">空catchで次へ</text>
+<text x="420" y="145" fill="#a89884" font-size="11">if(client)</text>
+<text x="420" y="160" fill="#a89884" font-size="11">条件分岐</text>
+<text x="660" y="145" fill="#a89884" font-size="11">if(apiKey)</text>
+<text x="660" y="160" fill="#a89884" font-size="11">未設定なら飛ばす</text>
+<text x="900" y="145" fill="#a89884" font-size="11">return文の最後</text>
+<text x="900" y="160" fill="#a89884" font-size="11">テンプレ生成</text>
+<rect x="80" y="200" width="920" height="50" rx="8" fill="#2a1a2a" stroke="#ff7aa2"/>
+<text x="540" y="222" fill="#ff7aa2" font-weight="700">TaskRouter (806行)</text>
+<text x="540" y="240" fill="#a89884" font-size="11">ROUTING_TABLE × FALLBACK_ORDER × healthCache(60s TTL) × Promise.race(5s timeout)</text>
+</g>
+</svg>
+</section>
+
+<main>
+<section class="block" id="routing-table">
+  <h2>📋 ROUTING_TABLE — タスクカテゴリ → プロバイダ割当</h2>
+  <p>ファイル: <code>packages/miyabi-agent-sdk/src/clients/TaskRouter.ts</code> 行58-66</p>
+  <table class="routing">
+    <thead><tr><th>カテゴリ</th><th>→</th><th>推奨プロバイダ</th><th>使用Agent</th><th>役割</th></tr></thead>
+    <tbody>
+      <tr><td>orchestration</td><td>→</td><td class="p-claude">claude-cli</td><td>CoordinatorAgent</td><td>タスク分解・DAG構築（司令塔）</td></tr>
+      <tr><td>analysis</td><td>→</td><td class="p-claude">claude-cli</td><td>IssueAgent, LLMDecomposer</td><td>Issue分析・判断</td></tr>
+      <tr><td class="hl">coding</td><td>→</td><td class="p-codex">codex-cli</td><td>CodeGenAgent</td><td>コード生成（ワーカー特化）</td></tr>
+      <tr><td class="hl">review</td><td>→</td><td class="p-codex">codex-cli</td><td>ReviewAgent</td><td>コード審査</td></tr>
+      <tr><td class="hl">testing</td><td>→</td><td class="p-codex">codex-cli</td><td>TestAgent</td><td>テスト実行</td></tr>
+      <tr><td>deployment</td><td>→</td><td class="p-claude">claude-cli</td><td>DeploymentAgent</td><td>CI/CD実行</td></tr>
+      <tr><td>business</td><td>→</td><td class="p-claude">claude-cli</td><td>14 Business Agents</td><td>ビジネス戦略</td></tr>
+    </tbody>
+  </table>
+  <p class="note">💡 <b>役割分担の思想</b>: Claude CLI = 司令塔（判断・分析・統括）、Codex CLI = ワーカー（コード実装・レビュー・テスト）</p>
+</section>
+
+<section class="block" id="fallback-order">
+  <h2>🔄 FALLBACK_ORDER — 失敗時の遷移順</h2>
+  <p>ファイル: <code>TaskRouter.ts</code> 行71-75</p>
+  <div class="fallback-grid">
+    <div class="fb-card">
+      <h3>Primary: claude-cli</h3>
+      <div class="chain">claude-cli → codex-cli → anthropic-api</div>
+    </div>
+    <div class="fb-card">
+      <h3>Primary: codex-cli</h3>
+      <div class="chain">codex-cli → claude-cli → anthropic-api</div>
+    </div>
+    <div class="fb-card">
+      <h3>Primary: anthropic-api</h3>
+      <div class="chain">anthropic-api → claude-cli → codex-cli</div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="health-check">
+  <h2>❤️ ヘルスチェック機構</h2>
+  <p>ファイル: <code>TaskRouter.ts</code> 行767-804</p>
+  <ul>
+    <li><b>TTL</b>: 60,000ms (60秒キャッシュ) — 行635 <code>HEALTH_CACHE_TTL</code></li>
+    <li><b>タイムアウト</b>: 5,000ms (Promise.race) — 行789-797</li>
+    <li><b>キャッシュ構造</b>: <code>Map&lt;ProviderType, {available, cachedAt}&gt;</code></li>
+    <li><b>isAvailable(type)</b>: キャッシュTTL内なら返却、切れたら runHealthCheck() 実行</li>
+    <li><b>checkHealth()</b>: 全プロバイダに対し Promise.all で並列ヘルスチェック → HealthCheckResult[]</li>
+    <li><b>実装</b>: <code>claude --version</code> / <code>codex --version</code> でプロセス確認（spawn, shell:false）</li>
+    <li><b>Anthropic API</b>: <code>analyzeIssue("health check", "ping")</code> で認証確認</li>
+  </ul>
+</section>
+
+<section class="block" id="config">
+  <h2>⚙️ ProviderConfig</h2>
+  <pre><code>interface ProviderConfig {
+  claudeCommand?: string;        // default: "claude"
+  codexCommand?: string;         // default: "codex"
+  anthropicApiKey?: string;      // 未設定時はAnthropicProvider生成されず
+  anthropicModel?: string;       // default: "claude-sonnet-4-20250514"
+  routingOverrides?: Partial&lt;Record&lt;TaskCategory, ProviderType&gt;&gt;;
+  enableFallback?: boolean;      // default: true
+  healthCheckTimeout?: number;   // default: 5000ms
+}</code></pre>
+  <p class="note">🔑 <b>APIフリー動作の鍵</b>: <code>anthropicApiKey</code> が未設定でも ProviderFactory.createAll() は claude-cli と codex-cli を必ず生成するため、CLI 2つが PATH 上にあれば完全無料動作。</p>
+</section>
+<section class="block providers">
+  <h2>🔌 3 Providers — 実装詳細</h2>
+  <div class="provider-grid">
+
+    <article class="provider p-claude-card">
+      <header>
+        <h3>① ClaudeCliProvider</h3>
+        <span class="cost">$0 (サブスク)</span>
+      </header>
+      <p><code>TaskRouter.ts</code> 行110-187 / 実装: <code>ClaudeCodeClient.ts</code></p>
+      <h4>起動コマンド</h4>
+      <pre><code>claude -p --output-format json
+    ↑ 非対話モード / JSON エンベロープ出力</code></pre>
+      <h4>通信</h4>
+      <ul>
+        <li><b>stdin</b>: プロンプトをテキスト送信（シェルエスケープ回避）</li>
+        <li><b>stdout</b>: JSON envelope <code>{result, usage:{input_tokens,output_tokens}, total_cost_usd}</code></li>
+        <li><b>shell: false</b> (インジェクション防止)</li>
+        <li><b>Windows</b>: shell:true に自動切替</li>
+      </ul>
+      <h4>トークン・コスト</h4>
+      <ul>
+        <li>envelope の <code>usage</code> から実トークン取得</li>
+        <li>envelope に無ければ文字数/4 で推定</li>
+        <li>cost: envelope.total_cost_usd ?? 0</li>
+      </ul>
+      <h4>healthCheck</h4>
+      <pre><code>spawn("claude", ["--version"], {shell:false, timeout:5000})
+  → exit 0 → available
+  → error → unavailable</code></pre>
+      <h4>メソッド</h4>
+      <ul>
+        <li>executePrompt(prompt, options)</li>
+        <li>analyzeIssue(issueData)</li>
+        <li>generateCode(requirements)</li>
+        <li>reviewCode(files)</li>
+      </ul>
+    </article>
+
+    <article class="provider p-codex-card">
+      <header>
+        <h3>② CodexCliProvider</h3>
+        <span class="cost">$0 (サブスク)</span>
+        <span class="badge">コード特化</span>
+      </header>
+      <p><code>TaskRouter.ts</code> 行199-412 / 実装: <code>CodexClient.ts</code></p>
+      <h4>起動コマンド</h4>
+      <pre><code>codex exec [--model xxx] -
+    ↑ stdin入力モード / モデル指定可</code></pre>
+      <h4>プロンプト別タイムアウト</h4>
+      <table class="mini">
+        <tr><th>用途</th><th>タイムアウト</th><th>行</th></tr>
+        <tr><td>analyzeIssue</td><td>60,000ms</td><td>299</td></tr>
+        <tr><td>generateCode</td><td>120,000ms</td><td>327</td></tr>
+        <tr><td>reviewCode</td><td>90,000ms</td><td>353</td></tr>
+        <tr><td>healthCheck</td><td>5,000ms</td><td>366</td></tr>
+      </table>
+      <h4>JSON解析 4パターン</h4>
+      <ol>
+        <li>```json ... ``` ブロック</li>
+        <li>``` ... ``` ジェネリックブロック</li>
+        <li>{ ... } 正規表現抽出</li>
+        <li>直接 JSON.parse</li>
+      </ol>
+      <h4>特化機能</h4>
+      <ul>
+        <li><code>runTests()</code> — テスト実行+構造化解析</li>
+        <li><code>refactorCode()</code> — リファクタリング専用</li>
+      </ul>
+      <h4>cost: 常に 0 (サブスクベース)</h4>
+    </article>
+
+    <article class="provider p-api-card">
+      <header>
+        <h3>③ AnthropicApiProvider</h3>
+        <span class="cost paid">有料</span>
+        <span class="badge">フォールバック</span>
+      </header>
+      <p><code>TaskRouter.ts</code> 行424-522 / 実装: <code>AnthropicClient.ts</code></p>
+      <h4>起動方式</h4>
+      <p>SDK 直接呼び出し（spawnなし）</p>
+      <pre><code>client.messages.create({
+  model: "claude-sonnet-4-20250514",
+  max_tokens: 32768,  // generateCode
+  messages: [{role:"user", content: prompt}]
+})</code></pre>
+      <h4>max_tokens</h4>
+      <ul>
+        <li>analyzeIssue: 1,024</li>
+        <li>generateCode: 32,768 (大規模コード対応)</li>
+        <li>reviewCode: 4,096</li>
+      </ul>
+      <h4>料金計算 (calculateCost)</h4>
+      <pre><code>Input:  $3  / 1M tokens
+Output: $15 / 1M tokens
+→ (input/1M)*3 + (output/1M)*15</code></pre>
+      <h4>有効化条件</h4>
+      <p><code>config.anthropicApiKey || process.env.ANTHROPIC_API_KEY</code> がある時のみ ProviderFactory.createAll() で生成される (行574)。未設定なら Map に存在しない。</p>
+      <h4>プロンプト言語</h4>
+      <p>🇯🇵 日本語 (他2つは英語) — 「JSON以外のテキストは含めないでください」で強制構造化</p>
+      <h4>healthCheck</h4>
+      <p><code>analyzeIssue("health check", "ping")</code> で認証確認</p>
+    </article>
+
+  </div>
+</section>
+<section class="block agent-fallback">
+  <h2>🎯 Agent 4層フォールバック実装</h2>
+  <p>CodeGenAgent と ReviewAgent は以下の4モードを順次試行。各モードが失敗すると次へフォールスルー、最後は必ず Mock で返る。</p>
+
+  <h3>CodeGenAgent.ts</h3>
+  <div class="modes">
+    <div class="mode m0">
+      <div class="mode-h"><span class="num">Mode 0</span><span>Codex CLI</span><span class="lines">行192-211</span></div>
+      <p>★ 最優先・コーディング特化。<code>try/catch</code> でラップされ失敗時は空 catch → 次モードへ自動フォールスルー。</p>
+      <pre><code>if (useRealAPI && codexClient) {
+  try {
+    const result = await codexClient.generateCode({...});
+    return { files, tests, qualityScore, cost: 0 };
+  } catch {
+    // Codex failed, fall through to Claude Code
+  }
+}</code></pre>
+    </div>
+    <div class="mode m1">
+      <div class="mode-h"><span class="num">Mode 1</span><span>Claude Code CLI</span><span class="lines">行213-229</span></div>
+      <p>$0 ローカル実行。<code>try/catch</code> なし — 意図的に例外を上位に伝播させる（上位 generate() メソッドの try/catch でキャッチ）。</p>
+      <pre><code>if (useRealAPI && claudeCodeClient) {
+  const result = await claudeCodeClient.generateCode({...});
+  return { files, tests, qualityScore, cost: 0 };
+}</code></pre>
+    </div>
+    <div class="mode m2">
+      <div class="mode-h"><span class="num">Mode 2</span><span>Anthropic API</span><span class="lines">行231-247</span></div>
+      <p>有料API。実トークン数とコストを <code>calculateCost()</code> で計算。</p>
+      <pre><code>if (useRealAPI && anthropicClient) {
+  const result = await anthropicClient.generateCode(...);
+  const cost = anthropicClient.calculateCost(result.tokensUsed);
+  return { ..., tokensUsed: result.tokensUsed, cost };
+}</code></pre>
+    </div>
+    <div class="mode m3">
+      <div class="mode-h"><span class="num">Mode 3</span><span>Mock テンプレート</span><span class="lines">行249-258, 291-322</span></div>
+      <p>必ず成功。言語別スタブ（TypeScript / Rust / Python）を返す。</p>
+      <pre><code>// 言語別テンプレート
+{
+  typescript: "export class GeneratedClass { ... TODO ... }",
+  rust:       "pub struct GeneratedStruct; ...",
+  python:     "class GeneratedClass: ...",
+}</code></pre>
+    </div>
+  </div>
+
+  <h3>ReviewAgent.ts</h3>
+  <div class="modes">
+    <div class="mode m0"><div class="mode-h"><span class="num">Mode 0</span><span>Codex CLI (レビュー特化)</span><span class="lines">行82-111</span></div><p><code>try/catch</code> で失敗時次へ。<code>codexClient.reviewCode(files)</code> + カバレッジ測定。</p></div>
+    <div class="mode m1"><div class="mode-h"><span class="num">Mode 1</span><span>Claude Code CLI</span><span class="lines">行113-138</span></div><p>ClaudeCodeClient.reviewCode + カバレッジ。</p></div>
+    <div class="mode m2"><div class="mode-h"><span class="num">Mode 2</span><span>Anthropic API</span><span class="lines">行140-162</span></div><p>AnthropicClient.reviewCode + 実コスト計算。</p></div>
+    <div class="mode m3"><div class="mode-h"><span class="num">Mode 3</span><span>Mock 静的解析</span><span class="lines">行164-207</span></div>
+      <p>実際の簡易静的解析を並列実行：</p>
+      <ul>
+        <li><code>runStaticAnalysis()</code> — ファイル名"bad"検出, 1000字超警告</li>
+        <li><code>runSecurityScan()</code> — password/api_key/secret/token/private_key パターン検出</li>
+        <li><code>checkCoverage()</code> — .test. ファイル比率計算</li>
+        <li><code>calculateQualityScore()</code> — 静的40点+セキュリティ30点+カバレッジ30点</li>
+        <li><code>generateSuggestions()</code> — 条件別改善提案生成</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block config-files">
+  <h2>📁 関連設定ファイル</h2>
+  <div class="cfg-grid">
+    <article class="cfg">
+      <h3><code>.codex/config.toml</code></h3>
+      <p>Codex CLIのモデル・サンドボックス設定</p>
+      <ul>
+        <li><code>model = "gpt-5.4"</code></li>
+        <li><code>model_reasoning_effort = "high"</code></li>
+        <li><code>approval_policy = "on-request"</code></li>
+        <li><code>sandbox_mode = "workspace-write"</code></li>
+        <li><code>[mcp_servers.*]</code> — Context7, Playwright, OpenAI Docs</li>
+      </ul>
+    </article>
+    <article class="cfg">
+      <h3><code>.env.example</code></h3>
+      <p>APIキーは optional として扱われる</p>
+      <ul>
+        <li><code>GITHUB_TOKEN</code> (必須 — gh CLI 自動検出推奨)</li>
+        <li><code>ANTHROPIC_API_KEY</code> (オプション — 未設定時はCLIのみで動作)</li>
+        <li><code>REPOSITORY=owner/repo</code></li>
+        <li><code>DEFAULT_CONCURRENCY=2</code></li>
+      </ul>
+    </article>
+    <article class="cfg">
+      <h3><code>.miyabi.yml</code></h3>
+      <p>CLI動作設定</p>
+      <ul>
+        <li><code>cli.language: ja</code></li>
+        <li><code>workflows.autoLabel/autoReview/autoSync: true</code></li>
+      </ul>
+    </article>
+    <article class="cfg">
+      <h3><code>.claude/settings.json</code></h3>
+      <p>Claude Code フック（API選択ではなく内部処理）</p>
+      <ul>
+        <li>PostToolUse: log-commands / auto-format</li>
+        <li>Notification: agent-event</li>
+      </ul>
+    </article>
+  </div>
+</section>
+</main>
+<footer>TaskRouter Fallback Flow Visualization · 並列サブエージェント調査(4) + 並列HTML構築(3) · Miyabi APIフリー化の中核<br>
+参照: TaskRouter.ts (806行) / ClaudeCodeClient.ts / CodexClient.ts / AnthropicClient.ts / CodeGenAgent.ts / ReviewAgent.ts
+</footer>
+</body></html>
