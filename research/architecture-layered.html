@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Miyabi — GitHub-as-OS Layered Architecture</title>
+<style>
+:root{
+  --bg:#0e0b14; --panel:#171221; --panel2:#1f1830; --ink:#f5e9d6; --ink-dim:#a89884;
+  --sakura:#ff7aa2; --sumi:#2a2235; --gold:#e4b04a; --line:#3a2f4f;
+  --l1:#6cc4a1; --l2:#6da7ff; --l3:#c98bff; --l4:#ff9d6e; --l5:#ffd166; --os:#ff7aa2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;line-height:1.65}
+header.top{padding:32px 40px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a1224,#0e0b14)}
+header.top h1{margin:0 0 6px;font-size:28px;color:var(--sakura);letter-spacing:.04em}
+header.top p{margin:0;color:var(--ink-dim);font-size:14px}
+header.top .legend{margin-top:16px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+header.top .legend span{padding:4px 10px;border-radius:12px;background:#221830;border:1px solid var(--line)}
+.stack{padding:30px 40px;display:flex;flex-direction:column;gap:14px;max-width:1400px;margin:auto}
+.layer{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 26px;position:relative;overflow:hidden}
+.layer::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+#layer-1::before{background:var(--l1)} #layer-2::before{background:var(--l2)}
+#layer-3::before{background:var(--l3)} #layer-4::before{background:var(--l4)}
+#layer-5::before{background:var(--l5)} #github-os::before{background:var(--os)}
+.layer-header{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.layer-num{font-weight:700;font-size:13px;padding:4px 10px;border-radius:8px;background:var(--sumi);color:var(--gold);letter-spacing:.1em}
+#layer-1 .layer-num{color:var(--l1)} #layer-2 .layer-num{color:var(--l2)}
+#layer-3 .layer-num{color:var(--l3)} #layer-4 .layer-num{color:var(--l4)}
+#layer-5 .layer-num{color:var(--l5)} #github-os .layer-num{color:var(--os)}
+.layer-header h2{margin:0;font-size:20px;color:var(--ink)}
+.layer-header .layer-desc{margin:0;color:var(--ink-dim);font-size:13px;flex-basis:100%}
+.packages{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px}
+.pkg{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:16px 18px;transition:transform .15s,border-color .15s}
+.pkg:hover{border-color:var(--sakura);transform:translateY(-1px)}
+.pkg header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;border:none;padding:0;background:none}
+.pkg h3{margin:0;font-size:16px;color:var(--gold)}
+.pkg h4{margin:14px 0 6px;font-size:13px;color:var(--sakura);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px dashed var(--line);padding-bottom:3px}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--sumi);color:var(--ink-dim);border:1px solid var(--line)}
+.pkg .role{margin:6px 0 10px;font-size:13px;color:var(--ink-dim)}
+.pkg ul{margin:6px 0 0;padding-left:18px;font-size:12.5px}
+.pkg li{margin:3px 0;color:var(--ink)}
+.pkg li code,.pkg code{background:#0e0b14;color:var(--gold);padding:1px 5px;border-radius:4px;font-size:12px;font-family:"SF Mono",Menlo,monospace}
+.pkg details{margin-top:8px;font-size:12.5px}
+.pkg summary{cursor:pointer;color:var(--sakura);user-select:none;padding:4px 0}
+.pkg details[open] summary{margin-bottom:6px}
+.pkg p{margin:4px 0}
+.flow{padding:24px 40px;border-top:1px solid var(--line);background:#120e1c}
+.flow h3{color:var(--sakura);margin:0 0 12px}
+.flow svg{width:100%;max-width:1100px;display:block;margin:auto}
+footer{padding:24px 40px;color:var(--ink-dim);font-size:12px;text-align:center;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header class="top">
+<h1>雅 Miyabi — GitHub-as-OS Layered Architecture</h1>
+<p>11パッケージ × Ω-System × Water Spider × 53ラベル状態機械 × 16 Workflows / APIフリー対応 (Codex/Claude CLI 3層フォールバック)</p>
+<div class="legend">
+<span style="color:var(--l1)">● L1 Foundation</span>
+<span style="color:var(--l2)">● L2 Integration</span>
+<span style="color:var(--l3)">● L3 Agent SDK</span>
+<span style="color:var(--l4)">● L4 Orchestration</span>
+<span style="color:var(--l5)">● L5 User/CLI</span>
+<span style="color:var(--os)">● GitHub OS</span>
+</div>
+</header>
+<main class="stack">
+<section class="layer" id="layer-1" data-layer="1">
+  <div class="layer-header">
+    <span class="layer-num">L1</span>
+    <h2>Foundation Layer — 基盤共通</h2>
+    <p class="layer-desc">純粋ユーティリティ・型定義・前処理。上位レイヤから依存される側で、自身は外部SDK以外のワークスペース依存を持たない（または最小限）。</p>
+  </div>
+  <div class="packages">
+
+    <article class="pkg" data-pkg="shared-utils">
+      <header>
+        <h3>@miyabi/shared-utils</h3>
+        <span class="badge">no-deps</span>
+      </header>
+      <p class="role">役割: ワークスペース依存ゼロの純粋ユーティリティ群。リトライ制御、GitHub APIクライアント（コネクションプール＋キャッシュ）、非同期ファイルライタ、システムリソース計測に基づく最適並列度算出を提供する。全パッケージから安全に import される最下層の土台。</p>
+      <details open>
+        <summary>主要ファイル (5)</summary>
+        <ul>
+          <li><code>src/index.ts</code> — バレルエクスポート（retry / api-client / async-file-writer / system-optimizer を再エクスポート）</li>
+          <li><code>src/retry.ts</code> — 指数バックオフ付きリトライ。<b>export:</b> <code>RetryOptions</code>, <code>withRetry&lt;T&gt;(fn, options?)</code></li>
+          <li><code>src/api-client.ts</code> — Octokit シングルトン＋HTTPコネクションプール＋簡易キャッシュ。<b>export:</b> <code>getGitHubClient(token?)</code>, <code>resetGitHubClient()</code>, <code>withGitHubCache&lt;T&gt;()</code>, <code>clearGitHubCache()</code>, <code>getConnectionPoolStats()</code>, <code>destroyAllConnections()</code></li>
+          <li><code>src/async-file-writer.ts</code> — ノンブロッキングなファイル書き込みキュー。<b>export:</b> <code>AsyncFileWriter</code>, <code>getAsyncFileWriter()</code>, <code>writeFileAsync()</code>, <code>appendFileAsync()</code>, <code>flushAllWrites()</code></li>
+          <li><code>src/system-optimizer.ts</code> — CPU/メモリから最適 concurrency を決定。<b>export:</b> <code>SystemResources</code>, <code>ConcurrencyConfig</code>, <code>getSystemResources()</code>, <code>getOptimalConcurrency()</code>, <code>getConcurrencyConfig()</code>, <code>formatSystemResources()</code>, <code>logConcurrencyRecommendation()</code>, <code>canHandleConcurrency()</code>, <code>getSafeConcurrency()</code></li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><b>imports:</b> ワークスペース依存なし（dependencies は空。Node 標準モジュールと外部 Octokit のみを動的に利用）</p>
+        <p><b>used by:</b> <code>@miyabi/coding-agents</code>（base-agent / issue-agent / pr-agent などから retry・api-client を利用）。間接的に CLI／agent-sdk 系の上位レイヤから取り込まれる</p>
+      </details>
+    </article>
+
+    <article class="pkg" data-pkg="core">
+      <header>
+        <h3>@agentic-os/core</h3>
+        <span class="badge">foundation</span>
+      </header>
+      <p class="role">役割: Agentic OS のコアとなる型定義・ビジネス系エージェント基底クラス・エージェントレジストリの土台。Coding Agents 側の <code>BaseAgent</code> / <code>AgentFactory</code> を再エクスポートして「core からまとめて取得」するファサードを提供しつつ、Business Agents 用のベース実装を独自に持つ。現状は意図的にプレースホルダ多め（フル実装は段階移行中）。</p>
+      <details open>
+        <summary>主要ファイル (4)</summary>
+        <ul>
+          <li><code>src/index.ts</code> — パッケージのエントリポイント。<b>export:</b> <code>BaseAgent</code>（型）, <code>AgentFactory</code>, <code>AgentRegistry</code>（@miyabi/coding-agents から再輸出）, <code>VERSION</code>, <code>metadata</code>, <code>BusinessBaseAgent</code>, <code>BusinessAgentConfig</code>, <code>BusinessTask</code>, <code>BusinessResult</code>, および <code>./types</code> 全体の再エクスポート</li>
+          <li><code>src/business-base-agent.ts</code> — 14 種の Business Agent が継承する抽象基底。<b>export:</b> <code>BusinessBaseAgent</code>（抽象クラス）, <code>BusinessAgentConfig</code>, <code>BusinessTask</code>, <code>BusinessResult</code></li>
+          <li><code>src/agents/index.ts</code> — エージェントレジストリ（プレースホルダ）。<b>export:</b> <code>IAgent</code> インターフェース, <code>AgentRegistry</code> クラス（register / get / getAll）</li>
+          <li><code>src/types/index.ts</code> — コア型定義（プレースホルダ）。<b>export:</b> <code>AgentStatus</code>（'idle' | 'running' | 'completed' | 'failed'）, <code>AgentConfig</code>, <code>AgentResult&lt;T&gt;</code>, <code>Task</code></li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><b>imports:</b> <code>@miyabi/coding-agents</code>（BaseAgent 型と AgentFactory/AgentRegistry を再輸出）, 外部: <code>@anthropic-ai/sdk</code>, <code>@octokit/rest</code>, <code>@octokit/graphql</code>, <code>chalk</code>, <code>ora</code>, <code>cli-table3</code>, <code>boxen</code></p>
+        <p><b>used by:</b> Business Agents 群（business-agents 配下の各エージェントが <code>BusinessBaseAgent</code> を継承）。上位の CLI/agent-sdk からは「core を入り口に Coding Agents の型を引く」用途で参照される</p>
+      </details>
+    </article>
+
+    <article class="pkg" data-pkg="context-engineering">
+      <header>
+        <h3>@miyabi/context-engineering</h3>
+        <span class="badge">SDK + service</span>
+      </header>
+      <p class="role">役割: コンテキスト最適化サブシステム。Python 製の Context API（FastAPI＋Gemini）をバックエンドとし、TypeScript SDK でセッション／コンテキストウィンドウ／要素追加／分析／最適化／プロンプトテンプレート生成を扱う。さらに同等機能を MCP サーバとして公開する Node 実装を同梱。プロンプト前処理と context window 管理を担当する独立サブシステム。</p>
+      <details open>
+        <summary>主要ファイル (TypeScript SDK 3 / Python サービス 8 / MCP 2)</summary>
+        <ul>
+          <li><code>src/index.ts</code> — 高レベルファサード。<b>export:</b> <code>ContextEngineering</code>（クラス：createSession, addContext, analyze, optimize, generateTemplate, renderTemplate, getStats などのラッパー）, 型一括 re-export, <code>ContextEngineeringError</code>, default export</li>
+          <li><code>src/client.ts</code> — axios ベースの低レベル API クライアント。<b>export:</b> <code>ContextEngineeringClient</code>（HTTP エンドポイント呼び出し本体）</li>
+          <li><code>src/types.ts</code> — DTO とドメイン型。<b>export:</b> <code>ContextEngineeringConfig</code>, <code>ContextSession</code>, <code>ContextWindow</code>, <code>ContextElement</code>, <code>AnalysisResult</code>, <code>OptimizationGoal</code>, <code>OptimizationRequest</code>, <code>OptimizationResult</code>, <code>PromptTemplate</code>, <code>TemplateGenerationRequest</code>, <code>TemplateRenderRequest</code>, <code>SystemStats</code>, <code>CreateSessionRequest</code>, <code>CreateWindowRequest</code>, <code>AddElementRequest</code>, <code>AnalyzeRequest</code>, <code>APIError</code>, <code>ContextEngineeringError</code>（クラス）</li>
+          <li><code>services/context-api/main.py</code> — FastAPI エントリ（Context API 本体起動）</li>
+          <li><code>services/context-api/gemini_service.py</code> — Gemini 連携層（最適化/生成）</li>
+          <li><code>services/context-api/Dockerfile</code> / <code>requirements.txt</code> / <code>.env.example</code> — デプロイ用</li>
+          <li><code>services/context-api/context_engineering/context_api.py</code> — API ルーティング</li>
+          <li><code>services/context-api/context_engineering/context_analyzer.py</code> — コンテキスト分析ロジック</li>
+          <li><code>services/context-api/context_engineering/context_optimizer.py</code> — トークン/関連性で最適化</li>
+          <li><code>services/context-api/context_engineering/context_models.py</code> — Pydantic モデル（Session/Window/Element 等）</li>
+          <li><code>services/context-api/context_engineering/template_manager.py</code> — プロンプトテンプレート管理（templates/*.json を読込）</li>
+          <li><code>services/context-api/context_engineering/start_context_engineering.sh</code> — サービス起動スクリプト</li>
+          <li><code>mcp-server/context_mcp_server.js</code> — MCP プロトコル実装本体（context tools を MCP ツールとして公開）</li>
+          <li><code>mcp-server/index.js</code> — MCP サーバ起動エントリ</li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><b>imports:</b> 外部のみ（<code>axios</code>）。ワークスペース内パッケージ依存なし。Python 側は FastAPI / Pydantic / google-generativeai に依存</p>
+        <p><b>used by:</b> 上位レイヤ（agent-sdk / coding-agents / CLI）から「プロンプト最適化が必要なときに optional に呼び出す」サブシステム。MCP 経由で Claude Code から直接ツールとしても利用可能</p>
+      </details>
+    </article>
+
+  </div>
+</section>
+<section class="layer" id="layer-2" data-layer="2">
+  <div class="layer-header">
+    <span class="layer-num">L2</span>
+    <h2>Integration Layer — 外部統合</h2>
+    <p class="layer-desc">GitHub API / MCP / タスク同期 / ドキュメント生成 — Miyabi を外部システム（Claude Desktop、GitHub Projects V2、LLM、TypeScript AST）と接続する統合レイヤー</p>
+  </div>
+  <div class="packages">
+
+    <article class="pkg" data-pkg="mcp-bundle">
+      <header>
+        <h3>miyabi-mcp-bundle</h3>
+        <span class="badge">172 tools</span>
+      </header>
+      <p class="role">All-in-One MCP (Model Context Protocol) サーバー。Claude Desktop / Codex CLI / AI エージェントへ <strong>21 カテゴリ・172 ツール</strong> を提供する単一バイナリ。Git・GitHub・tmux・システム監視・Docker・Kubernetes・SQL・spec-kit などを統一インターフェイスで扱える。エンタープライズ級セキュリティ（入力サニタイズ、パストラバーサル防御、シンボリックリンク攻撃対策）と LRU+TTL キャッシュを内蔵。実装は <code>src/index.ts</code> 約 3500 行のシングルファイル構成。</p>
+      <details>
+        <summary>主要ファイル</summary>
+        <ul>
+          <li><code>src/index.ts</code> — エントリポイント。ツール定義配列、<code>handleTool()</code> ルータ、各カテゴリ別ハンドラ（<code>handleTmuxTool</code> / <code>handleGitHubTool</code> / <code>handleDockerTool</code> / <code>handleK8sTool</code> / <code>handleSpeckitTool</code> / <code>handleMcpTool</code> / <code>handleDbTool</code> ほか）</li>
+          <li><code>src/cli.ts</code> — <code>miyabi-mcp-bundle</code> / <code>miyabi-mcp</code> 実行バイナリ</li>
+          <li><code>src/handlers/health.ts</code> — ヘルスチェックシステム（環境・依存・パーミッション検証）</li>
+          <li><code>src/handlers/index.ts</code> — ハンドラ集約</li>
+          <li><code>src/utils/security.ts</code> — 入力サニタイズ・パス検証・シンボリックリンク防御</li>
+          <li><code>src/utils/validation.ts</code> — Zod スキーマによる引数検証</li>
+          <li><code>src/utils/errors.ts</code> — 共通エラーハンドリング</li>
+          <li><code>src/cache.ts</code> — LRU+TTL キャッシュ</li>
+          <li><code>src/constants.ts</code> — クロスプラットフォームパス（macOS / Windows / Linux 用 Claude config 解決）</li>
+          <li><code>src/types.ts</code> — MCP ツール型定義</li>
+          <li><code>server.json</code> — MCP マニフェスト</li>
+          <li><code>plugins/</code>, <code>claude-plugins/</code> — Claude プラグイン定義</li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><strong>依存:</strong> <code>@modelcontextprotocol/sdk ^1.27</code>（MCP プロトコル）, <code>@octokit/rest ^21.1</code>（GitHub API・任意）, <code>simple-git ^3.33</code>, <code>systeminformation ^5.31</code>, <code>glob ^10.5</code>, <code>zod ^3.23</code></p>
+        <p><strong>環境変数:</strong> <code>GITHUB_TOKEN</code>, <code>MIYABI_REPO_PATH</code>, <code>MIYABI_LOG_DIR</code>, <code>MIYABI_WATCH_DIR</code>, <code>GITHUB_DEFAULT_OWNER</code>, <code>GITHUB_DEFAULT_REPO</code></p>
+        <p><strong>被参照:</strong> Claude Desktop / Claude Code / Codex CLI から MCP サーバーとして起動。npm パッケージ <code>miyabi-mcp-bundle</code> として独立配布（v3.8.0）。Miyabi CLI とは疎結合で、ユーザー側 MCP クライアント設定経由で利用される。</p>
+      </details>
+    </article>
+
+    <article class="pkg" data-pkg="github-projects">
+      <header>
+        <h3>@agentic-os/github-projects</h3>
+        <span class="badge">Projects V2 SDK</span>
+      </header>
+      <p class="role">GitHub Projects V2（GraphQL API）専用の TypeScript SDK。Issue #5「Data Persistence Layer」として実装され、Miyabi における <strong>データ永続化層</strong> を担う。Projects V2 のカスタムフィールド、アイテム、エージェントメトリクス、週次レポートをタイプセーフに操作。レート制限対応のため指数バックオフ付きリトライを <code>@miyabi/agent-sdk</code> の <code>withRetry</code> 経由で全 API 呼び出しに適用（Issue #41）。</p>
+      <details>
+        <summary>主要ファイル</summary>
+        <ul>
+          <li><code>src/index.ts</code> — 公開エクスポート。<code>GitHubProjectsClient</code>, <code>GitHubProjectSetup</code>, および型（<code>ProjectConfig</code> / <code>CustomField</code> / <code>ProjectItem</code> / <code>AgentMetrics</code> / <code>WeeklyReport</code> / <code>FieldValue</code> / <code>SingleSelectField</code> / <code>NumberField</code> / <code>TextField</code> / <code>DateField</code> / <code>IterationField</code>）</li>
+          <li><code>src/client.ts</code> — メイン SDK <code>GitHubProjectsClient</code>。<code>@octokit/graphql</code> + <code>@octokit/rest</code> による Projects V2 操作、<code>ProjectNotFoundError</code> / <code>FieldNotFoundError</code>、<code>RateLimitInfo</code> 取得</li>
+          <li><code>src/setup.ts</code> — <code>GitHubProjectSetup</code>: プロジェクト初期化、カスタムフィールド作成、ラベル整備</li>
+          <li><code>src/types.ts</code> — Projects V2 GraphQL レスポンスに対応する型定義一式</li>
+          <li><code>src/client.test.ts</code> — クライアント単体テスト（Vitest）</li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><strong>依存:</strong> <code>@miyabi/agent-sdk</code>（<code>withRetry</code> / <code>GitHubRetryConfig</code>）, <code>@octokit/graphql ^8.2</code>, <code>@octokit/rest ^21.1</code></p>
+        <p><strong>被参照:</strong> <code>@miyabi/task-manager</code> の <code>projects-v2-sync.ts</code> から Projects V2 同期に利用。CoordinatorAgent / IssueAgent などが Issue ↔ Projects アイテム連携で間接的に依存。<code>private: true</code> の内部パッケージ。</p>
+      </details>
+    </article>
+
+    <article class="pkg" data-pkg="task-manager">
+      <header>
+        <h3>@miyabi/task-manager</h3>
+        <span class="badge">LLM decompose + sync</span>
+      </header>
+      <p class="role">LLM ベースのタスク分解と Linear 風ステータス同期を担うパッケージ。大きな Issue を Anthropic Claude API で子タスクに分解し、GitHub ラベル状態機械（pending → analyzing → implementing → reviewing → done）を駆動、さらに GitHub Projects V2 と双方向同期する。Worktree を用いた並列実行コーディネートも提供。Miyabi の <strong>「Issue を OS のタスクキューとして使う」</strong> 中核ロジック。</p>
+      <details>
+        <summary>主要ファイル</summary>
+        <ul>
+          <li><code>src/index.ts</code> — 集約エクスポート。<code>TaskManager</code>, <code>TaskStateMachine</code>, <code>LLMDecomposer</code>, <code>DecompositionValidator</code>, <code>GitHubLabelSync</code>, <code>ProjectsV2Sync</code>, <code>BidirectionalSync</code>, <code>TaskExecutor</code>, <code>WorktreeCoordinator</code></li>
+          <li><code>src/task-manager.ts</code> — ファサード <code>TaskManager</code>。分解→ステート遷移→同期→実行を統括</li>
+          <li><code>src/decomposition/llm-decomposer.ts</code> — Anthropic SDK 経由の LLM タスク分解</li>
+          <li><code>src/decomposition/decomposition-validator.ts</code> — 分解結果の検証（DAG 整合性、循環依存検知）</li>
+          <li><code>src/decomposition/prompt-templates.ts</code> — <code>SYSTEM_PROMPT</code>, <code>buildDecompositionPrompt</code>, <code>buildSimplePrompt</code></li>
+          <li><code>src/state/task-state-machine.ts</code> — <code>TaskStateMachine</code>: 53 ラベル状態機械、<code>StateTransitionRule</code>, <code>TransitionResult</code></li>
+          <li><code>src/sync/github-label-sync.ts</code> — Issue ラベルとタスク状態の同期</li>
+          <li><code>src/sync/projects-v2-sync.ts</code> — GitHub Projects V2 アイテムのフィールド同期</li>
+          <li><code>src/sync/bidirectional-sync.ts</code> — <code>BidirectionalSync</code>, <code>ConflictStrategy</code>, <code>BidirectionalSyncOptions</code>（GitHub ⇄ ローカル状態の競合解決）</li>
+          <li><code>src/execution/task-executor.ts</code> — <code>TaskExecutor</code>, <code>ExecutionHandler</code>, <code>AgentExecutor</code></li>
+          <li><code>src/execution/worktree-coordinator.ts</code> — <code>WorktreeCoordinator</code>: git worktree を用いた並列タスク実行調整</li>
+          <li><code>src/types/</code> — <code>task.ts</code>, <code>decomposition.ts</code>, <code>sync.ts</code>, <code>config.ts</code></li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><strong>依存:</strong> <code>@anthropic-ai/sdk ^0.71</code>（LLM 分解）, <code>@octokit/rest ^21.1</code>, <code>@octokit/graphql ^8.2</code>, <code>uuid ^13</code></p>
+        <p><strong>peerDependency:</strong> <code>@miyabi/coding-agents</code>（<code>AgentExecutor</code> 経由で CodeGen / Review / PR エージェントを実行）</p>
+        <p><strong>被参照:</strong> Miyabi CLI の <code>miyabi auto</code>（Water Spider 全自動モード）, <code>miyabi omega</code>, <code>miyabi task</code> サブコマンド、CoordinatorAgent の DAG ビルドから利用。<code>@agentic-os/github-projects</code> と連動し Projects V2 を同期。</p>
+      </details>
+    </article>
+
+    <article class="pkg" data-pkg="doc-generator">
+      <header>
+        <h3>@agentic-os/doc-generator</h3>
+        <span class="badge">AST → Markdown</span>
+      </header>
+      <p class="role">TypeScript ソースコードを AST 解析し、Markdown 形式の API ドキュメントを自動生成する CLI / ライブラリ。<code>ts-morph</code> による型情報抽出と <code>handlebars</code> テンプレートエンジンを組み合わせ、関数・クラス・インタフェースの JSDoc を含む構造化情報をテンプレートに流し込む。<code>doc-gen</code> CLI として単独利用可能で、<code>miyabi docs</code> コマンドや <code>generate-docs</code> スキルから呼び出される。</p>
+      <details>
+        <summary>主要ファイル</summary>
+        <ul>
+          <li><code>src/index.ts</code> — 公開エクスポート。<code>CodeAnalyzer</code>, <code>TemplateEngine</code>, <code>FunctionInfo</code>, <code>ClassInfo</code>, <code>InterfaceInfo</code>, <code>AnalysisResult</code>, <code>TemplateType</code>, <code>GenerationOptions</code>, <code>VERSION</code>, <code>PACKAGE_INFO</code></li>
+          <li><code>src/cli.ts</code> — <code>doc-gen</code> 実行バイナリ。Commander.js + chalk + ora による対話 UI</li>
+          <li><code>src/analyzer/CodeAnalyzer.ts</code> — ts-morph による TypeScript AST 解析。関数シグネチャ・クラスメンバ・インタフェース・JSDoc コメントを抽出して <code>AnalysisResult</code> を生成</li>
+          <li><code>src/generator/TemplateEngine.ts</code> — Handlebars テンプレートエンジン。<code>TemplateType</code> ごとに Markdown を出力（API リファレンス / README / クラス図など）</li>
+          <li><code>example-docs/</code> — 出力例</li>
+          <li><code>tests/</code> — Vitest テスト</li>
+        </ul>
+      </details>
+      <details>
+        <summary>依存・被参照</summary>
+        <p><strong>依存:</strong> <code>ts-morph ^21</code>（TypeScript AST）, <code>handlebars ^4.7</code>（テンプレート）, <code>commander ^11.1</code>（CLI）, <code>chalk ^5.3</code>, <code>ora ^9</code></p>
+        <p><strong>サブパスエクスポート:</strong> <code>./analyzer</code>, <code>./generator</code>（個別インポート可）</p>
+        <p><strong>被参照:</strong> Miyabi CLI <code>miyabi docs</code> サブコマンド、<code>generate-docs</code> スキル、<code>doc-generator</code> スキルから呼び出される。<code>private: true</code> ではなく <code>publishConfig.access: public</code> 指定で npm 公開構成。Miyabi 本体への依存は持たず疎結合。</p>
+      </details>
+    </article>
+
+  </div>
+</section>
+<section class="layer" id="layer-3" data-layer="3">
+  <div class="layer-header">
+    <span class="layer-num">L3</span>
+    <h2>Agent SDK Layer — エージェント基盤</h2>
+    <p class="layer-desc">7 Agents + 6 Clients + TaskRouter（APIフリー対応の核：Claude CLI / Codex CLI / Anthropic API の3層フォールバック）</p>
+  </div>
+
+  <div class="packages">
+    <article class="pkg" data-pkg="miyabi-agent-sdk">
+      <header>
+        <h3>@miyabi/agent-sdk</h3>
+        <span class="badge">v0.1.0</span>
+        <span class="badge">7 agents</span>
+        <span class="badge">6 clients</span>
+        <span class="badge">3-tier fallback</span>
+        <span class="badge">ESM strict</span>
+      </header>
+
+      <p class="role">
+        Miyabi の <b>エージェント実行基盤</b>。GitHub Issue を入力に、分析→コード生成→レビュー→PR 作成まで一気通貫で自動化する 7 つの専門 Agent と、それらを支える 6 つの Client、そしてタスクカテゴリに応じて最適な LLM プロバイダー（Claude CLI / Codex CLI / Anthropic API）を選択する <b>TaskRouter</b> を提供する。Claude CLI と Codex CLI を優先することで、サブスクリプション内で <b>$0 実行</b> を実現し、API キーが無い環境では Anthropic API に自動フォールバックする。<code>packages/cli</code> や <code>packages/coding-agents</code> から import される、Miyabi の中核 SDK。
+      </p>
+
+      <h4>src/agents/ — 7 つの専門エージェント</h4>
+      <ul class="files">
+        <li><code>CoordinatorAgent.ts</code> <span class="meta">288 行</span> — 最上位意思決定 Agent。Issue を解析しタスクを分解、<b>TaskDAG</b>（nodes / edges）を生成、<b>Critical Path 特定</b>、並列実行可能グループの抽出、推定実行時間の算出を担う。<code>maxConcurrency = 3</code> で並列度制御。<br><b>export</b>: <code>CoordinatorAgent</code>, <code>CoordinatorInput</code>, <code>CoordinatorOutput</code> / <b>deps</b>: なし（純ロジック）</li>
+
+        <li><code>IssueAgent.ts</code> <span class="meta">278 行</span> — GitHub Issue を取得し <b>53 ラベル分類体系</b>に従って自動分類。type / complexity / priority / labels を判定。<b>3 モード実行</b>: ① ClaudeCodeClient（claude -p, $0） ② AnthropicClient（API 直接, 有料） ③ Mock（キーワードベース, フォールバック）。<br><b>export</b>: <code>IssueAgent</code>, <code>IssueInput</code>, <code>IssueOutput</code> / <b>deps</b>: <code>AnthropicClient</code>, <code>ClaudeCodeClient</code>, <code>GitHubClient</code></li>
+
+        <li><code>CodeGenAgent.ts</code> <span class="meta">342 行</span> — ★ Miyabi の心臓部。要件からコード本体とテストを生成し、qualityScore を返す。<b>4 層フォールバック</b>: ① Codex CLI（コーディング特化、$0） ② Claude Code CLI（claude -p, $0） ③ Anthropic API（有料） ④ Mock テンプレート。コンストラクタで <code>useCodex</code> / <code>useClaudeCode</code> / <code>anthropicApiKey</code> を切り替え。生成物は <code>{path, content, action: create|modify|delete}</code> 形式。<br><b>export</b>: <code>CodeGenAgent</code>, <code>CodeGenInput</code>, <code>CodeGenOutput</code> / <b>deps</b>: <code>AnthropicClient</code>, <code>ClaudeCodeClient</code>, <code>CodexClient</code>, <code>GitHubClient</code></li>
+
+        <li><code>ReviewAgent.ts</code> <span class="meta">362 行</span> — ★ コード品質判定 Agent。生成コードを 0–100 でスコアリングし、severity 付き issues, coverage, suggestions を返す。<b>minQualityScore（既定 80）</b> を満たせば passed=true、満たさなければ Auto-Loop で CodeGen をリトライ（最大 3 回）。CodeGenAgent と同じ <b>4 層フォールバック</b>を持つ。<br><b>export</b>: <code>ReviewAgent</code>, <code>ReviewInput</code>, <code>ReviewOutput</code> / <b>deps</b>: <code>AnthropicClient</code>, <code>ClaudeCodeClient</code>, <code>CodexClient</code></li>
+
+        <li><code>PRAgent.ts</code> <span class="meta">262 行</span> — Branch 作成 → ファイル commit → Draft PR 作成。<b>Conventional Commits</b> 準拠のメッセージを自動生成し、qualityReport を PR 本文に埋め込む。Issue 番号からブランチ名と PR タイトルを導出。<br><b>export</b>: <code>PRAgent</code>, <code>PRInput</code>, <code>PROutput</code> / <b>deps</b>: <code>GitHubClient</code></li>
+
+        <li><code>TestAgent.ts</code> <span class="meta">184 行</span> — テストコマンド実行・カバレッジ計測・失敗レポート生成を担当。<code>coverageThreshold = 80</code>, <code>timeoutThreshold = 300_000ms</code>。totalTests / passedTests / failedTests / failures[] を返す。<br><b>export</b>: <code>TestAgent</code>, <code>TestInput</code>, <code>TestOutput</code> / <b>deps</b>: なし（child_process）</li>
+
+        <li><code>DeploymentAgent.ts</code> <span class="meta">107 行</span> — CI/CD 自動化。pre-deploy チェック（tests / lint / typeCheck / securityAudit）→ 環境別デプロイ（staging / production）→ ヘルスチェック → 失敗時ロールバック。<code>dryRun</code> モードあり。<br><b>export</b>: <code>DeploymentAgent</code>, <code>DeploymentInput</code>, <code>DeploymentOutput</code> / <b>deps</b>: なし</li>
+
+        <li><code>index.ts</code> <span class="meta">24 行</span> — 7 Agent の barrel export</li>
+      </ul>
+
+      <h4>src/clients/ — LLM / GitHub クライアント &amp; ルーティング</h4>
+      <ul class="files">
+        <li><code>ClaudeCodeClient.ts</code> <span class="meta">286 行</span> — <code>claude -p --output-format json</code> ラッパー。プロンプトは <b>stdin 経由</b>で渡しシェルエスケープ問題を回避。<code>spawn(shell:false)</code> でインジェクション防止。サブスク内 <b>$0 実行</b>。<code>analyzeIssue</code> / <code>generateCode</code> / <code>reviewCode</code> / <code>executePrompt</code> を提供。Issue #320 で codex exec → claude -p に修正済み。<br><b>export</b>: <code>ClaudeCodeClient</code>, <code>ClaudeCodeResponse</code></li>
+
+        <li><code>CodexClient.ts</code> <span class="meta">355 行</span> — OpenAI Codex CLI v0.116.0 ラッパー。<code>codex exec -</code> で stdin からプロンプトを渡す。コーディング特化タスクで CodeGen / Review / Test に使われる。サブスクベースで <b>$0 実行</b>。<br><b>export</b>: <code>CodexClient</code>, <code>CodexResponse</code></li>
+
+        <li><code>AnthropicClient.ts</code> <span class="meta">268 行</span> — <code>@anthropic-ai/sdk</code> 直接ラッパー。モデルは <b>claude-sonnet-4-20250514</b> 固定。<code>analyzeIssue</code> / <code>generateCode</code> / <code>reviewCode</code> / <code>calculateCost</code> を提供。<b>有料フォールバック</b>用（CI/CD・cron 環境向け）。<br><b>export</b>: <code>AnthropicClient</code></li>
+
+        <li><code>GitHubClient.ts</code> <span class="meta">272 行</span> — Octokit ラッパー。Issue 取得・ブランチ作成・ファイル commit・PR 作成など Agent 共通の GitHub 操作を集約。<code>GITHUB_TOKEN</code> 環境変数または引数から認証。<br><b>export</b>: <code>GitHubClient</code>, <code>GitHubIssueData</code>, <code>GitHubFile</code>, <code>PullRequestInfo</code></li>
+
+        <li><code>LLMProvider.ts</code> <span class="meta">162 行</span> — <b>LLMProvider 統一インターフェース</b>定義。<code>executePrompt</code> / <code>analyzeIssue</code> / <code>generateCode</code> / <code>reviewCode</code> / <code>healthCheck</code> の契約と、<code>ProviderType</code>（"claude-cli" | "codex-cli" | "anthropic-api"）, <code>LLMProviderResponse</code>, <code>IssueAnalysisResult</code>, <code>CodeGenerationResult</code>, <code>CodeReviewResult</code> 等の共通型を提供。</li>
+
+        <li><code>TaskRouter.ts</code> <span class="meta">806 行</span> — ★ <b>3 層プロバイダルーティングの核</b>。<br>
+          ・<b>ROUTING_TABLE</b>: orchestration / analysis / deployment / business → <code>claude-cli</code>、coding / review / testing → <code>codex-cli</code><br>
+          ・<b>FALLBACK_ORDER</b>: claude-cli → [codex-cli, anthropic-api]、codex-cli → [claude-cli, anthropic-api]<br>
+          ・内部に <code>ClaudeCliProvider</code> / <code>CodexCliProvider</code> / <code>AnthropicApiProvider</code> 3 実装（全て <code>LLMProvider</code> 準拠）<br>
+          ・<code>ProviderFactory.createAll()</code> で全プロバイダーを一括生成、<code>ANTHROPIC_API_KEY</code> がある場合のみ API プロバイダーを追加<br>
+          ・<code>getProvider(category)</code>: ヘルスチェック付きで推奨プロバイダーを返し、失敗時にフォールバック順で代替を選択<br>
+          ・<code>checkHealth()</code>: 全プロバイダーを並列ヘルスチェック<br>
+          ・<b>HEALTH_CACHE_TTL = 60_000ms</b>（1 分間ヘルス結果をキャッシュ）<br>
+          ・<code>healthCheckTimeout</code>（既定 5000ms）で Promise.race によるタイムアウト制御<br>
+          ・<code>routingOverrides</code> で <code>.miyabi.yml</code> から個別カテゴリの上書き可<br>
+          <b>export</b>: <code>TaskRouter</code>, <code>ProviderFactory</code>, <code>TaskCategory</code>, <code>ProviderConfig</code>, <code>HealthCheckResult</code>
+        </li>
+
+        <li><code>index.ts</code> <span class="meta">29 行</span> — clients の barrel export</li>
+      </ul>
+
+      <h4>src/ ルート — 共通基盤</h4>
+      <ul class="files">
+        <li><code>agent-base.ts</code> <span class="meta">4.2 KB</span> — 全 Agent 共通の <code>AgentBase</code> 抽象クラス。ライフサイクル / メトリクス / エラーハンドリングの共通化。</li>
+        <li><code>types.ts</code> <span class="meta">6.1 KB</span> — <code>AgentContext</code>, <code>AgentConfig</code>, <code>AgentResult</code>, <code>AgentMetrics</code>, <code>AgentArtifact</code>, <code>AgentError</code>, <code>AgentTask</code>, <code>GitHubIssue</code>, <code>GitHubPullRequest</code>, <code>DeploymentConfig</code>, <code>RetryConfig</code>, <code>EscalationConfig</code> 等の SDK 全体型定義。</li>
+        <li><code>retry-config.ts</code> <span class="meta">5.6 KB</span> — <code>p-retry</code> ベースのリトライユーティリティ。<code>withRetry</code>, <code>shouldRetry</code>, <code>createRetryOptions</code>, <code>calculateBackoff</code>, <code>DEFAULT_RETRY_CONFIG</code>, <code>RETRYABLE_ERROR_CODES</code>, <code>NON_RETRYABLE_ERROR_CODES</code> をエクスポート。指数バックオフ対応。</li>
+        <li><code>github-client.ts</code> <span class="meta">5.6 KB</span> — レガシー fetch ベースの GitHub クライアント。<code>{owner, repo, token}</code> コンストラクタ。<code>LegacyGitHubClient</code> として再エクスポート（後方互換）。</li>
+        <li><code>utils.ts</code> <span class="meta">3.7 KB</span> — <code>createAgentContext</code>, <code>validateContext</code> ユーティリティ。</li>
+        <li><code>index.ts</code> <span class="meta">87 行</span> — public API。types / AgentBase / LegacyGitHubClient / utils / retry / 6 Clients / 6 Agents（Coordinator, Issue, CodeGen, Review, PR, Test）と関連 I/O 型を統一エクスポート。</li>
+        <li><code>__tests__/retry-config.test.ts</code> — リトライ設定のユニットテスト</li>
+      </ul>
+
+      <details>
+        <summary>依存・被参照・特記事項</summary>
+        <p><b>peerDependencies:</b> <code>@anthropic-ai/sdk &gt;=0.65.0</code>, <code>@octokit/rest &gt;=20.0.0</code></p>
+        <p><b>dependencies:</b> <code>chalk ^5.3.0</code>, <code>ora ^9.0.0</code>, <code>p-retry ^7.1.0</code></p>
+        <p><b>外部 CLI（実行時）:</b> <code>claude</code>（Claude Code CLI）, <code>codex</code>（OpenAI Codex CLI v0.116.0）。共に <code>spawn(shell:false)</code> で安全に呼び出し、stdin 経由でプロンプトを渡す。</p>
+        <p><b>used by:</b> <code>packages/cli</code>（miyabi コマンドが 7 Agent を直接実行）, <code>packages/coding-agents</code>（薄いラッパとして再利用）, <code>packages/business-agents</code>（TaskRouter 経由で business カテゴリを利用）</p>
+        <p><b>パッケージ名:</b> <code>@miyabi/agent-sdk</code>（GitHub Packages 公開: <code>npm.pkg.github.com</code>）</p>
+        <p><b>ビルド:</b> <code>tsc</code> 単体（ESM strict, <code>"type": "module"</code>）。dist 配信、型定義同梱。</p>
+        <p><b>設計の核:</b> 「LLM プロバイダー抽象化 + タスクカテゴリベースのルーティング + ヘルスチェック付きフォールバック」によって、開発者は API キー無しでもサブスク内で完全自律実行が可能。CI/CD のみ Anthropic API にフォールバックする <b>ハイブリッド経済モデル</b>を実現している。</p>
+      </details>
+    </article>
+  </div>
+</section>
+<section class="layer" id="layer-4" data-layer="4">
+  <div class="layer-header">
+    <span class="layer-num">L4</span>
+    <h2>Layer 4: Orchestration Layer — オーケストレーション層</h2>
+    <p class="layer-desc">Ω-System (6段階θ変換 E = θ₆∘θ₅∘θ₄∘θ₃∘θ₂∘θ₁) + Water Spider (JIT自動継続) + Hook/MessageBus/Worktree による21 Agent統括実行基盤</p>
+  </div>
+
+  <div class="packages">
+    <article class="pkg" data-pkg="coding-agents">
+      <header>
+        <h3>@miyabi/coding-agents</h3>
+        <span class="badge">Ω-System</span>
+        <span class="badge">Water Spider</span>
+        <span class="badge">DAG Orchestration</span>
+        <span class="badge">Worktree Parallel</span>
+      </header>
+
+      <p class="pkg-summary">
+        Miyabiの実行心臓部。Issue → Task分解 → DAG構築 → Agent割当 → 並列実行 → 統合 → 学習 までを
+        数学的に定式化された <code>Ω: I × W → R</code> パイプラインとして実装する。CoordinatorAgentが司令塔となり、
+        6特化Coding Agent (CodeGen / Review / Issue / PR / Deployment / Coordinator) を git worktree 上で並列駆動し、
+        Water Spider が JIT 補充係としてセッション停止を防ぎ、Hook / MessageBus / FeedbackLoop が横断的制御を担う。
+      </p>
+
+      <h4>サブシステム一覧 (実ディレクトリ)</h4>
+      <ul>
+        <li><b>coordinator/</b> — タスク分解・DAG構築・トポロジカルソート・スケジューリング (<code>coordinator-agent.ts</code>, <code>task-grouper.ts</code>, <code>task-scheduler.ts</code>, <code>task-tool-executor.ts</code>)</li>
+        <li><b>codegen/</b> — Claude Sonnet 4 による実装生成 (<code>codegen-agent.ts</code>)</li>
+        <li><b>review/</b> — 品質ゲート 80点以上必須 + セキュリティ + Auto-Loop (<code>review-agent.ts</code>, <code>review-loop.ts</code>, <code>security-scanner.ts</code>)</li>
+        <li><b>issue/</b> — 53ラベル分類・複雑度推定 (<code>issue-agent.ts</code>)</li>
+        <li><b>pr/</b> — Conventional Commits PR自動作成 (<code>pr-agent.ts</code>)</li>
+        <li><b>deployment/</b> — CI/CD自動化 (<code>deployment-agent.ts</code>)</li>
+        <li><b>omega-system/</b> — 6段階θ変換エンジン本体。<code>omega-engine.ts</code> + <code>transformations/</code> (understanding, generation, allocation, execution, integration, learning) + <code>adapters/</code> (issue-to-intent, context-to-world, deliverable-to-report, omega-agent-adapter)</li>
+        <li><b>water-spider/</b> — JIT自動continue制御。<code>water-spider-agent.ts</code> + <code>session-manager.ts</code> + <code>webhook-client.ts</code> (アイドル監視→continue信号送出)</li>
+        <li><b>worktree/</b> — git worktree 並列実行 (<code>worktree-manager.ts</code>, <code>claude-code-session-manager.ts</code>)</li>
+        <li><b>coordination/</b> — タスクオーケストレーション・ロック制御・ワーカ登録 (<code>task-orchestrator.ts</code>, <code>lock-manager.ts</code>, <code>worker-registry.ts</code>)</li>
+        <li><b>execution/</b> — 並列実行マネージャ (<code>parallel-execution-manager.ts</code>)</li>
+        <li><b>feedback-loop/</b> — 無限ループ + ゴール管理 + メトリクス + 消費検証 (<code>infinite-loop-orchestrator.ts</code>, <code>goal-manager.ts</code>, <code>metrics-collector.ts</code>, <code>consumption-validator.ts</code>, <code>feedback-loop-demo.ts</code>)</li>
+        <li><b>hooks/</b> — pre/post/error フック基盤 (<code>hook-manager.ts</code>, <code>built-in/</code>, <code>examples/</code>, ダッシュボード連携)</li>
+        <li><b>monitoring/</b> — グローバルメトリクス・パフォーマンス計測 (<code>global-metrics.ts</code>, <code>performance-monitor.ts</code>, <code>task-tool-performance-monitor.ts</code>)</li>
+        <li><b>logging/</b> — Issue単位トレースロガー (<code>issue-trace-logger.ts</code>)</li>
+        <li><b>github/</b> — Discussions連携・Projects V2連携 (<code>discussions.ts</code>, <code>projects-v2.ts</code>)</li>
+        <li><b>utils/</b> — DAGManager / IssueAnalyzer / PlansGenerator / GitHubClient / MessageBus / Cache / Retry / SecurityValidator / GitRepository</li>
+        <li><b>types/</b> — intent / world / omega / hooks / result / errors / communication / dashboard-events / entity-relation-graph / agent-template / performance-metrics / feedback-loop-types / tool-creator-interface / agent-analysis</li>
+        <li><b>ui/</b> — CLI UI部品 (box, logger, progress, table, theme, tree)</li>
+        <li><b>tests/</b>, <b>benchmark/</b>, <b>demo/</b>, <b>examples/</b> — テスト・ベンチマーク・デモ</li>
+      </ul>
+
+      <h4>Ω-System 6段階θ変換 (omega-system/transformations/)</h4>
+      <ol>
+        <li><b>θ₁ understanding.ts</b> — Issue/Intent から戦略計画 <code>StrategicPlan</code> を導出 (理解段階)</li>
+        <li><b>θ₂ generation.ts</b> — StrategicPlan → <code>TaskSet</code> 生成 (タスク生成段階)</li>
+        <li><b>θ₃ allocation.ts</b> — TaskSet → <code>AgentAllocation</code> 割当 (Agent最適配分)</li>
+        <li><b>θ₄ execution.ts</b> — AgentAllocation → <code>ResultSet</code> 並列実行</li>
+        <li><b>θ₅ integration.ts</b> — ResultSet → <code>Deliverable</code> 統合</li>
+        <li><b>θ₆ learning.ts</b> — Deliverable → <code>Knowledge</code> 学習・フィードバック</li>
+      </ol>
+      <p>合成式: <code>E = θ₆ ∘ θ₅ ∘ θ₄ ∘ θ₃ ∘ θ₂ ∘ θ₁</code> 数学定義: <code>Ω: I × W → R</code> (Intent空間 × World空間 → Result空間)。<code>omega-engine.ts</code> が <code>ExecutionTrace</code> / <code>PipelineState</code> / <code>PipelineStage</code> として全段階を計測しトレース化。各段階に <code>validatePlan/validateTaskSet/validateAllocation/validateResultSet/validateDeliverable/validateKnowledge</code> の検証関数を持つ。</p>
+
+      <h4>Water Spider パターン (water-spider/)</h4>
+      <p>
+        トヨタ生産方式の「資材補充係 (水蜘蛛)」に由来。<code>WaterSpiderAgent</code> は <code>BaseAgent</code> を継承し、
+        <code>SessionManager</code> で各 Worktree セッションの <code>SessionStatus</code> (running / idle / stopped / error) を
+        <code>monitorInterval</code> (既定 5000ms) で監視、<code>maxIdleTime</code> (既定 30000ms) を超えたセッションへ
+        <code>WebhookClient</code> 経由で「continue」信号を JIT 送出する。<code>autoRestart</code> 有効時は停止セッションを自動再起動。
+        Claude Code セッションが「止まらないライン」となるよう保証する自律継続コントローラ。
+      </p>
+
+      <h4>CoordinatorAgent (coordinator/coordinator-agent.ts)</h4>
+      <p>
+        Miyabi階層の最重要Agent。責務は (1) Issue → Task分解、(2) DAG構築、(3) トポロジカルソート、
+        (4) Agent割当、(5) 並列実行制御、(6) 進捗監視。<code>IssueAnalyzer</code>, <code>DAGManager</code>,
+        <code>PlansGenerator</code>, <code>WorktreeManager</code>, <code>GitHubClient</code>, <code>IssueTraceLogger</code> を統合し、
+        オプションで <code>OmegaAgentAdapter</code> 経由で Ω-System に処理を委譲して 6段階θ変換実行へ昇格できる。
+        <code>WorktreeExecutionContext</code> により worktree 単位の並列タスクをハンドリング。
+      </p>
+
+      <h4>主要ファイル / エクスポート</h4>
+      <ul class="files">
+        <li><code>index.ts</code> — パッケージ統合エクスポート</li>
+        <li><code>base-agent.ts</code> — <b>BaseAgent</b> 抽象基底 (metrics, escalation, logging, lifecycle)</li>
+        <li><code>agent-factory.ts</code> / <code>agent-registry.ts</code> — DynamicAgent 動的生成 + Registry</li>
+        <li><code>dynamic-agent.ts</code> / <code>dynamic-tool-creator.ts</code> / <code>tool-factory.ts</code> — ランタイム Agent/Tool 生成</li>
+        <li><code>agent-analyzer.ts</code> — Agent 自己解析</li>
+        <li><code>websocket-server.ts</code> — Dashboard 双方向通信サーバ</li>
+        <li><code>hooks/hook-manager.ts</code> — pre/post/error Hook 実行基盤</li>
+        <li><code>utils/message-bus.ts</code> — Agent 間 Pub/Sub メッセージバス</li>
+        <li><code>utils/dag-manager.ts</code> — DAG構築・トポロジカルソート・循環検出</li>
+        <li><code>utils/issue-analyzer.ts</code> — Issue → Task分解ロジック</li>
+        <li><code>utils/plans-generator.ts</code> — 実行計画自動生成</li>
+        <li><code>utils/github-client.ts</code> — Octokit ラッパ</li>
+        <li><code>utils/security-validator.ts</code> / <code>utils/cache.ts</code> / <code>utils/retry.ts</code> / <code>utils/git-repository.ts</code></li>
+        <li><code>coordinator/coordinator-agent.ts</code> — 司令塔 Agent</li>
+        <li><code>coordinator/task-grouper.ts</code> / <code>task-scheduler.ts</code> / <code>task-tool-executor.ts</code> — タスクのグルーピング・スケジューリング・Tool実行</li>
+        <li><code>codegen/codegen-agent.ts</code> — Claude Sonnet 4 コード生成</li>
+        <li><code>review/review-agent.ts</code> — 100点満点品質スコアリング</li>
+        <li><code>review/review-loop.ts</code> — 80点未満時の最大3回 Auto-Retry ループ</li>
+        <li><code>review/security-scanner.ts</code> — 脆弱性スキャナ</li>
+        <li><code>issue/issue-agent.ts</code> — 53ラベル自動分類</li>
+        <li><code>pr/pr-agent.ts</code> — Conventional Commits PR 自動生成</li>
+        <li><code>deployment/deployment-agent.ts</code> — CI/CD デプロイ</li>
+        <li><code>omega-system/omega-engine.ts</code> — Ω パイプラインエンジン (ExecutionTrace 計測)</li>
+        <li><code>omega-system/transformations/{understanding,generation,allocation,execution,integration,learning}.ts</code> — θ₁〜θ₆ 6変換</li>
+        <li><code>omega-system/adapters/{issue-to-intent,context-to-world,deliverable-to-report,omega-agent-adapter}.ts</code> — 既存型⇄Ω型 変換アダプタ</li>
+        <li><code>water-spider/water-spider-agent.ts</code> — JIT 自動継続 Agent</li>
+        <li><code>water-spider/session-manager.ts</code> — Worktree セッション状態管理</li>
+        <li><code>water-spider/webhook-client.ts</code> — continue Webhook 送出</li>
+        <li><code>worktree/worktree-manager.ts</code> — git worktree 生成・破棄・並列管理</li>
+        <li><code>worktree/claude-code-session-manager.ts</code> — Claude Code セッションライフサイクル</li>
+        <li><code>coordination/task-orchestrator.ts</code> / <code>lock-manager.ts</code> / <code>worker-registry.ts</code> — 競合制御とワーカ登録</li>
+        <li><code>execution/parallel-execution-manager.ts</code> — 並列度・concurrency 制御</li>
+        <li><code>feedback-loop/infinite-loop-orchestrator.ts</code> — フィードバック無限ループ統括</li>
+        <li><code>feedback-loop/goal-manager.ts</code> / <code>metrics-collector.ts</code> / <code>consumption-validator.ts</code> / <code>feedback-loop-demo.ts</code></li>
+        <li><code>monitoring/global-metrics.ts</code> / <code>performance-monitor.ts</code> / <code>task-tool-performance-monitor.ts</code></li>
+        <li><code>logging/issue-trace-logger.ts</code> — Issue 単位の実行トレース永続化</li>
+        <li><code>github/discussions.ts</code> / <code>projects-v2.ts</code> — GitHub Discussions / Projects V2 連携</li>
+        <li><code>types/{intent,world,omega,hooks,result,errors,communication,dashboard-events,entity-relation-graph,entity-relation-mapping,agent-template,agent-analysis,performance-metrics,feedback-loop-types,tool-creator-interface,index}.ts</code></li>
+        <li><code>ui/{box,logger,progress,table,theme,tree,index}.ts</code> — CLI UI コンポーネント</li>
+      </ul>
+
+      <h4>品質ゲート (Auto-Loop Pattern)</h4>
+      <p>
+        <code>review-agent.ts</code> がコードを 0〜100 点でスコアリングし、80 点未満の場合 <code>review-loop.ts</code> が
+        最大 3 回まで CodeGenAgent への差し戻し再生成を自動実行。閾値突破後にのみ <code>pr-agent.ts</code> が
+        Conventional Commits 形式で PR を作成する。
+      </p>
+
+      <details>
+        <summary>依存・被参照</summary>
+        <p><b>imports:</b> @miyabi/shared-utils, miyabi-agent-sdk, @anthropic-ai/sdk (Claude Sonnet 4), @octokit/rest, chalk, yaml, ws (WebSocket Dashboard)</p>
+        <p><b>内部依存:</b> coordinator → utils (DAGManager/IssueAnalyzer/PlansGenerator) → omega-system/adapters → omega-system/transformations → omega-engine。water-spider → worktree (session-manager 経由)。feedback-loop → monitoring + hooks。</p>
+        <p><b>used by:</b> packages/cli (<code>miyabi omega</code>, <code>miyabi auto</code>, <code>miyabi agent run</code>, <code>miyabi run</code>, <code>miyabi pipeline</code>, <code>miyabi fix/build/ship</code> 経由), packages/mcp-bundle (Agent ツール公開)</p>
+        <p><b>ドキュメント:</b> README.md, DYNAMIC_AGENT_SYSTEM.md, INTELLIGENT_AGENT_SYSTEM.md, IMPLEMENTATION_REPORT.md, IMPROVEMENTS_SUMMARY.md, NEXT_PHASE_PROPOSAL.md, codegen-agent.md, coordinator-agent.md</p>
+      </details>
+    </article>
+  </div>
+</section>
+<section class="layer" id="layer-5" data-layer="5">
+  <div class="layer-header">
+    <span class="layer-num">L5</span>
+    <h2>User / CLI Layer — ユーザー接点</h2>
+    <p class="layer-desc">CLI（30+ コマンド）と Next.js Web Dashboard。人間と Miyabi 自律システムの境界面。</p>
+  </div>
+  <div class="packages">
+
+    <article class="pkg" data-pkg="cli">
+      <header>
+        <h3>miyabi (CLI)</h3>
+        <span class="badge">30+ commands</span>
+        <span class="badge">Commander.js</span>
+        <span class="badge">ESM / TS strict</span>
+      </header>
+      <p class="pkg-desc">エントリポイント <code>src/index.ts</code>。<code>npx miyabi</code> として配布。すべてのコマンドは <code>--json</code> をサポートし AI エージェントから機械可読に駆動可能。</p>
+
+      <h4>commands/ (25 ファイル) — ユーザー接点コマンド群</h4>
+      <ul class="files">
+        <li><code>init.ts</code> — 新規プロジェクト作成（GitHub リポジトリ＋ラベル＋ワークフロー一括投入）</li>
+        <li><code>install.ts</code> — 既存プロジェクトへの Miyabi 導入</li>
+        <li><code>setup.ts</code> — セットアップウィザード（対話）</li>
+        <li><code>onboard.ts</code> — 初回オンボーディングフロー</li>
+        <li><code>auth.ts</code> — GitHub OAuth / Token 認証</li>
+        <li><code>config.ts</code> — グローバル／プロジェクト設定管理</li>
+        <li><code>doctor.ts</code> — システムヘルスチェック（環境・依存・トークン）</li>
+        <li><code>status.ts</code> — Issue／Agent／Project 状態の集約表示</li>
+        <li><code>health.ts</code> — クイックヘルス確認</li>
+        <li><code>agent.ts</code> — 個別 Agent 実行（<code>agent run codegen --issue=123</code>）</li>
+        <li><code>auto.ts</code> — Water Spider 全自動モード（Issue を巡回→順次処理）</li>
+        <li><code>omega.ts</code> — Omega パイプライン（6 段階フル自動）</li>
+        <li><code>run.ts</code> — 統合実行ランチャ（<code>--task</code> ベース）</li>
+        <li><code>pipeline.ts</code> — コマンド合成（<code>"/review | /deploy"</code>）</li>
+        <li><code>sprint.ts</code> — スプリント運営支援</li>
+        <li><code>release.ts</code> — リリース管理</li>
+        <li><code>dashboard.ts</code> — ダッシュボード起動／管理</li>
+        <li><code>docs.ts</code> — ドキュメント自動生成</li>
+        <li><code>todos.ts</code> — TODO コメント検出 → Issue 化</li>
+        <li><code>voice.ts</code> — Voice-First コントロール</li>
+        <li><code>skills.ts</code> — Claude Code Skills 管理</li>
+        <li><code>gni.ts</code> — GitNexus コードインテリジェンス（impact/query/hotspots ほか 14 サブ）</li>
+        <li><code>bus.ts</code> — Agent Skill Bus キュー操作（11 サブ：enqueue/health/record-run …）</li>
+        <li><code>task.ts</code> — タスク管理（list/add/done/…）</li>
+        <li><code>cycle.ts</code> — フィードバックループ（CHECK→DISPATCH→HEALTH→RECORD）</li>
+      </ul>
+
+      <h4>setup/ — init/install の中身</h4>
+      <ul class="files">
+        <li><code>repository.ts</code> — GitHub リポジトリ作成</li>
+        <li><code>labels.ts</code> — 53 ラベル投入（state/priority/agent/severity ほか）</li>
+        <li><code>workflows.ts</code> — Actions ワークフロー配置</li>
+        <li><code>projects.ts</code> — Projects V2 ボード生成</li>
+        <li><code>claude-config.ts</code> — <code>.claude/</code> 一式コピー</li>
+        <li><code>local.ts</code> — ローカル環境セットアップ</li>
+        <li><code>validation.ts</code> — 事前検証</li>
+        <li><code>welcome.ts</code> — ウェルカム表示</li>
+      </ul>
+
+      <h4>auth/ — 認証層</h4>
+      <ul class="files">
+        <li><code>github-oauth.ts</code> — Device Flow OAuth</li>
+        <li><code>credentials.ts</code> — 安全なトークン保管</li>
+      </ul>
+
+      <h4>analyze/ — リポジトリ解析</h4>
+      <ul class="files">
+        <li><code>issues.ts</code> — Issue 集計／分類</li>
+        <li><code>project.ts</code> — プロジェクト構造解析</li>
+      </ul>
+
+      <h4>pipeline/ — コマンド合成エンジン</h4>
+      <ul class="files">
+        <li><code>pipeline-executor.ts</code> — <code>|</code> / <code>&amp;&amp;</code> / <code>||</code> / <code>&amp;</code> の評価器</li>
+      </ul>
+
+      <h4>feedback/</h4>
+      <ul class="files">
+        <li><code>issue-reporter.ts</code> — エラー → GitHub Issue 自動報告</li>
+      </ul>
+
+      <h4>config/, types/</h4>
+      <ul class="files">
+        <li><code>config/loader.ts</code> — 設定ローダ</li>
+        <li><code>types/agent-skill-bus.d.ts</code>, <code>types/miyabi-coding-agents.d.ts</code> — 外部パッケージの型補完</li>
+      </ul>
+
+      <h4>utils/ — 共有ユーティリティ</h4>
+      <ul class="files">
+        <li><code>agent-output.ts</code> — JSON/TTY 出力切替</li>
+        <li><code>cross-platform.ts</code> — Win/macOS/Linux 差分吸収</li>
+        <li><code>github-token.ts</code> — トークン解決順位</li>
+        <li><code>gitnexus.ts</code> — GitNexus MCP ブリッジ</li>
+        <li><code>global-config.ts</code> — <code>~/.miyabi</code> 管理</li>
+        <li><code>hub-paths.ts</code> — miyabi-hub パス解決</li>
+        <li><code>human-in-the-loop.ts</code> — 人間承認ゲート</li>
+        <li><code>interactive.ts</code> — inquirer ラッパ</li>
+        <li><code>shell-bridge.ts</code> — シェル呼び出し抽象</li>
+        <li><code>storage.ts</code> — ローカルキャッシュ</li>
+        <li><code>tui-dashboard.ts</code> — 端末 TUI ダッシュボード</li>
+      </ul>
+
+      <h4>templates/ — 配布アセット</h4>
+      <ul class="files">
+        <li><code>labels.yml</code> — 53 ラベル定義</li>
+        <li><code>workflows/</code> — 10 個の GitHub Actions ワークフロー雛形：
+          <code>autonomous-agent.yml</code>, <code>state-machine.yml</code>, <code>label-sync.yml</code>,
+          <code>webhook-handler.yml</code>, <code>auto-add-to-project.yml</code>,
+          <code>update-project-status.yml</code>, <code>project-sync.yml</code>,
+          <code>economic-circuit-breaker.yml</code>, <code>weekly-kpi-report.yml</code>,
+          <code>weekly-report.yml</code>
+        </li>
+      </ul>
+
+      <details>
+        <summary>依存関係</summary>
+        <code>miyabi-agent-sdk</code>, <code>@miyabi/coding-agents</code>, <code>agent-skill-bus</code>,
+        <code>@octokit/rest</code>, <code>commander</code>, <code>inquirer</code>, <code>ora</code>,
+        <code>chalk</code>, <code>vitest</code>（test）。GitNexus / miyabi-hub と協調。
+      </details>
+    </article>
+
+    <article class="pkg" data-pkg="miyabi-web">
+      <header>
+        <h3>miyabi-web — Next.js Dashboard</h3>
+        <span class="badge">Next 15</span>
+        <span class="badge">React 18</span>
+        <span class="badge">@xyflow/react</span>
+        <span class="badge">Tailwind</span>
+      </header>
+      <p class="pkg-desc">ワークフロー（DAG）の可視化・編集と Gantt 表示を行うブラウザ UI。<code>src/</code> 配下に App Router 構成。</p>
+
+      <h4>app/ — App Router</h4>
+      <ul class="files">
+        <li><code>layout.tsx</code> / <code>page.tsx</code> / <code>globals.css</code> — ルート</li>
+        <li><code>dashboard/workflows/page.tsx</code> — ワークフロー一覧</li>
+        <li><code>dashboard/workflows/[id]/page.tsx</code> — ワークフロー詳細（DAG/Gantt）</li>
+        <li><code>dashboard/workflows/create/page.tsx</code> — 新規作成</li>
+        <li><code>api/workflows/route.ts</code> — REST: 一覧／作成</li>
+        <li><code>api/workflows/[id]/route.ts</code> — REST: 取得／更新／削除</li>
+      </ul>
+
+      <h4>components/</h4>
+      <ul class="files">
+        <li><code>workflow/AgentNode.tsx</code> — Agent ノード（@xyflow）</li>
+        <li><code>workflow/IssueNode.tsx</code> — Issue ノード</li>
+        <li><code>workflow/ConditionNode.tsx</code> — 条件分岐ノード</li>
+        <li><code>gantt/GanttChart.tsx</code> — Gantt 表示</li>
+      </ul>
+
+      <h4>hooks/</h4>
+      <ul class="files">
+        <li><code>useWorkflow.ts</code> — ワークフロー状態管理フック</li>
+      </ul>
+
+      <h4>lib/ — ドメインロジック</h4>
+      <ul class="files">
+        <li><code>types.ts</code> — Workflow / Node / Edge 型</li>
+        <li><code>api-client.ts</code> — API クライアント</li>
+        <li><code>workflow-storage.ts</code> — 永続化</li>
+        <li><code>dag-validator.ts</code> — DAG 妥当性（循環検出など）</li>
+      </ul>
+
+      <h4>test/</h4>
+      <ul class="files">
+        <li><code>setup.ts</code>, <code>test-utils.tsx</code> — Vitest + Testing Library 基盤。各コンポーネント／ルートに <code>__tests__/</code> を併設。</li>
+      </ul>
+
+      <details>
+        <summary>依存関係</summary>
+        <code>next@15</code>, <code>react@18</code>, <code>@xyflow/react</code>, <code>tailwindcss</code>,
+        <code>vitest</code>, <code>@testing-library/react</code>。
+      </details>
+    </article>
+
+  </div>
+</section>
+
+<section class="layer github-os" id="github-os">
+  <div class="layer-header">
+    <span class="layer-num">OS</span>
+    <h2>GitHub OS Substrate — GitHub をオペレーティングシステムとして使う</h2>
+    <p class="layer-desc">
+      <strong>Issues</strong> = タスクキュー / <strong>Labels</strong> = 状態機械（53 ラベル）/
+      <strong>Projects V2</strong> = データ層 / <strong>Actions</strong> = 実行エンジン（16 workflows）/
+      <strong>Webhooks</strong> = イベントバス。Miyabi はこの基層の上に構築される。
+    </p>
+  </div>
+  <div class="packages">
+
+    <article class="pkg" data-pkg="dot-github">
+      <header>
+        <h3>.github/workflows — 実行エンジン</h3>
+        <span class="badge">16 workflows</span>
+      </header>
+      <ul class="files">
+        <li><code>autonomous-agent.yml</code> — Issue ラベル変化を起点に Agent パイプラインを起動（中核）</li>
+        <li><code>state-machine.yml</code> — 状態ラベル遷移（pending→analyzing→implementing→reviewing→done）の駆動</li>
+        <li><code>label-sync.yml</code> — 53 ラベル定義をリポジトリへ同期</li>
+        <li><code>ai-auto-label.yml</code> — 新規 Issue を AI が自動分類しラベル付与</li>
+        <li><code>commit-to-issue.yml</code> — コミットメッセージから Issue を解決／更新</li>
+        <li><code>webhook-handler.yml</code> — 外部 Webhook 受信のフォールバック処理</li>
+        <li><code>integrated-system-ci.yml</code> — モノレポ統合 CI（lint / typecheck / test）</li>
+        <li><code>snapshot-test.yml</code> — Vitest スナップショット検証</li>
+        <li><code>cli-cross-platform.yml</code> — CLI を Win/macOS/Linux でクロスチェック</li>
+        <li><code>codeql.yml</code> — CodeQL セキュリティ解析</li>
+        <li><code>gitleaks.yml</code> — シークレット検出</li>
+        <li><code>security-audit.yml</code> — 依存脆弱性監査</li>
+        <li><code>mcp-health-check.yml</code> — MCP サーバ群の死活監視</li>
+        <li><code>docker-build.yml</code> — Docker イメージビルド／公開</li>
+        <li><code>npm-publish.yml</code> — npm パッケージ公開</li>
+        <li><code>auto-release.yml</code> — タグ／リリースノート自動生成</li>
+      </ul>
+    </article>
+
+    <article class="pkg" data-pkg="dot-claude">
+      <header>
+        <h3>.claude/ — Claude Code 統合層</h3>
+        <span class="badge">hooks 8</span>
+        <span class="badge">commands 11</span>
+        <span class="badge">skills 19</span>
+      </header>
+
+      <h4>hooks/ — Claude Code フック</h4>
+      <ul class="files">
+        <li><code>auto-format.sh</code> — 編集後の自動フォーマット（PostToolUse）</li>
+        <li><code>validate-typescript.sh</code> — TS 編集後の型検証</li>
+        <li><code>log-commands.sh</code> — コマンド実行ログ収集</li>
+        <li><code>agent-event.sh</code> — Agent イベントの GitHub 連携</li>
+        <li><code>session-continue.sh</code> — セッション継続用フック</li>
+        <li><code>webhook-fallback.js</code> — Webhook 受信不能時のローカル中継</li>
+        <li><code>README.md</code>, <code>WEBHOOK_FALLBACK.md</code> — フック仕様</li>
+      </ul>
+
+      <h4>agents/specs/ + prompts/ — 21 Agent の仕様と実行プロンプト</h4>
+      <ul class="files">
+        <li><code>specs/coding/</code> — 7 Coding Agents（Coordinator/CodeGen/Review/Issue/PR/Deployment/Test）</li>
+        <li><code>specs/business/</code> — 14 Business Agents（戦略・マーケ・営業・分析）</li>
+        <li><code>prompts/coding/</code>, <code>prompts/business/</code> — 各 Agent の実行プロンプト</li>
+        <li><code>AGENT_CHARACTERS.md</code>, <code>COMMUNICATION_PROTOCOL.md</code>, <code>PERFORMANCE_METRICS.md</code>, <code>USAGE_GUIDE_SIMPLE.md</code>, <code>agent-name-mapping.json</code></li>
+      </ul>
+
+      <h4>commands/ — スラッシュコマンド (11)</h4>
+      <ul class="files">
+        <li><code>agent-run.md</code> — Agent パイプライン起動</li>
+        <li><code>miyabi-auto.md</code> — Water Spider 全自動</li>
+        <li><code>miyabi-todos.md</code> — TODO → Issue</li>
+        <li><code>create-issue.md</code> — 対話的 Issue 作成</li>
+        <li><code>review.md</code> — コードレビュー（自動修正可）</li>
+        <li><code>deploy.md</code> — Firebase/Cloud デプロイ</li>
+        <li><code>test.md</code> — テスト一括実行</li>
+        <li><code>verify.md</code> — 環境＋型＋テスト確認</li>
+        <li><code>security-scan.md</code> — セキュリティ監査</li>
+        <li><code>generate-docs.md</code> — ドキュメント生成</li>
+        <li><code>PIPELINE_GUIDE.md</code> — パイプライン文法ガイド</li>
+      </ul>
+
+      <h4>skills/ — Claude Code Skills (19)</h4>
+      <ul class="files">
+        <li><strong>Agent 系:</strong> <code>coordinator-agent</code>, <code>issue-agent</code>, <code>pr-agent</code>, <code>deploy-agent</code>, <code>autonomous-coding-agent</code></li>
+        <li><strong>品質系:</strong> <code>code-reviewer</code>, <code>test-generator</code>, <code>refactor-helper</code>, <code>commit-helper</code>, <code>doc-generator</code>, <code>miyabi-quality-gate</code></li>
+        <li><strong>Miyabi 中核:</strong> <code>miyabi-github-os</code>, <code>miyabi-pipeline</code></li>
+        <li><strong>コード解析:</strong> <code>gitnexus</code>（exploring/impact/debugging/refactoring/guide/cli の 6 サブスキル）</li>
+        <li><strong>拡張:</strong> <code>skill-creator</code>, <code>agent-skill-use</code>, <code>ccg</code>, <code>teachable-course-creator</code>, <code>guides</code></li>
+      </ul>
+
+      <h4>設定ファイル</h4>
+      <ul class="files">
+        <li><code>settings.json</code> — Claude Code ハーネス設定（権限・フック登録）</li>
+        <li><code>mcp.json</code> — MCP サーバ接続定義（GitHub / GitNexus / miyabi-mcp-bundle ほか）</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+</main>
+<section class="flow">
+<h3>↕ レイヤ間データフロー</h3>
+<svg viewBox="0 0 1100 280" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff7aa2"/></marker>
+</defs>
+<g font-family="sans-serif" font-size="12" fill="#f5e9d6" text-anchor="middle">
+<rect x="20" y="20"  width="1060" height="32" rx="6" fill="#1f1830" stroke="#ffd166"/><text x="550" y="40">L5  User / CLI  (miyabi command, miyabi-web Dashboard)</text>
+<rect x="20" y="62"  width="1060" height="32" rx="6" fill="#1f1830" stroke="#ff9d6e"/><text x="550" y="82">L4  Orchestration  (Ω-System θ₁..θ₆ / Water Spider / Coordinator DAG)</text>
+<rect x="20" y="104" width="1060" height="32" rx="6" fill="#1f1830" stroke="#c98bff"/><text x="550" y="124">L3  Agent SDK  (7 Agents / TaskRouter — Codex → Claude CLI → Anthropic API → Mock)</text>
+<rect x="20" y="146" width="1060" height="32" rx="6" fill="#1f1830" stroke="#6da7ff"/><text x="550" y="166">L2  Integration  (mcp-bundle 172 tools / github-projects / task-manager / doc-generator)</text>
+<rect x="20" y="188" width="1060" height="32" rx="6" fill="#1f1830" stroke="#6cc4a1"/><text x="550" y="208">L1  Foundation  (shared-utils / core / context-engineering)</text>
+<rect x="20" y="230" width="1060" height="32" rx="6" fill="#2a1a2a" stroke="#ff7aa2"/><text x="550" y="250">GitHub OS  ◇ Issues=Queue ◇ Labels=State(53) ◇ Projects V2=Data ◇ Actions=Engine(16) ◇ Webhooks=Bus</text>
+<line x1="550" y1="52"  x2="550" y2="62"  stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="550" y1="94"  x2="550" y2="104" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="550" y1="136" x2="550" y2="146" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="550" y1="178" x2="550" y2="188" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="550" y1="220" x2="550" y2="230" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+</g>
+</svg>
+</section>
+<footer>Generated by Claude Code · 並列サブエージェント調査 · /home/user/Miyabi/research/architecture-layered.html</footer>
+</body></html>
