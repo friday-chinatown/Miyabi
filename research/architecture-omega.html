@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Ω-System Pipeline — Miyabi</title>
+<style>
+:root{
+  --bg:#0a0814; --panel:#161023; --panel2:#1e1730; --ink:#f5e9d6; --ink-dim:#a89884;
+  --sakura:#ff7aa2; --gold:#e4b04a; --line:#3a2f4f; --sumi:#2a2235;
+  --t1:#6cc4a1; --t2:#6da7ff; --t3:#c98bff; --t4:#ff9d6e; --t5:#ffd166; --t6:#ff7aa2;
+  --adapter:#7ad9c7; --engine:#e4b04a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(ellipse at top,#1a0f28,#0a0814);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;line-height:1.65}
+header.top{padding:36px 40px 24px;border-bottom:1px solid var(--line)}
+header.top h1{margin:0 0 6px;font-size:30px;color:var(--sakura);letter-spacing:.04em}
+header.top .formula{font-family:"Times New Roman",serif;font-size:22px;color:var(--gold);margin:8px 0}
+header.top p{margin:4px 0;color:var(--ink-dim);font-size:13px}
+.pipeline-svg{padding:20px 40px;background:#0f0a1a;border-bottom:1px solid var(--line)}
+.pipeline-svg svg{width:100%;max-width:1300px;display:block;margin:auto}
+main{max-width:1400px;margin:auto;padding:32px 40px;display:flex;flex-direction:column;gap:22px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 26px;position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+#theta-1::before{background:var(--t1)} #theta-2::before{background:var(--t2)}
+#theta-3::before{background:var(--t3)} #theta-4::before{background:var(--t4)}
+#theta-5::before{background:var(--t5)} #theta-6::before{background:var(--t6)}
+#omega-engine::before{background:var(--engine);width:8px}
+.stage.adapter::before,.mini-card::before{background:var(--adapter)}
+.stage.adapter,.mini-card{background:var(--panel2);opacity:.92}
+.stage-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:14px}
+.theta-badge{flex-shrink:0;width:64px;height:64px;border-radius:50%;background:var(--sumi);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:"Times New Roman",serif;font-size:26px;color:var(--gold);font-weight:700}
+#theta-1 .theta-badge{border-color:var(--t1);color:var(--t1)}
+#theta-2 .theta-badge{border-color:var(--t2);color:var(--t2)}
+#theta-3 .theta-badge{border-color:var(--t3);color:var(--t3)}
+#theta-4 .theta-badge{border-color:var(--t4);color:var(--t4)}
+#theta-5 .theta-badge{border-color:var(--t5);color:var(--t5)}
+#theta-6 .theta-badge{border-color:var(--t6);color:var(--t6)}
+.adapter .theta-badge,.mini-card .theta-badge{width:48px;height:48px;font-size:14px;border-color:var(--adapter);color:var(--adapter)}
+.stage h2{margin:0 0 4px;font-size:22px;color:var(--ink)}
+.stage .math{margin:2px 0;font-family:"Times New Roman",serif;color:var(--gold);font-size:16px}
+.stage .file{margin:2px 0;font-family:"SF Mono",Menlo,monospace;color:var(--ink-dim);font-size:12px}
+.stage h4{margin:16px 0 6px;color:var(--sakura);font-size:13px;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px dashed var(--line);padding-bottom:3px}
+.stage ul,.stage ol{margin:4px 0;padding-left:22px;font-size:13.5px}
+.stage li{margin:3px 0}
+.stage code,.stage pre{font-family:"SF Mono",Menlo,monospace}
+.stage code{background:#0a0814;color:var(--gold);padding:1px 6px;border-radius:4px;font-size:12px}
+.stage pre{background:#0a0814;border:1px solid var(--line);border-radius:6px;padding:10px 14px;overflow-x:auto;font-size:12px;color:var(--ink)}
+.io{display:flex;align-items:center;gap:14px;margin:14px 0;flex-wrap:wrap}
+.io-box{flex:1;min-width:250px;background:var(--sumi);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.io-box.in{border-left:3px solid var(--t2)}
+.io-box.out{border-left:3px solid var(--t6)}
+.io-box h4{margin:0 0 6px;border:none;padding:0;font-size:11px}
+.io-box ul{margin:0;padding-left:18px}
+.io-arrow{font-size:28px;color:var(--sakura);flex-shrink:0}
+.mini-card{padding:16px 20px;border-radius:10px;border:1px solid var(--line);margin-left:40px;position:relative}
+.stage.engine{border:2px solid var(--gold);background:linear-gradient(180deg,#241a30,#161023)}
+footer{padding:30px 40px;text-align:center;color:var(--ink-dim);font-size:12px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header class="top">
+<h1>Ω-System Pipeline — 6段階決定的自律実行</h1>
+<div class="formula">Ω : I × W → R &nbsp;&nbsp;&nbsp;&nbsp; E = θ₆ ∘ θ₅ ∘ θ₄ ∘ θ₃ ∘ θ₂ ∘ θ₁</div>
+<p>Intent (意図) × World (環境) → Result (結果) を、6つの数学的変換関数の合成で決定的に写像する自律開発エンジン</p>
+<p>実装: <code>packages/coding-agents/omega-system/</code> &nbsp;|&nbsp; 総行数: ~1,838行 &nbsp;|&nbsp; SWML (Structured World Model Language) 準拠</p>
+</header>
+
+<section class="pipeline-svg">
+<svg viewBox="0 0 1300 160" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff7aa2"/></marker>
+</defs>
+<g font-family="serif" font-size="18" text-anchor="middle">
+<text x="60" y="30" fill="#a89884" font-size="12">Input</text>
+<text x="60" y="58" fill="#f5e9d6">I × W</text>
+<circle cx="180" cy="55" r="38" fill="#1e1730" stroke="#6cc4a1" stroke-width="2"/><text x="180" y="50" fill="#6cc4a1">θ₁</text><text x="180" y="72" fill="#a89884" font-size="10">理解</text>
+<circle cx="320" cy="55" r="38" fill="#1e1730" stroke="#6da7ff" stroke-width="2"/><text x="320" y="50" fill="#6da7ff">θ₂</text><text x="320" y="72" fill="#a89884" font-size="10">生成</text>
+<circle cx="460" cy="55" r="38" fill="#1e1730" stroke="#c98bff" stroke-width="2"/><text x="460" y="50" fill="#c98bff">θ₃</text><text x="460" y="72" fill="#a89884" font-size="10">割当</text>
+<circle cx="600" cy="55" r="38" fill="#1e1730" stroke="#ff9d6e" stroke-width="2"/><text x="600" y="50" fill="#ff9d6e">θ₄</text><text x="600" y="72" fill="#a89884" font-size="10">実行</text>
+<circle cx="740" cy="55" r="38" fill="#1e1730" stroke="#ffd166" stroke-width="2"/><text x="740" y="50" fill="#ffd166">θ₅</text><text x="740" y="72" fill="#a89884" font-size="10">統合</text>
+<circle cx="880" cy="55" r="38" fill="#1e1730" stroke="#ff7aa2" stroke-width="2" stroke-dasharray="4,2"/><text x="880" y="50" fill="#ff7aa2">θ₆</text><text x="880" y="72" fill="#a89884" font-size="10">学習*</text>
+<text x="1050" y="30" fill="#a89884" font-size="12">Output</text>
+<text x="1050" y="58" fill="#f5e9d6">R (+K)</text>
+<line x1="100" y1="55" x2="140" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="220" y1="55" x2="280" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="360" y1="55" x2="420" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="500" y1="55" x2="560" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="640" y1="55" x2="700" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="780" y1="55" x2="840" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<line x1="920" y1="55" x2="1000" y2="55" stroke="#ff7aa2" stroke-width="2" marker-end="url(#ar)"/>
+<text x="250" y="115" fill="#a89884" font-size="11">S</text>
+<text x="390" y="115" fill="#a89884" font-size="11">𝕋 (DAG)</text>
+<text x="530" y="115" fill="#a89884" font-size="11">A</text>
+<text x="670" y="115" fill="#a89884" font-size="11">R</text>
+<text x="810" y="115" fill="#a89884" font-size="11">D</text>
+<text x="960" y="115" fill="#a89884" font-size="11">K (non-fatal)</text>
+<text x="650" y="148" fill="#a89884" font-size="10">* θ₆ は非致命的：失敗しても継続。他は指数バックオフで最大3回リトライ</text>
+</g>
+</svg>
+</section>
+
+<main>
+<article class="stage adapter" id="adapter-issue-intent">
+  <div class="stage-head">
+    <div class="theta-badge">⇄</div>
+    <div>
+      <h2>Issue → Intent アダプタ</h2>
+      <p class="math">GitHubIssue → IntentSpace</p>
+      <p class="file">packages/coding-agents/omega-system/adapters/issue-to-intent.ts (306行)</p>
+    </div>
+  </div>
+  <div class="stage-body mini-card">
+    <div class="io">
+      <div class="io-box in"><h4>入力</h4><ul><li><code>GitHubIssue</code> — title / body / labels / assignees</li></ul></div>
+      <div class="io-arrow">→</div>
+      <div class="io-box out"><h4>出力</h4><ul><li><code>IntentSpace</code> — goals / preferences / objectives / modality</li></ul></div>
+    </div>
+    <h4>主要ロジック</h4>
+    <ol>
+      <li><b>ラベル → 優先度マッピング</b> — <code>priority:P0</code>=critical, <code>P1</code>=high, <code>P2</code>=medium, <code>P3</code>=low</li>
+      <li><b>ラベル → タイプ推論</b> — <code>type:bug</code>=fix, <code>type:feature</code>=feature, <code>type:refactor</code>=refactor</li>
+      <li><b>チェックボックス解析</b> — <code>- [ ] ...</code> / <code>- [x] ...</code> を goals として抽出（完了/未完了を区別）</li>
+      <li><b>番号付きリスト解析</b> — <code>1. ... 2. ...</code> 形式を順序付きgoalとして抽出</li>
+      <li><b>本文セクション抽出</b> — 「## 目的」「## 受入基準」等の見出しから objectives/successCriteria を構造化</li>
+      <li><b>modality推定</b> — assignee有無・ラベルから interactive / autonomous / hybrid を決定</li>
+    </ol>
+    <h4>特徴</h4>
+    <ul>
+      <li>Issue本文の自然言語を決定論的に IntentSpace に正規化</li>
+      <li>抽出失敗時は title をフォールバック goal として採用</li>
+      <li>preferences はラベル<code>quality:*</code> / <code>speed:*</code>から自動生成</li>
+    </ul>
+  </div>
+</article>
+
+<article class="stage" id="theta-1" data-theta="1">
+  <div class="stage-head">
+    <div class="theta-badge">θ₁</div>
+    <div>
+      <h2>Understanding — 理解</h2>
+      <p class="math">θ₁ : I × W → S</p>
+      <p class="file">packages/coding-agents/omega-system/transformations/understanding.ts (485行)</p>
+    </div>
+  </div>
+  <div class="stage-body">
+    <div class="io">
+      <div class="io-box in"><h4>入力</h4><ul><li><code>IntentSpace</code> — ユーザー意図(goals/preferences/objectives/modality)</li><li><code>WorldSpace</code> — 実行環境制約</li></ul></div>
+      <div class="io-arrow">→</div>
+      <div class="io-box out"><h4>出力</h4><ul><li><code>StrategicPlan</code> — 実行戦略・フェーズ・リスク</li></ul></div>
+    </div>
+    <h4>主要ロジック</h4>
+    <ol>
+      <li><b>analyzeIntent</b> — 4レイヤー目標 → StrategicObjective 変換</li>
+      <li><b>analyzeWorld</b> — CPU/メモリ/並行度/セキュリティ制約抽出</li>
+      <li><b>assessRisks</b> — 複雑度・リソース・時間からリスク算出</li>
+      <li><b>determineStrategy</b> — sequential/parallel/hybrid自動選択</li>
+    </ol>
+    <h4>特徴</h4>
+    <ul>
+      <li>複雑度推定：キーワード分析 (refactor→complex, fix→simple)</li>
+      <li>能力推論：目標説明から必要Agent能力を自動抽出</li>
+      <li>ハイブリッド戦略：trivial/simple と complex を2フェーズ分離</li>
+      <li>信頼度スコア：confidenceLevel 0.3〜0.9</li>
+    </ul>
+    <h4>主要型</h4>
+    <pre><code>StrategicObjective { complexity, requiredCapabilities, successMetrics }
+ResourceRequirements { computational, human, information }
+RiskAssessment { overallRisk, factors, blockers, dependencies }</code></pre>
+  </div>
+</article>
+
+<article class="stage" id="theta-2" data-theta="2">
+  <div class="stage-head">
+    <div class="theta-badge">θ₂</div>
+    <div>
+      <h2>Generation — 生成</h2>
+      <p class="math">θ₂ : S × W → 𝕋</p>
+      <p class="file">packages/coding-agents/omega-system/transformations/generation.ts (502行)</p>
+    </div>
+  </div>
+  <div class="stage-body">
+    <div class="io">
+      <div class="io-box in"><h4>入力</h4><ul><li><code>StrategicPlan</code> — θ₁の戦略出力</li><li><code>WorldSpace</code> — 実行環境制約</li></ul></div>
+      <div class="io-arrow">→</div>
+      <div class="io-box out"><h4>出力</h4><ul><li><code>TaskSet</code> — DAG付きタスク集合（実行順・並列グループ含む）</li></ul></div>
+    </div>
+    <h4>主要ロジック</h4>
+    <ol>
+      <li><b>generateTasksFromObjective</b> — StrategicObjective を GeneratedTask 群へ展開</li>
+      <li><b>buildDAG</b> — タスク間依存関係を解析し有向非巡回グラフを構築</li>
+      <li><b>topologicalSort</b> — 実行順序を決定論的に決定（循環検出付き）</li>
+      <li><b>groupTasks</b> — 依存のないタスクを並列実行グループにまとめる</li>
+    </ol>
+    <h4>特徴</h4>
+    <ul>
+      <li>トークン推定は決定的（同入力→同推定値、再現性保証）</li>
+      <li>complex タスクは自動で3分解（設計 → 実装 → 検証）</li>
+      <li>DAG自動生成：input/output artifact 照合で依存を推論</li>
+      <li>artifact追跡：各タスクの生成物を型付きで追跡</li>
+    </ul>
+    <h4>主要型</h4>
+    <pre><code>GeneratedTask { id, capability, inputs, outputs, estimatedTokens, dependencies }
+TaskSet { tasks, dag, executionOrder, parallelGroups }
+DAG { nodes, edges, roots, leaves }</code></pre>
+  </div>
+</article>
+<article class="stage" id="theta-3-allocation">
+  <header class="stage-head">
+    <span class="theta-badge">θ₃</span>
+    <h2>Allocation — エージェント割当</h2>
+    <p class="file-ref"><code>allocation.ts</code></p>
+    <p class="transform">変換: <code>θ₃ : 𝕋 × W → A</code></p>
+  </header>
+
+  <section class="io">
+    <div class="io-in">
+      <h4>入力</h4>
+      <ul>
+        <li><code>TaskSet</code> — θ₂の出力タスク集合 (DAG付)</li>
+        <li><code>WorldSpace</code> — プロジェクト世界モデル</li>
+      </ul>
+    </div>
+    <div class="io-out">
+      <h4>出力</h4>
+      <ul>
+        <li><code>AgentAllocation</code> — Worker割当 + 実行バッチ + メトリクス</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="logic">
+    <h4>主要ロジック</h4>
+    <ol>
+      <li><strong>findBestAgent(task, capabilities)</strong> — 6種のエージェント候補をスコアリング。要求スキル一致度・専門領域マッチ・品質スコア・コスト(token推定)を加重評価し、最適エージェントを選定。</li>
+      <li><strong>createWorkerAssignments(tasks, agents)</strong> — 最大並列度と「1 worker あたり最大3タスク」制約のもとでタスクをWorkerに束ね、負荷分散する。</li>
+      <li><strong>createExecutionBatches(dag, assignments)</strong> — DAGのレベル(トポロジカル深さ)ごとにバッチを構成。同レベル内タスクは並列実行可能としてグルーピング。</li>
+      <li><strong>computeMetrics()</strong> — 利用率(utilization)・コスト見積・最適化スコアを算出し<code>AgentAllocation.metrics</code>に格納。</li>
+    </ol>
+  </section>
+
+  <section class="features">
+    <h4>特徴</h4>
+    <ul>
+      <li>コスト意識: 入出力tokenを推定し総コストを最小化</li>
+      <li>品質スコア加算: 過去実績に基づく信頼度をスコアに反映</li>
+      <li>DAG準拠並列化: 依存関係を保持したままレベル並列実行</li>
+      <li>6種エージェント候補 (Coordinator/CodeGen/Review/Issue/PR/Test) から動的選択</li>
+    </ul>
+  </section>
+
+  <section class="types">
+    <h4>主要型</h4>
+    <ul>
+      <li><code>AgentCapability</code> — エージェントのスキル・専門領域・品質スコア・コスト係数</li>
+      <li><code>WorkerAssignment</code> — Worker単位のタスク束 (agentId + tasks[] + 推定時間)</li>
+      <li><code>ExecutionBatch</code> — DAGレベル単位の並列実行バッチ (level + workers[])</li>
+    </ul>
+  </section>
+</article>
+
+<article class="stage" id="theta-4-execution">
+  <header class="stage-head">
+    <span class="theta-badge">θ₄</span>
+    <h2>Execution — 実行</h2>
+    <p class="file-ref"><code>execution.ts</code></p>
+    <p class="transform">変換: <code>θ₄ : A → R</code></p>
+  </header>
+
+  <section class="io">
+    <div class="io-in">
+      <h4>入力</h4>
+      <ul>
+        <li><code>AgentAllocation</code> — θ₃の割当結果</li>
+      </ul>
+    </div>
+    <div class="io-out">
+      <h4>出力</h4>
+      <ul>
+        <li><code>ResultSet</code> — タスク結果集合 + パフォーマンス統計</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="logic">
+    <h4>主要ロジック</h4>
+    <ol>
+      <li><strong>executeTask(task)</strong> — タスク単体の実行シミュレーション。成功率95%、レイテンシ50–500msを模擬し、<code>TaskResult</code>を生成。</li>
+      <li><strong>executeWorker(worker)</strong> — Worker内タスクを並列または順次に実行。失敗時は<code>retryFailedTasks</code>で再試行。</li>
+      <li><strong>executeBatch(batch)</strong> — バッチ内Workerを並列起動しつつ、依存順序を尊重して進行。<code>BatchResult</code>に集約。</li>
+      <li><strong>aggregatePerformance()</strong> — 全バッチ完了後に成功率・平均実行時間・スループット(tasks/sec)・並列度を集計。</li>
+    </ol>
+  </section>
+
+  <section class="features">
+    <h4>特徴</h4>
+    <ul>
+      <li>非同期バッチ処理 (Promise.all ベース)</li>
+      <li><code>retryFailedTasks</code> による回復性</li>
+      <li>アーティファクト記録 (生成物・ログ・メトリクス)</li>
+      <li>Issueまで遡れるトレーサビリティ保持</li>
+    </ul>
+  </section>
+
+  <section class="types">
+    <h4>主要型</h4>
+    <ul>
+      <li><code>TaskResult</code> — 個別タスクの成否・所要時間・アーティファクト</li>
+      <li><code>WorkerResult</code> — Worker単位の集約結果</li>
+      <li><code>BatchResult</code> — バッチ単位の並列実行結果</li>
+      <li><code>ResultSet</code> — 全体結果 + パフォーマンスサマリ</li>
+    </ul>
+  </section>
+</article>
+
+<aside class="mini-card" id="context-to-world-adapter">
+  <header>
+    <h3>Context → World アダプタ</h3>
+    <p class="file-ref"><code>context-to-world.ts</code></p>
+  </header>
+  <p>プロジェクトコンテキストを<code>WorldSpace</code>(世界モデル)に変換するアダプタ層。</p>
+  <ul>
+    <li><strong>detectProjectType()</strong> — package.json/tsconfig/言語構成からプロジェクト種別 (CLI / Library / Web / Monorepo 等) を推定。</li>
+    <li><strong>inferArchitecturePatterns()</strong> — ディレクトリ構造と依存関係から アーキテクチャパターン (Layered / Hexagonal / MVC / Event-driven 等) を推論。</li>
+  </ul>
+  <h4>8層 概念レイヤー</h4>
+  <ol>
+    <li><code>miyabi_def</code> — Miyabi自体の定義・規約層</li>
+    <li><code>domain</code> — ドメインモデル・ビジネスルール</li>
+    <li><code>application</code> — ユースケース・アプリケーションサービス</li>
+    <li><code>infrastructure</code> — 永続化・外部I/O実装</li>
+    <li><code>interface</code> — CLI/API/UI境界</li>
+    <li><code>shared</code> — 横断的ユーティリティ・型</li>
+    <li><code>tooling</code> — ビルド・テスト・開発支援</li>
+    <li><code>integrations</code> — GitHub/MCP/外部サービス連携</li>
+  </ol>
+</aside>
+<article class="stage" id="theta-5">
+  <header>
+    <span class="badge">θ₅</span>
+    <h2>Integration — 統合・パッケージング</h2>
+    <p class="file">integration.ts</p>
+  </header>
+  <p class="math">θ₅ : R → D</p>
+  <p class="io"><strong>入力:</strong> ResultSet　<strong>出力:</strong> Deliverable</p>
+
+  <section class="logic">
+    <h3>主要ロジック</h3>
+    <ul>
+      <li><code>categorizeArtifacts()</code> — 成果物を5分類（code / test / doc / config / report）に振り分け</li>
+      <li><code>calculateCodeChanges()</code> — 言語判定 + diff 計算で変更行数を集計</li>
+      <li><code>generateQualityReport()</code> — 3項目（実行率・カバレッジ・エラー）スコアを統合した品質レポート</li>
+      <li><code>generateCommitMessage()</code> — Conventional Commits 形式のコミットメッセージ自動生成</li>
+      <li><code>generatePullRequestDraft()</code> — 品質判定に応じて自動的に draft PR を作成</li>
+    </ul>
+  </section>
+
+  <section class="features">
+    <h3>特徴</h3>
+    <ul>
+      <li>実行率 ≥ 80% <strong>AND</strong> 品質スコア ≥ 80 → <code>ready</code></li>
+      <li>スコア配分: 実行 40% / カバレッジ 30% / エラー 30%</li>
+      <li>PR 自動パッケージング（artifacts → commit → PR draft）</li>
+    </ul>
+  </section>
+
+  <section class="status">
+    <h3>ステータス</h3>
+    <p><span class="tag ok">ready</span> <span class="tag warn">needs-review</span> <span class="tag err">blocked</span></p>
+  </section>
+</article>
+
+<article class="stage" id="theta-6">
+  <header>
+    <span class="badge">θ₆</span>
+    <h2>Learning — 学習・知識化</h2>
+    <p class="file">learning.ts</p>
+  </header>
+  <p class="math">θ₆ : D × I × W → K</p>
+  <p class="io"><strong>出力:</strong> Knowledge　<strong>性質:</strong> 非致命的（失敗しても継続）</p>
+
+  <section class="logic">
+    <h3>主要ロジック</h3>
+    <ul>
+      <li><code>extractPatterns()</code> — 4種類のパターン抽出（成功 / 失敗 / 最適化 / アンチパターン）</li>
+      <li><code>generateInsights()</code> — 速度 / 品質 / コスト / リソースの 4 軸で洞察生成</li>
+      <li><code>analyzeAgentPerformance()</code> — エージェント別スコアカード作成</li>
+      <li><code>extractLessons()</code> — 3 教訓体系で学びを構造化</li>
+      <li><code>generateUpdates()</code> — ナレッジベース更新提案</li>
+      <li><code>generateCalibrations()</code> — 閾値の自動キャリブレーション</li>
+      <li><code>generateRecommendations()</code> — 即時 / 中期 / 長期の推奨アクション</li>
+    </ul>
+  </section>
+
+  <section class="features">
+    <h3>特徴</h3>
+    <ul>
+      <li>学習スコア = パターン×10 + アクション×15 + 教訓×10 + 更新×5 + キャリブ×5</li>
+      <li>動的キャリブレーションによる閾値の自己調整</li>
+      <li>フィードバックループで次回実行品質を継続的に改善</li>
+    </ul>
+  </section>
+</article>
+
+<article class="stage engine" id="omega-engine">
+  <header>
+    <span class="badge">Ω</span>
+    <h2>Ω-Engine — 完全パイプライン</h2>
+    <p class="file">omega-engine.ts（545 行）</p>
+  </header>
+  <p class="math">Ω : I × W → R / E = θ₆ ∘ θ₅ ∘ θ₄ ∘ θ₃ ∘ θ₂ ∘ θ₁</p>
+
+  <section class="pipeline">
+    <h3>パイプライン構成</h3>
+    <p>θ₁ Perception → θ₂ Intent → θ₃ Plan → θ₄ Execution → θ₅ Integration → θ₆ Learning</p>
+  </section>
+
+  <section class="config">
+    <h3>OmegaEngineConfig</h3>
+    <ul>
+      <li><code>validateBetweenStages</code> — ステージ間で型・契約を検証</li>
+      <li><code>stopOnValidationError</code> — 検証失敗時に即停止</li>
+      <li><code>enableLearning</code> — θ₆ 学習ステージを有効化</li>
+      <li><code>maxExecutionTimeMs = 600000</code>（10 分上限）</li>
+      <li><code>maxRetries = 3</code></li>
+    </ul>
+  </section>
+
+  <section class="features">
+    <h3>実行制御</h3>
+    <ul>
+      <li>リトライ: 指数バックオフ <code>2^attempt × 100ms</code></li>
+      <li>θ₆ のみ非致命的（失敗しても全体は継続）</li>
+      <li><code>trace.intermediates</code> に全ステージの中間結果を保存</li>
+      <li>コールバック: <code>onStageComplete</code> / <code>onStageError</code></li>
+    </ul>
+  </section>
+
+  <section class="exports">
+    <h3>エクスポート</h3>
+    <ul>
+      <li><code>OmegaEngine</code> クラス</li>
+      <li><code>omega()</code> — 標準実行</li>
+      <li><code>omegaWithoutLearning()</code> — θ₆ をスキップ</li>
+      <li><code>omegaStrict()</code> — 厳格モード（検証失敗で即停止）</li>
+    </ul>
+  </section>
+</article>
+
+<article class="mini-card" id="deliverable-to-report">
+  <header>
+    <h3>Adapter — deliverable-to-report.ts</h3>
+  </header>
+  <ul>
+    <li>ステータスマッピング: <code>ready → success</code> / <code>needs-review → partial</code> / <code>blocked → failure</code></li>
+    <li>スコア → レターグレード変換: <strong>90+ A</strong> / <strong>80+ B</strong> / <strong>70+ C</strong> / <strong>60+ D</strong></li>
+    <li>Deliverable を既存 Agent レポート形式へブリッジ</li>
+  </ul>
+</article>
+
+<article class="mini-card" id="omega-agent-adapter">
+  <header>
+    <h3>Adapter — omega-agent-adapter.ts</h3>
+  </header>
+  <ul>
+    <li><code>OmegaAgentAdapter</code> クラス: <code>execute()</code> / <code>executeParallel()</code> / <code>executeSequential()</code></li>
+    <li>Agent 能力マッピング例: <code>CoordinatorAgent → task-decomposition</code> 等</li>
+    <li>オプション: <code>skipPlanning</code> / <code>forceSequential</code> / <code>enableLearning</code></li>
+    <li>既存 21 Agent を Ω-Engine 上で実行可能にする統合層</li>
+  </ul>
+</article>
+</main>
+<footer>Ω-System Pipeline Visualization · 並列サブエージェント調査 (3 agents) · Miyabi coding-agents package<br>
+参照: omega-engine.ts (545行) / transformations/*.ts (×6) / adapters/*.ts (×4)
+</footer>
+</body></html>
