@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>🕸️ Miyabi 全体依存グラフ</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root{
+  --bg:#0a0814; --bg2:#15101f; --panel:#1a1428; --border:#3a2a48;
+  --ink:#f5e9d6; --ink-dim:#b8a890; --sakura:#ff7aa2; --kin:#e4b04a;
+  --midori:#7fc9a0; --ai:#6fa8dc; --murasaki:#a888d4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+  background:radial-gradient(ellipse at top,#1a0f24 0%,#0a0814 60%);
+  color:var(--ink);min-height:100vh;overflow-x:hidden;
+}
+header{
+  padding:24px 32px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(40,20,60,0.6),rgba(10,8,20,0.3));
+  backdrop-filter:blur(8px);
+}
+h1{font-size:28px;color:var(--sakura);letter-spacing:0.1em;
+  text-shadow:0 0 20px rgba(255,122,162,0.4);}
+.subtitle{color:var(--ink-dim);font-size:13px;margin-top:6px;letter-spacing:0.15em}
+.stats{display:flex;gap:24px;margin-top:14px;font-size:13px}
+.stat{padding:6px 14px;background:rgba(228,176,74,0.08);
+  border:1px solid rgba(228,176,74,0.3);border-radius:2px}
+.stat b{color:var(--kin);font-size:16px;margin-right:6px}
+
+.layout{display:grid;grid-template-columns:280px 1fr 300px;gap:0;height:calc(100vh - 130px)}
+aside{background:var(--bg2);border-right:1px solid var(--border);
+  padding:20px;overflow-y:auto}
+aside.right{border-right:none;border-left:1px solid var(--border)}
+aside h3{font-size:13px;color:var(--kin);margin-bottom:10px;
+  letter-spacing:0.2em;border-bottom:1px solid var(--border);padding-bottom:6px}
+aside h3:not(:first-child){margin-top:22px}
+
+.search{width:100%;padding:8px 12px;background:var(--bg);
+  border:1px solid var(--border);color:var(--ink);font-family:inherit;
+  border-radius:2px;outline:none;font-size:13px}
+.search:focus{border-color:var(--sakura)}
+
+.pkg-filter label{display:flex;align-items:center;gap:8px;padding:5px 0;
+  font-size:12px;cursor:pointer;color:var(--ink-dim)}
+.pkg-filter label:hover{color:var(--ink)}
+.pkg-filter input{accent-color:var(--sakura)}
+.chip{width:12px;height:12px;border-radius:50%;display:inline-block;
+  box-shadow:0 0 6px currentColor}
+
+.legend-role div{display:flex;align-items:center;gap:8px;font-size:12px;
+  padding:4px 0;color:var(--ink-dim)}
+.role-dot{width:14px;height:14px;border-radius:50%;background:#444}
+
+.slider-row{display:flex;justify-content:space-between;font-size:11px;
+  color:var(--ink-dim);margin-bottom:4px}
+input[type=range]{width:100%;accent-color:var(--kin)}
+
+button.reset{width:100%;padding:8px;background:transparent;
+  border:1px solid var(--sakura);color:var(--sakura);font-family:inherit;
+  cursor:pointer;letter-spacing:0.15em;margin-top:14px;border-radius:2px}
+button.reset:hover{background:rgba(255,122,162,0.1)}
+
+main{position:relative;background:
+  radial-gradient(circle at 50% 50%,rgba(30,15,45,0.6),transparent 70%),var(--bg);}
+svg{width:100%;height:100%;display:block;cursor:grab}
+svg:active{cursor:grabbing}
+
+.link{stroke-opacity:0.35}
+.link.cross{stroke:var(--sakura);stroke-width:1.4}
+.link.intra{stroke:#6a5878;stroke-width:0.7}
+.link.highlight{stroke-opacity:1;stroke:var(--kin);stroke-width:2.2}
+
+.node circle{cursor:pointer;transition:filter 0.2s}
+.node:hover circle{filter:brightness(1.4) drop-shadow(0 0 10px currentColor)}
+.node text{font-size:9px;fill:var(--ink-dim);pointer-events:none;
+  font-family:"Yu Gothic",sans-serif}
+.node.dim{opacity:0.12}
+.node.hl text{fill:var(--ink);font-weight:bold;font-size:11px}
+
+.tooltip{position:absolute;pointer-events:none;background:rgba(20,12,32,0.96);
+  border:1px solid var(--sakura);padding:8px 12px;font-size:12px;
+  color:var(--ink);border-radius:2px;max-width:260px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.6);opacity:0;transition:opacity 0.15s}
+
+aside.right .detail{font-size:12px;color:var(--ink-dim);line-height:1.7}
+.detail .name{color:var(--sakura);font-size:16px;margin-bottom:6px;
+  font-family:"Hiragino Mincho ProN",serif}
+.detail .pkg{color:var(--kin);font-size:11px;letter-spacing:0.15em;margin-bottom:12px}
+.detail .row{padding:3px 0;border-bottom:1px dashed var(--border)}
+.detail ul{list-style:none;margin-top:6px}
+.detail ul li{padding:2px 0 2px 12px;position:relative;font-size:11px}
+.detail ul li:before{content:"❀";position:absolute;left:0;color:var(--sakura);font-size:8px}
+.empty{color:#5a4868;font-style:italic;text-align:center;padding:40px 0}
+
+.pattern-bg{position:fixed;inset:0;pointer-events:none;opacity:0.03;
+  background-image:repeating-linear-gradient(45deg,var(--sakura) 0,var(--sakura) 1px,transparent 1px,transparent 30px);}
+</style>
+</head>
+<body>
+<div class="pattern-bg"></div>
+<header>
+  <h1>🕸️ Miyabi 全体依存グラフ</h1>
+  <div class="subtitle">Force-Directed Architecture Visualization · 雅 モノレポ依存関係可視化</div>
+  <div class="stats">
+    <div class="stat"><b id="stat-pkg">11</b>パッケージ</div>
+    <div class="stat"><b id="stat-node">0</b>ノード</div>
+    <div class="stat"><b id="stat-edge">0</b>エッジ</div>
+    <div class="stat"><b id="stat-cross">0</b>クロス依存</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <h3>🔍 検索</h3>
+    <input type="search" class="search" id="search" placeholder="モジュール名で絞り込み...">
+
+    <h3>📦 パッケージ凡例</h3>
+    <div class="pkg-filter" id="pkg-filter"></div>
+
+    <h3>🎭 役割</h3>
+    <div class="legend-role">
+      <div><span class="role-dot" style="border:2px solid #fff"></span>agent (実線)</div>
+      <div><span class="role-dot" style="border:2px dashed #fff"></span>client (破線)</div>
+      <div><span class="role-dot" style="border:2px dotted #fff"></span>command (点線)</div>
+      <div><span class="role-dot" style="border:1px solid #888"></span>util / type / config</div>
+    </div>
+
+    <h3>⚙️ 物理エンジン</h3>
+    <div class="slider-row"><span>反発力 (charge)</span><span id="charge-val">-380</span></div>
+    <input type="range" id="charge" min="-800" max="-100" value="-380">
+
+    <button class="reset" id="reset">↺ ビューをリセット</button>
+  </aside>
+
+  <main>
+    <svg id="graph"></svg>
+    <div class="tooltip" id="tooltip"></div>
+  </main>
+
+  <aside class="right">
+    <h3>📜 ノード詳細</h3>
+    <div id="detail" class="detail">
+      <div class="empty">ノードをクリックして<br>詳細を表示</div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// =================== DATA ===================
+const PKGS = [
+  {id:"cli",                  color:"#7fc9a0", group:1},
+  {id:"miyabi-agent-sdk",     color:"#ff7aa2", group:2},
+  {id:"coding-agents",        color:"#a888d4", group:3},
+  {id:"core",                 color:"#e4b04a", group:4},
+  {id:"mcp-bundle",           color:"#6fa8dc", group:5},
+  {id:"task-manager",         color:"#f0a868", group:6},
+  {id:"github-projects",      color:"#5dd5c4", group:7},
+  {id:"context-engineering",  color:"#d4748a", group:8},
+  {id:"doc-generator",        color:"#c8c878", group:9},
+  {id:"shared-utils",         color:"#909090", group:10},
+  {id:"miyabi-web",           color:"#b58968", group:11},
+];
+const PKG = Object.fromEntries(PKGS.map(p=>[p.id,p]));
+
+// nodes
+const N = [];
+const L = [];
+function n(pkg,label,role="util"){
+  const id = pkg+"/"+label;
+  N.push({id,label,pkg,group:PKG[pkg].group,role,size:0});
+  return id;
+}
+function l(s,t,kind){ L.push({source:s,target:t,kind:kind||"intra"}); }
+
+// --- miyabi-agent-sdk ---
+const sdkAgents = ["CoordinatorAgent","CodeGenAgent","ReviewAgent","IssueAgent","PRAgent","DeploymentAgent","TestAgent"];
+const sdkAgentIds = sdkAgents.map(a=>n("miyabi-agent-sdk",a,"agent"));
+const sdkClients = ["AnthropicClient","ClaudeCodeClient","CodexClient","GitHubClient","LLMProvider","TaskRouter"];
+const sdkClientIds = sdkClients.map(c=>n("miyabi-agent-sdk",c,"client"));
+const sdkBase = n("miyabi-agent-sdk","agent-base","type");
+const sdkGH = n("miyabi-agent-sdk","github-client","client");
+const sdkRetry = n("miyabi-agent-sdk","retry-config","config");
+const sdkTypes = n("miyabi-agent-sdk","types","type");
+const sdkUtils = n("miyabi-agent-sdk","utils","util");
+const sdkIndex = n("miyabi-agent-sdk","index","config");
+sdkAgentIds.forEach(a=>{ l(a,sdkBase); l(a,sdkTypes); l(a,sdkUtils); l(a,sdkRetry); });
+l(sdkAgentIds[1],sdkClientIds[0]); // CodeGen → Anthropic
+l(sdkAgentIds[1],sdkClientIds[1]); // CodeGen → ClaudeCode
+l(sdkAgentIds[1],sdkClientIds[5]); // CodeGen → TaskRouter
+l(sdkAgentIds[2],sdkClientIds[0]); // Review → Anthropic
+l(sdkAgentIds[3],sdkClientIds[0]);
+l(sdkAgentIds[4],sdkGH);
+l(sdkAgentIds[5],sdkGH);
+l(sdkAgentIds[0],sdkClientIds[5]);
+sdkClientIds.forEach(c=>l(c,sdkTypes));
+l(sdkClientIds[5],sdkClientIds[0]);
+l(sdkClientIds[5],sdkClientIds[1]);
+l(sdkClientIds[5],sdkClientIds[2]);
+sdkAgentIds.forEach(a=>l(sdkIndex,a));
+
+// --- cli ---
+const cliCmds = ["init","install","status","doctor","setup","auth","agent","auto","omega","run","pipeline","gni","bus","task","cycle","release","voice","skills","health","todos","dashboard","docs","onboard","sprint","config"];
+const cliCmdIds = cliCmds.map(c=>n("cli","cmd:"+c,"command"));
+const cliIndex = n("cli","index","config");
+const cliAuth = n("cli","auth/github","util");
+const cliPipeline = n("cli","pipeline/parser","util");
+const cliSetup = n("cli","setup/wizard","util");
+const cliAnalyze = n("cli","analyze/repo","util");
+const cliFeedback = n("cli","feedback/loop","util");
+const cliTypes = n("cli","types","type");
+const cliUtils = n("cli","utils/json","util");
+const cliConfig = n("cli","config/loader","config");
+cliCmdIds.forEach(c=>{ l(cliIndex,c); l(c,cliUtils); });
+l(cliCmdIds[5],cliAuth);          // auth
+l(cliCmdIds[10],cliPipeline);     // pipeline
+l(cliCmdIds[4],cliSetup);         // setup
+l(cliCmdIds[2],cliAnalyze);       // status
+l(cliCmdIds[7],cliFeedback);      // auto
+l(cliCmdIds[8],cliFeedback);      // omega
+[2,3,5,24].forEach(i=>l(cliCmdIds[i],cliConfig));
+l(cliAuth,cliTypes); l(cliPipeline,cliTypes);
+
+// cli → sdk (cross)
+l(cliCmdIds[6],sdkIndex,"cross");      // agent
+l(cliCmdIds[7],sdkAgentIds[0],"cross");// auto → Coordinator
+l(cliCmdIds[8],sdkAgentIds[0],"cross");// omega → Coordinator
+l(cliCmdIds[9],sdkAgentIds[1],"cross");// run → CodeGen
+l(cliCmdIds[6],sdkAgentIds[1],"cross");
+l(cliCmdIds[6],sdkAgentIds[2],"cross");
+l(cliAuth,sdkGH,"cross");
+
+// --- coding-agents (re-export wrapper) ---
+const caIndex = n("coding-agents","index","config");
+const caCodeGen = n("coding-agents","CodeGenWrapper","agent");
+const caReview = n("coding-agents","ReviewWrapper","agent");
+const caCoord = n("coding-agents","CoordinatorWrapper","agent");
+const caTest = n("coding-agents","TestWrapper","agent");
+const caPR = n("coding-agents","PRWrapper","agent");
+const caDeploy = n("coding-agents","DeployWrapper","agent");
+const caIssue = n("coding-agents","IssueWrapper","agent");
+[caCodeGen,caReview,caCoord,caTest,caPR,caDeploy,caIssue].forEach(x=>l(caIndex,x));
+l(caCodeGen,sdkAgentIds[1],"cross");
+l(caReview,sdkAgentIds[2],"cross");
+l(caCoord,sdkAgentIds[0],"cross");
+l(caTest,sdkAgentIds[6],"cross");
+l(caPR,sdkAgentIds[4],"cross");
+l(caDeploy,sdkAgentIds[5],"cross");
+l(caIssue,sdkAgentIds[3],"cross");
+
+// --- core ---
+const coreIndex = n("core","index","config");
+const coreBase = n("core","business-base-agent","agent");
+const coreTypes = n("core","types","type");
+const coreAgents = n("core","agents/index","config");
+l(coreIndex,coreBase); l(coreIndex,coreAgents); l(coreBase,coreTypes);
+l(coreAgents,caIndex,"cross"); // re-export
+
+// --- mcp-bundle ---
+const mcpIndex = n("mcp-bundle","index","config");
+const mcpCli = n("mcp-bundle","cli","command");
+const mcpCache = n("mcp-bundle","cache","util");
+const mcpConst = n("mcp-bundle","constants","config");
+const mcpTypes = n("mcp-bundle","types","type");
+const mcpHealth = n("mcp-bundle","handlers/health","util");
+const mcpHandlers = n("mcp-bundle","handlers/index","util");
+const mcpUtils = n("mcp-bundle","utils","util");
+[mcpCli,mcpCache,mcpHandlers,mcpHealth,mcpUtils].forEach(x=>l(mcpIndex,x));
+l(mcpHandlers,mcpHealth); l(mcpHandlers,mcpTypes);
+l(mcpHealth,mcpConst); l(mcpCache,mcpUtils);
+
+// --- task-manager ---
+const tmIndex = n("task-manager","index","config");
+const tmCore = n("task-manager","task-manager","agent");
+const tmDecomp = n("task-manager","decomposition/llm-decomposer","util");
+const tmDecompV = n("task-manager","decomposition/validator","util");
+const tmPrompts = n("task-manager","decomposition/prompt-templates","config");
+const tmExec = n("task-manager","execution/task-executor","agent");
+const tmWorktree = n("task-manager","execution/worktree-coordinator","util");
+const tmState = n("task-manager","state","util");
+const tmSync = n("task-manager","sync","util");
+const tmTypes = n("task-manager","types","type");
+[tmCore,tmDecomp,tmExec,tmState,tmSync].forEach(x=>l(tmIndex,x));
+l(tmCore,tmTypes); l(tmDecomp,tmPrompts); l(tmDecomp,tmDecompV);
+l(tmExec,tmWorktree); l(tmExec,tmCore); l(tmCore,tmDecomp);
+l(tmExec,caIndex,"cross");
+l(tmCore,caCoord,"cross");
+l(tmDecomp,sdkClientIds[0],"cross");
+
+// --- github-projects ---
+const gpIndex = n("github-projects","index","config");
+const gpClient = n("github-projects","client","client");
+const gpSetup = n("github-projects","setup","command");
+const gpTypes = n("github-projects","types","type");
+l(gpIndex,gpClient); l(gpIndex,gpSetup);
+l(gpClient,gpTypes); l(gpSetup,gpClient);
+l(gpClient,sdkGH,"cross");
+
+// --- context-engineering ---
+const ceIndex = n("context-engineering","index","config");
+const ceClient = n("context-engineering","client","client");
+const ceTypes = n("context-engineering","types","type");
+l(ceIndex,ceClient); l(ceClient,ceTypes);
+l(ceClient,sdkClientIds[0],"cross");
+
+// --- doc-generator ---
+const dgIndex = n("doc-generator","index","config");
+const dgCli = n("doc-generator","cli","command");
+const dgAnalyzer = n("doc-generator","analyzer","util");
+const dgGenerator = n("doc-generator","generator","util");
+l(dgIndex,dgAnalyzer); l(dgIndex,dgGenerator);
+l(dgCli,dgIndex); l(dgGenerator,dgAnalyzer);
+l(dgGenerator,sdkClientIds[0],"cross");
+
+// --- shared-utils ---
+const suIndex = n("shared-utils","index","config");
+const suApi = n("shared-utils","api-client","client");
+const suFile = n("shared-utils","async-file-writer","util");
+const suRetry = n("shared-utils","retry","util");
+const suOpt = n("shared-utils","system-optimizer","util");
+[suApi,suFile,suRetry,suOpt].forEach(x=>l(suIndex,x));
+
+// shared-utils used by many
+l(sdkRetry,suRetry,"cross");
+l(sdkGH,suApi,"cross");
+l(cliUtils,suFile,"cross");
+l(mcpCache,suFile,"cross");
+l(tmState,suFile,"cross");
+l(gpClient,suApi,"cross");
+l(ceClient,suApi,"cross");
+l(dgGenerator,suFile,"cross");
+
+// --- miyabi-web ---
+const mwApp = n("miyabi-web","app/page","command");
+const mwLayout = n("miyabi-web","app/layout","config");
+const mwDash = n("miyabi-web","components/Dashboard","agent");
+const mwGraph = n("miyabi-web","components/Graph","agent");
+const mwAgentCard = n("miyabi-web","components/AgentCard","util");
+const mwHookStatus = n("miyabi-web","hooks/useStatus","util");
+const mwHookAgents = n("miyabi-web","hooks/useAgents","util");
+const mwLibApi = n("miyabi-web","lib/api","client");
+const mwLibAuth = n("miyabi-web","lib/auth","util");
+l(mwApp,mwDash); l(mwApp,mwLayout); l(mwDash,mwGraph); l(mwDash,mwAgentCard);
+l(mwDash,mwHookStatus); l(mwDash,mwHookAgents);
+l(mwHookStatus,mwLibApi); l(mwHookAgents,mwLibApi);
+l(mwApp,mwLibAuth);
+l(mwLibApi,sdkGH,"cross");
+l(mwLibApi,suApi,"cross");
+l(mwHookAgents,caIndex,"cross");
+
+// compute size = in-degree
+const inDeg = {};
+L.forEach(e=>{ inDeg[e.target] = (inDeg[e.target]||0)+1; });
+N.forEach(node=>{ node.size = inDeg[node.id]||0; });
+
+const data = {nodes:N, links:L};
+
+// =================== RENDER ===================
+const svg = d3.select("#graph");
+const tooltip = d3.select("#tooltip");
+let W = svg.node().clientWidth, H = svg.node().clientHeight;
+
+const g = svg.append("g");
+const zoom = d3.zoom().scaleExtent([0.2,4]).on("zoom",e=>g.attr("transform",e.transform));
+svg.call(zoom);
+
+const link = g.append("g").selectAll("line")
+  .data(data.links).join("line")
+  .attr("class",d=>"link "+(d.kind==="cross"?"cross":"intra"));
+
+const node = g.append("g").selectAll("g")
+  .data(data.nodes).join("g")
+  .attr("class","node")
+  .call(d3.drag()
+    .on("start",(e,d)=>{ if(!e.active)sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y;})
+    .on("drag",(e,d)=>{ d.fx=e.x; d.fy=e.y;})
+    .on("end",(e,d)=>{ if(!e.active)sim.alphaTarget(0);})
+  );
+
+const roleStroke = {agent:["#fff",2.2,null], client:["#fff",1.8,"4,2"],
+  command:["#fff",1.5,"1,2"], util:["#888",0.8,null], type:["#888",0.8,null], config:["#888",0.8,null]};
+
+node.append("circle")
+  .attr("r",d=>Math.sqrt(d.size)*4+6)
+  .attr("fill",d=>PKG[d.pkg].color)
+  .attr("stroke",d=>roleStroke[d.role][0])
+  .attr("stroke-width",d=>roleStroke[d.role][1])
+  .attr("stroke-dasharray",d=>roleStroke[d.role][2]||"none")
+  .style("color",d=>PKG[d.pkg].color);
+
+node.append("text").attr("dy",d=>Math.sqrt(d.size)*4+18).attr("text-anchor","middle").text(d=>d.label);
+
+const sim = d3.forceSimulation(data.nodes)
+  .force("link",d3.forceLink(data.links).id(d=>d.id).distance(d=>d.kind==="cross"?120:50).strength(0.6))
+  .force("charge",d3.forceManyBody().strength(-380))
+  .force("center",d3.forceCenter(W/2,H/2))
+  .force("collide",d3.forceCollide().radius(d=>Math.sqrt(d.size)*4+14))
+  .on("tick",()=>{
+    link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+        .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+    node.attr("transform",d=>`translate(${d.x},${d.y})`);
+  });
+
+// stats
+document.getElementById("stat-node").textContent = data.nodes.length;
+document.getElementById("stat-edge").textContent = data.links.length;
+document.getElementById("stat-cross").textContent = data.links.filter(x=>x.kind==="cross").length;
+
+// neighbors
+const adj = {};
+data.links.forEach(e=>{
+  const s = typeof e.source==="object"?e.source.id:e.source;
+  const t = typeof e.target==="object"?e.target.id:e.target;
+  (adj[s]=adj[s]||new Set()).add(t);
+  (adj[t]=adj[t]||new Set()).add(s);
+});
+
+node.on("mouseover",(ev,d)=>{
+  const nb = adj[d.id]||new Set();
+  node.classed("dim",x=>x.id!==d.id && !nb.has(x.id));
+  node.classed("hl",x=>x.id===d.id||nb.has(x.id));
+  link.classed("highlight",x=>x.source.id===d.id||x.target.id===d.id);
+  tooltip.style("opacity",1)
+    .html(`<b style="color:${PKG[d.pkg].color}">${d.label}</b><br>
+      <span style="color:#b8a890">${d.pkg}</span><br>
+      役割: ${d.role}<br>被参照: ${d.size}<br>隣接: ${nb.size}`)
+    .style("left",(ev.pageX+14)+"px").style("top",(ev.pageY+10)+"px");
+})
+.on("mousemove",ev=>tooltip.style("left",(ev.pageX+14)+"px").style("top",(ev.pageY+10)+"px"))
+.on("mouseout",()=>{
+  node.classed("dim",false).classed("hl",false);
+  link.classed("highlight",false);
+  tooltip.style("opacity",0);
+})
+.on("click",(ev,d)=>{
+  const nb = [...(adj[d.id]||[])];
+  const out = data.links.filter(e=>e.source.id===d.id).map(e=>e.target.id);
+  const inn = data.links.filter(e=>e.target.id===d.id).map(e=>e.source.id);
+  document.getElementById("detail").innerHTML = `
+    <div class="name">${d.label}</div>
+    <div class="pkg">📦 ${d.pkg}</div>
+    <div class="row">役割: <b style="color:#e4b04a">${d.role}</b></div>
+    <div class="row">被参照数: <b style="color:#e4b04a">${d.size}</b></div>
+    <div class="row">隣接ノード: <b style="color:#e4b04a">${nb.length}</b></div>
+    <div style="margin-top:12px;color:#ff7aa2">→ 依存先 (${out.length})</div>
+    <ul>${out.slice(0,15).map(x=>`<li>${x}</li>`).join("")||"<li style='color:#5a4868'>なし</li>"}</ul>
+    <div style="margin-top:10px;color:#ff7aa2">← 被参照 (${inn.length})</div>
+    <ul>${inn.slice(0,15).map(x=>`<li>${x}</li>`).join("")||"<li style='color:#5a4868'>なし</li>"}</ul>
+  `;
+})
+.on("dblclick",(ev,d)=>{ d.fx=null; d.fy=null; sim.alpha(0.3).restart(); });
+
+// pkg filter
+const filter = d3.select("#pkg-filter");
+const active = new Set(PKGS.map(p=>p.id));
+PKGS.forEach(p=>{
+  const lab = filter.append("label");
+  lab.append("input").attr("type","checkbox").property("checked",true)
+    .on("change",function(){
+      if(this.checked) active.add(p.id); else active.delete(p.id);
+      apply();
+    });
+  lab.append("span").attr("class","chip").style("background",p.color).style("color",p.color);
+  lab.append("span").text(p.id);
+});
+function apply(){
+  const q = document.getElementById("search").value.toLowerCase();
+  node.style("display",d=>(active.has(d.pkg) && (!q||d.label.toLowerCase().includes(q)||d.id.toLowerCase().includes(q)))?null:"none");
+  link.style("display",d=>(active.has(d.source.pkg)&&active.has(d.target.pkg))?null:"none");
+}
+document.getElementById("search").addEventListener("input",apply);
+document.getElementById("charge").addEventListener("input",function(){
+  document.getElementById("charge-val").textContent=this.value;
+  sim.force("charge").strength(+this.value); sim.alpha(0.5).restart();
+});
+document.getElementById("reset").addEventListener("click",()=>{
+  svg.transition().duration(600).call(zoom.transform,d3.zoomIdentity);
+  data.nodes.forEach(d=>{d.fx=null;d.fy=null;});
+  sim.alpha(0.8).restart();
+});
+
+window.addEventListener("resize",()=>{
+  W=svg.node().clientWidth; H=svg.node().clientHeight;
+  sim.force("center",d3.forceCenter(W/2,H/2)).alpha(0.3).restart();
+});
+</script>
+</body>
+</html>
