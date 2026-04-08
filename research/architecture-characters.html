@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>雅 Miyabi 21キャラクター図鑑</title>
+<style>
+:root{
+  --bg:#0a0814;
+  --bg2:#140f22;
+  --ink:#f5e9d6;
+  --ink-dim:#b9aa90;
+  --sakura:#ff7aa2;
+  --sakura-soft:rgba(255,122,162,.18);
+  --gold:#e4b04a;
+  --sumi:#2a2235;
+  --line:#3a2f48;
+  --red:#e2495a;
+  --green:#5fc97a;
+  --blue:#5fb6e8;
+  --yellow:#f0c452;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{
+  background:
+    radial-gradient(ellipse at top left,rgba(255,122,162,.08),transparent 60%),
+    radial-gradient(ellipse at bottom right,rgba(228,176,74,.06),transparent 60%),
+    var(--bg);
+  min-height:100vh;
+  padding:48px 24px 80px;
+}
+.wrap{max-width:1280px;margin:0 auto}
+
+/* Header */
+header{text-align:center;padding:32px 0 24px;border-bottom:1px solid var(--line);margin-bottom:40px}
+header .kanji{font-size:64px;color:var(--sakura);letter-spacing:.2em;text-shadow:0 0 24px var(--sakura-soft);margin-bottom:8px}
+header h1{font-size:28px;color:var(--gold);font-weight:400;letter-spacing:.15em;margin-bottom:6px}
+header .sub{font-size:13px;color:var(--ink-dim);letter-spacing:.3em;text-transform:uppercase}
+
+/* Stats */
+.stats{display:flex;justify-content:center;gap:0;flex-wrap:wrap;margin:32px auto 56px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:0;max-width:880px;overflow:hidden}
+.stat{flex:1;min-width:140px;padding:20px 16px;text-align:center;border-right:1px solid var(--line)}
+.stat:last-child{border-right:none}
+.stat .num{font-size:32px;color:var(--gold);font-weight:600;display:block;line-height:1}
+.stat .lab{font-size:11px;color:var(--ink-dim);letter-spacing:.2em;margin-top:6px;display:block}
+
+/* Section */
+section{margin-bottom:64px}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.sec-head .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.sec-head h2{font-size:22px;color:var(--ink);font-weight:500;letter-spacing:.1em}
+.sec-head .count{font-size:12px;color:var(--ink-dim);letter-spacing:.15em;margin-left:auto}
+
+.sec-red .dot{background:var(--red);box-shadow:0 0 12px var(--red)}
+.sec-green .dot{background:var(--green);box-shadow:0 0 12px var(--green)}
+.sec-blue .dot{background:var(--blue);box-shadow:0 0 12px var(--blue)}
+.sec-yellow .dot{background:var(--yellow);box-shadow:0 0 12px var(--yellow)}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+
+/* Card */
+.card{
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--sumi);
+  border-radius:4px;
+  padding:18px 18px 16px;
+  position:relative;
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 24px rgba(255,122,162,.15),0 0 0 1px var(--sakura-soft);
+  border-color:var(--sakura);
+}
+.card.red{border-left-color:var(--red)}
+.card.green{border-left-color:var(--green)}
+.card.blue{border-left-color:var(--blue)}
+.card.yellow{border-left-color:var(--yellow)}
+
+.card .no{position:absolute;top:14px;right:16px;font-size:11px;color:var(--ink-dim);letter-spacing:.1em;font-family:"SF Mono",Menlo,monospace}
+.card .name{font-size:22px;color:var(--gold);font-weight:600;letter-spacing:.05em;margin-bottom:2px;line-height:1.2}
+.card .en{font-size:12px;color:var(--ink-dim);letter-spacing:.1em;margin-bottom:8px;font-style:italic}
+.card code{display:inline-block;font-family:"SF Mono",Menlo,monospace;font-size:11px;color:var(--sakura);background:rgba(255,122,162,.08);padding:2px 7px;border-radius:3px;margin-bottom:10px;border:1px solid rgba(255,122,162,.2)}
+.card .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tag{font-size:10px;padding:2px 8px;border-radius:10px;letter-spacing:.05em;border:1px solid var(--line);color:var(--ink-dim);background:rgba(255,255,255,.02)}
+.tag.cat-coding{color:var(--sakura);border-color:rgba(255,122,162,.3)}
+.tag.cat-business{color:var(--gold);border-color:rgba(228,176,74,.3)}
+.tag.par-yes{color:var(--green);border-color:rgba(95,201,122,.3)}
+.tag.par-no{color:var(--red);border-color:rgba(226,73,90,.3)}
+.card .desc{font-size:13px;color:var(--ink);line-height:1.65;opacity:.92}
+
+/* Footer */
+footer{margin-top:64px;padding-top:32px;border-top:1px solid var(--line);text-align:center;color:var(--ink-dim);font-size:12px;letter-spacing:.15em}
+footer .petal{color:var(--sakura);font-size:16px;margin:0 8px}
+
+@media(max-width:640px){
+  body{padding:24px 12px 40px}
+  header .kanji{font-size:48px}
+  header h1{font-size:20px}
+  .stat{min-width:120px;padding:14px 8px}
+  .stat .num{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kanji">雅</div>
+  <h1>Miyabi 21キャラクター図鑑</h1>
+  <div class="sub">Autonomous Agent Bestiary</div>
+</header>
+
+<div class="stats">
+  <div class="stat"><span class="num">21</span><span class="lab">エージェント</span></div>
+  <div class="stat"><span class="num">2</span><span class="lab">統括</span></div>
+  <div class="stat"><span class="num">10</span><span class="lab">実行</span></div>
+  <div class="stat"><span class="num">6</span><span class="lab">分析</span></div>
+  <div class="stat"><span class="num">3</span><span class="lab">サポート</span></div>
+</div>
+
+<!-- 統括 -->
+<section>
+  <div class="sec-head sec-red">
+    <span class="dot"></span>
+    <h2>統括 Coordination</h2>
+    <span class="count">2 agents</span>
+  </div>
+  <div class="grid">
+    <article class="card red">
+      <span class="no">No.01</span>
+      <div class="name">しきるん</div>
+      <div class="en">CoordinatorAgent</div>
+      <code>CoordinatorAgent</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-no">直列指揮</span></div>
+      <p class="desc">Issueをタスクに分解しDAGを構築。トポロジカルソートで実行順を決定し、各Agentに割当てる司令塔。</p>
+    </article>
+    <article class="card red">
+      <span class="no">No.02</span>
+      <div class="name">あきんどさん</div>
+      <div class="en">AIEntrepreneurAgent</div>
+      <code>AIEntrepreneurAgent</code>
+      <div class="tags"><span class="tag cat-business">Business</span><span class="tag par-no">直列指揮</span></div>
+      <p class="desc">8段階ビジネスプランを統括する起業家AI。フェーズ1〜12を横断管理し、各専門Agentを束ねる。</p>
+    </article>
+  </div>
+</section>
+
+<!-- 実行 -->
+<section>
+  <div class="sec-head sec-green">
+    <span class="dot"></span>
+    <h2>実行 Execution</h2>
+    <span class="count">10 agents</span>
+  </div>
+  <div class="grid">
+    <article class="card green">
+      <span class="no">No.03</span>
+      <div class="name">つくるん</div>
+      <div class="en">CodeGenAgent</div>
+      <code>CodeGenAgent</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">Claude Sonnet 4を駆使しTypeScriptコードを自動生成。Vitestテストも同時に書き上げる主力職人。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.04</span>
+      <div class="name">つくろん</div>
+      <div class="en">ProductConceptAgent</div>
+      <code>ProductConceptAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase4</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">プロダクトのUSPを言語化しBMC(ビジネスモデルキャンバス)を設計する構想家。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.05</span>
+      <div class="name">かくん</div>
+      <div class="en">ProductDesignAgent</div>
+      <code>ProductDesignAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase5</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">6ヶ月分のコンテンツとMVPを定義。最小実用プロダクトの輪郭を描く設計士。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.06</span>
+      <div class="name">みちびきん</div>
+      <div class="en">FunnelDesignAgent</div>
+      <code>FunnelDesignAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase7</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">認知から購入までの6段階顧客導線を設計。コンバージョンを導く水先案内人。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.07</span>
+      <div class="name">ひろめるん</div>
+      <div class="en">MarketingAgent</div>
+      <code>MarketingAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase9</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">広告・SEO・SNSを統合運用。KPIを設計し露出を最大化するマーケティング担当。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.08</span>
+      <div class="name">かくちゃん</div>
+      <div class="en">ContentCreationAgent</div>
+      <code>ContentCreationAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase6</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">動画・PDF・記事を量産する制作職人。マルチフォーマットでコンテンツを生み出す。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.09</span>
+      <div class="name">つぶやきん</div>
+      <div class="en">SNSStrategyAgent</div>
+      <code>SNSStrategyAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase8</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">SNS戦略を立案し3ヶ月分の投稿カレンダーを生成。エンゲージを設計する。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.10</span>
+      <div class="name">どうがん</div>
+      <div class="en">YouTubeAgent</div>
+      <code>YouTubeAgent</code>
+      <div class="tags"><span class="tag cat-business">Business</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">動画企画・スクリプト・サムネイルを一気通貫で生成するYouTubeディレクター。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.11</span>
+      <div class="name">うるん</div>
+      <div class="en">SalesAgent</div>
+      <code>SalesAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase10</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">営業パイプラインを管理し提案資料を自動生成。クロージングまで導く営業マン。</p>
+    </article>
+    <article class="card green">
+      <span class="no">No.12</span>
+      <div class="name">おきゃくさま</div>
+      <div class="en">CRMAgent</div>
+      <code>CRMAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase11</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">LTVを最大化しチャーンを防止。既存顧客との関係を育てる接客係。</p>
+    </article>
+  </div>
+</section>
+
+<!-- 分析 -->
+<section>
+  <div class="sec-head sec-blue">
+    <span class="dot"></span>
+    <h2>分析 Analysis</h2>
+    <span class="count">6 agents</span>
+  </div>
+  <div class="grid">
+    <article class="card blue">
+      <span class="no">No.13</span>
+      <div class="name">めだまん</div>
+      <div class="en">ReviewAgent</div>
+      <code>ReviewAgent</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">品質80点ゲートの番人。ESLint + TypeScript + Secret検出で全方位を見張る審査官。</p>
+    </article>
+    <article class="card blue">
+      <span class="no">No.14</span>
+      <div class="name">みつけるん</div>
+      <div class="en">IssueAgent</div>
+      <code>IssueAgent</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">53ラベル体系でIssueを自動分類し、担当者を割り当てる索引係。</p>
+    </article>
+    <article class="card blue">
+      <span class="no">No.15</span>
+      <div class="name">なりきりん</div>
+      <div class="en">PersonaAgent</div>
+      <code>PersonaAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase3</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">3〜5人のペルソナとカスタマージャーニーマップを構築する役者AI。</p>
+    </article>
+    <article class="card blue">
+      <span class="no">No.16</span>
+      <div class="name">じぶんさん</div>
+      <div class="en">SelfAnalysisAgent</div>
+      <code>SelfAnalysisAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase1</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">過去5年分のキャリアを分析し、強みと方向性を言語化する自己分析家。</p>
+    </article>
+    <article class="card blue">
+      <span class="no">No.17</span>
+      <div class="name">しらべるん</div>
+      <div class="en">MarketResearchAgent</div>
+      <code>MarketResearchAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase2</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">競合20社を徹底調査しマーケットを俯瞰するリサーチャー。</p>
+    </article>
+    <article class="card blue">
+      <span class="no">No.18</span>
+      <div class="name">かぞえるん</div>
+      <div class="en">AnalyticsAgent</div>
+      <code>AnalyticsAgent</code>
+      <div class="tags"><span class="tag cat-business">Business · Phase12</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">KPIを追跡しコホート分析を実施。数字で意思決定を支える計数係。</p>
+    </article>
+  </div>
+</section>
+
+<!-- サポート -->
+<section>
+  <div class="sec-head sec-yellow">
+    <span class="dot"></span>
+    <h2>サポート Support</h2>
+    <span class="count">3 agents</span>
+  </div>
+  <div class="grid">
+    <article class="card yellow">
+      <span class="no">No.19</span>
+      <div class="name">まとめるん</div>
+      <div class="en">PRAgent</div>
+      <code>PRAgent</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">Conventional Commits準拠でPull Requestを自動作成する取りまとめ役。</p>
+    </article>
+    <article class="card yellow">
+      <span class="no">No.20</span>
+      <div class="name">はこぶん</div>
+      <div class="en">DeploymentAgent</div>
+      <code>DeploymentAgent</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-no">直列実行</span></div>
+      <p class="desc">Firebaseへ自動デプロイし、失敗時は即座にRollbackする運送屋。</p>
+    </article>
+    <article class="card yellow">
+      <span class="no">No.21</span>
+      <div class="name">つなぐん</div>
+      <div class="en">HooksIntegration</div>
+      <code>HooksIntegration</code>
+      <div class="tags"><span class="tag cat-coding">Coding</span><span class="tag par-yes">並列可</span></div>
+      <p class="desc">Pre / Post / Error Hooksを統合管理し、全Agentの繋ぎ目を制御する連結係。</p>
+    </article>
+  </div>
+</section>
+
+<footer>
+  <div><span class="petal">花</span> Miyabi Autonomous Development Platform <span class="petal">花</span></div>
+  <div style="margin-top:6px;opacity:.7">21 Agents · 7 Coding · 14 Business · GitHub as OS</div>
+</footer>
+
+</div>
+</body>
+</html>
