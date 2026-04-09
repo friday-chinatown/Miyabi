@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miyabi Event Cascade Timeline</title>
+<style>
+:root{
+  --bg:#0a0814;
+  --bg2:#13101f;
+  --ink:#f5e9d6;
+  --ink-dim:#bfae8e;
+  --sakura:#ff7aa2;
+  --gold:#e4b04a;
+  --sumi:#2a2235;
+  --green:#7adf9c;
+  --blue:#6cb8ff;
+  --purple:#b08aff;
+  --orange:#ff9a55;
+  --cyan:#5be0e0;
+  --yellow:#ffd95b;
+  --gray:#9aa0b4;
+  --line:#3a3050;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Hiragino Sans','Yu Gothic',-apple-system,Segoe UI,sans-serif;line-height:1.6;font-size:14px}
+body{background:radial-gradient(ellipse at top,#1a1230 0%,#0a0814 60%);min-height:100vh}
+.container{max-width:1280px;margin:0 auto;padding:32px 24px}
+header{border-bottom:2px solid var(--sumi);padding-bottom:24px;margin-bottom:32px;text-align:center}
+h1{font-size:32px;color:var(--sakura);letter-spacing:.05em;margin-bottom:8px;text-shadow:0 0 16px rgba(255,122,162,.4)}
+.subtitle{color:var(--ink-dim);font-size:14px;margin-bottom:18px}
+.stats{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:16px}
+.stat{background:var(--bg2);border:1px solid var(--sumi);border-radius:8px;padding:10px 18px;min-width:120px}
+.stat-num{font-size:22px;color:var(--gold);font-weight:bold;display:block}
+.stat-label{font-size:11px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.1em}
+h2{font-size:20px;color:var(--gold);margin:48px 0 18px;border-left:4px solid var(--gold);padding-left:12px}
+h3{font-size:16px;color:var(--sakura);margin:18px 0 10px}
+.timeline{position:relative;padding-left:120px}
+.timeline::before{content:'';position:absolute;left:90px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--sakura) 0%,var(--gold) 25%,var(--green) 45%,var(--blue) 60%,var(--purple) 70%,var(--orange) 80%,var(--cyan) 88%,var(--yellow) 94%,var(--gray) 100%)}
+.phase{position:relative;margin-bottom:28px}
+.phase-time{position:absolute;left:-120px;top:6px;width:80px;text-align:right;color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:bold}
+.phase::before{content:'';position:absolute;left:-34px;top:10px;width:14px;height:14px;border-radius:50%;background:var(--sakura);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--sakura)}
+.phase.p2::before{background:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.phase.p3::before{background:var(--green);box-shadow:0 0 0 2px var(--green)}
+.phase.p4::before{background:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+.phase.p5::before{background:var(--purple);box-shadow:0 0 0 2px var(--purple)}
+.phase.p6::before{background:var(--orange);box-shadow:0 0 0 2px var(--orange)}
+.phase.p7::before{background:var(--cyan);box-shadow:0 0 0 2px var(--cyan)}
+.phase.p8::before{background:var(--yellow);box-shadow:0 0 0 2px var(--yellow)}
+.phase.p9::before{background:var(--gray);box-shadow:0 0 0 2px var(--gray)}
+.phase-label{font-size:13px;color:var(--ink-dim);margin-bottom:8px;font-weight:bold;text-transform:uppercase;letter-spacing:.08em}
+.cards{display:flex;gap:12px;flex-wrap:wrap}
+.card{background:var(--bg2);border:1px solid var(--sumi);border-left:4px solid var(--sakura);border-radius:8px;padding:14px 16px;flex:1 1 280px;min-width:260px;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,122,162,.15)}
+.p2 .card{border-left-color:var(--gold)}
+.p2 .card:hover{box-shadow:0 6px 24px rgba(228,176,74,.15)}
+.p3 .card{border-left-color:var(--green)}
+.p3 .card:hover{box-shadow:0 6px 24px rgba(122,223,156,.15)}
+.p4 .card{border-left-color:var(--blue)}
+.p4 .card:hover{box-shadow:0 6px 24px rgba(108,184,255,.15)}
+.p5 .card{border-left-color:var(--purple)}
+.p5 .card:hover{box-shadow:0 6px 24px rgba(176,138,255,.15)}
+.p6 .card{border-left-color:var(--orange)}
+.p6 .card:hover{box-shadow:0 6px 24px rgba(255,154,85,.15)}
+.p7 .card{border-left-color:var(--cyan)}
+.p7 .card:hover{box-shadow:0 6px 24px rgba(91,224,224,.15)}
+.p8 .card{border-left-color:var(--yellow)}
+.p8 .card:hover{box-shadow:0 6px 24px rgba(255,217,91,.15)}
+.p9 .card{border-left-color:var(--gray)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.card-title{font-size:14px;color:var(--ink);font-weight:bold}
+.badge{font-size:10px;padding:3px 8px;border-radius:10px;background:var(--sumi);color:var(--gold);font-weight:bold;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.badge.parallel{background:rgba(108,184,255,.15);color:var(--blue);border:1px solid var(--blue)}
+.badge.serial{background:rgba(228,176,74,.12);color:var(--gold);border:1px solid var(--gold)}
+code{background:#1f1830;color:var(--sakura);padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono','SF Mono',Consolas,monospace;font-size:12px;border:1px solid var(--sumi)}
+.card-detail{font-size:12px;color:var(--ink-dim);margin-top:6px}
+.card-detail strong{color:var(--ink)}
+.card-detail ul{margin:4px 0 0 16px;padding:0}
+.card-detail li{margin:2px 0;font-size:12px}
+.section{background:var(--bg2);border:1px solid var(--sumi);border-radius:10px;padding:24px;margin-top:24px}
+.section p{color:var(--ink-dim);font-size:13px;margin:8px 0}
+.section ul{margin:8px 0 8px 20px;color:var(--ink-dim);font-size:13px}
+.section li{margin:4px 0}
+.section li code{font-size:11px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
+th{background:var(--sumi);color:var(--gold);text-align:left;padding:10px 12px;border:1px solid var(--line);font-weight:bold;text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:8px 12px;border:1px solid var(--line);color:var(--ink-dim);vertical-align:top}
+td:first-child{color:var(--sakura);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap}
+tr:hover td{background:rgba(255,122,162,.04)}
+.state-svg{display:block;margin:16px auto;max-width:100%}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.slot{background:#1a1428;border:1px solid var(--sumi);border-radius:8px;padding:14px}
+.slot-name{color:var(--gold);font-weight:bold;font-size:13px;margin-bottom:6px}
+.slot-num{color:var(--sakura);font-size:24px;font-weight:bold;font-family:'JetBrains Mono',monospace}
+.slot-desc{color:var(--ink-dim);font-size:11px;margin-top:4px}
+footer{text-align:center;color:var(--ink-dim);font-size:11px;margin-top:48px;padding-top:24px;border-top:1px solid var(--sumi)}
+@media(max-width:720px){
+  .timeline{padding-left:80px}
+  .timeline::before{left:50px}
+  .phase-time{left:-80px;width:60px;font-size:10px}
+  .phase::before{left:-34px}
+  h1{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>⚡ Event Cascade Timeline</h1>
+  <div class="subtitle">Miyabi — Issue から Deploy まで 17 ワークフローが奏でる自律カスケード</div>
+  <div class="stats">
+    <div class="stat"><span class="stat-num">17</span><span class="stat-label">Workflows</span></div>
+    <div class="stat"><span class="stat-num">9</span><span class="stat-label">Phases</span></div>
+    <div class="stat"><span class="stat-num">12+</span><span class="stat-label">Parallel Slots</span></div>
+    <div class="stat"><span class="stat-num">~12m</span><span class="stat-label">End-to-End</span></div>
+  </div>
+</header>
+
+<h2>タイムライン (Issue → Deploy)</h2>
+<div class="timeline">
+
+<!-- Phase 1 -->
+<div class="phase p1">
+  <div class="phase-time">T+0s</div>
+  <div class="phase-label">Phase 1 — Trigger</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Issue 作成</span><span class="badge serial">SERIAL</span></div>
+      <code>github.com/issues</code>
+      <div class="card-detail">ユーザーが <strong>Issue #123</strong> を作成 → GitHub が <code>issues.opened</code> Webhook を発火。Miyabi の自律カスケードが起動。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 2 -->
+<div class="phase p2">
+  <div class="phase-time">T+0〜30s</div>
+  <div class="phase-label">Phase 2 — Triage (3 並列)</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Webhook ルーティング</span><span class="badge parallel">PARALLEL ×3</span></div>
+      <code>webhook-handler.yml</code>
+      <div class="card-detail"><strong>route-event</strong>: イベントタイプを判定し対応ジョブへ振り分ける。Issue / PR / Push / Schedule をハンドリング。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">初期トリアージ</span><span class="badge parallel">PARALLEL ×3</span></div>
+      <code>state-machine.yml</code>
+      <div class="card-detail"><strong>initial-triage</strong>: <code>state:pending</code> ラベル付与。タイトル/本文から <strong>P0/P1/P2</strong> 優先度を自動決定。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">AI 分類</span><span class="badge parallel">PARALLEL ×3</span></div>
+      <code>ai-auto-label.yml</code>
+      <div class="card-detail"><strong>Anthropic API</strong> で本文を解析、53 ラベル分類体系から該当ラベルを推論し付与。type/area/severity を抽出。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 3 -->
+<div class="phase p3">
+  <div class="phase-time">T+30〜60s</div>
+  <div class="phase-label">Phase 3 — Coordinator アサイン</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Coordinator 割当</span><span class="badge serial">SERIAL</span></div>
+      <code>state-machine.yml</code>
+      <div class="card-detail"><strong>coordinator-assignment</strong>: <code>🤖agent:coordinator</code> ラベル付与 → 状態を <code>state:analyzing</code> に遷移。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Autonomous Agent 起動</span><span class="badge serial">SERIAL</span></div>
+      <code>autonomous-agent.yml</code>
+      <div class="card-detail">ラベル変更を検知して <strong>CoordinatorAgent</strong> をディスパッチ。タスク分解 (DAG 構築) を開始。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 4 -->
+<div class="phase p4">
+  <div class="phase-time">T+60s〜3m</div>
+  <div class="phase-label">Phase 4 — Agent 実行 (concurrency=3)</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">IssueAgent</span><span class="badge parallel">DAG d=0</span></div>
+      <code>autonomous-agent.yml</code>
+      <div class="card-detail">依存数 <strong>0</strong> / 推定 <strong>30s</strong>。Issue 詳細解析と 53 ラベル再分類。コンテキスト抽出。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">CodeGenAgent</span><span class="badge parallel">DAG d=1</span></div>
+      <code>autonomous-agent.yml</code>
+      <div class="card-detail">依存数 <strong>1</strong> / 推定 <strong>60s</strong>。Claude Sonnet 4 でコード生成。複数ファイル差分を計算。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">ReviewAgent</span><span class="badge parallel">DAG d=2</span></div>
+      <code>autonomous-agent.yml</code>
+      <div class="card-detail">依存数 <strong>2</strong> / 推定 <strong>60s</strong>。品質スコア算出 (0-100)。<strong>≥80</strong> 必須、不足時は最大 3 回 Auto-Loop。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Branch / Commit / Push</span><span class="badge serial">FINALIZE</span></div>
+      <code>git</code>
+      <div class="card-detail"><code>git checkout -b agent/issue-123</code> → Conventional Commits でコミット → push。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 5 -->
+<div class="phase p5">
+  <div class="phase-time">T+3m</div>
+  <div class="phase-label">Phase 5 — Pull Request 作成</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Draft PR 作成</span><span class="badge serial">SERIAL</span></div>
+      <code>peter-evans/create-pull-request</code>
+      <div class="card-detail">Draft PR を作成しラベル <code>agent-generated</code> / <code>automated</code> / <code>needs-review</code> を付与。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">状態遷移</span><span class="badge serial">SERIAL</span></div>
+      <code>state-machine.yml</code>
+      <div class="card-detail"><strong>pr-created</strong>: 状態を <code>state:reviewing</code> に遷移。<strong>snapshot-test.yml</strong> を起動。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 6 -->
+<div class="phase p6">
+  <div class="phase-time">T+3m〜7m</div>
+  <div class="phase-label">Phase 6 — 検証 (並列)</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">統合 CI</span><span class="badge parallel">PARALLEL</span></div>
+      <code>integrated-system-ci.yml</code>
+      <div class="card-detail"><strong>lint → unit → e2e → build → report</strong>。失敗時は ReviewAgent に差し戻し。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">セキュリティ監査</span><span class="badge parallel">PARALLEL</span></div>
+      <code>security-audit.yml</code>
+      <div class="card-detail"><strong>npm audit</strong> / <strong>Gitleaks</strong> / <strong>CodeQL</strong> / <strong>SBOM</strong> を統合実行。CRITICAL は即停止。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">MCP ヘルスチェック</span><span class="badge parallel">CONDITIONAL</span></div>
+      <code>mcp-health-check.yml</code>
+      <div class="card-detail">MCP Bundle 関連の差分があった場合のみ実行。172+ tools の到達性を検証。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 7 -->
+<div class="phase p7">
+  <div class="phase-time">T+7m</div>
+  <div class="phase-label">Phase 7 — マージ</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">ユーザーマージ</span><span class="badge serial">HUMAN</span></div>
+      <code>github.com/merge</code>
+      <div class="card-detail">人間が PR をレビュー → マージ。<strong>state-machine.yml</strong> の <strong>pr-merged</strong> ジョブが <code>state:done</code> に遷移。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 8 -->
+<div class="phase p8">
+  <div class="phase-time">T+7m〜12m</div>
+  <div class="phase-label">Phase 8 — デプロイ (並列)</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Docker ビルド</span><span class="badge parallel">PARALLEL</span></div>
+      <code>docker-build.yml</code>
+      <div class="card-detail"><strong>linux/amd64 + arm64</strong> マルチアーキビルド → <strong>GHCR</strong> に push。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">CLI クロスプラットフォーム</span><span class="badge parallel">PARALLEL</span></div>
+      <code>cli-cross-platform.yml</code>
+      <div class="card-detail"><strong>3 OS × 2 Node = 6 マトリクス</strong>。Linux / macOS / Windows × Node 20 / 22 で互換テスト。</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">自動リリース + npm 公開</span><span class="badge parallel">TAG ONLY</span></div>
+      <code>auto-release.yml</code> <code>npm-publish.yml</code>
+      <div class="card-detail">タグ push 時のみ起動。CHANGELOG 生成 → GitHub Release → <code>npm publish</code>。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase 9 -->
+<div class="phase p9">
+  <div class="phase-time">T+12m+</div>
+  <div class="phase-label">Phase 9 — クローズ</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Issue クローズ</span><span class="badge serial">FINAL</span></div>
+      <code>state-machine.yml</code>
+      <div class="card-detail">Issue を自動クローズ。最終ラベル <code>state:done</code> + <code>agent-generated</code> 確定。サイクル完了。</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- webhook-fallback -->
+<div class="section">
+  <h2 style="margin-top:0">サイドチャネル: webhook-fallback.js</h2>
+  <p>場所: <code>.claude/hooks/webhook-fallback.js</code> (Issue #137 で導入)。GitHub Webhook が一時的に到達できない場合に備えたローカルキュー機構。</p>
+  <ul>
+    <li><strong>5 秒タイムアウト検出</strong> → 失敗したリクエストを <code>~/.ai/logs/webhook-queue/</code> に <code>webhook-{ts}-{rand}.json</code> として保存</li>
+    <li>エントリ形式: <code>{ timestamp, url, payload, retries: 0 }</code></li>
+    <li><code>node webhook-fallback.js flush</code> でキューを再送 — 最大 <strong>3 リトライ</strong>後に <code>failed/</code> サブディレクトリへ移動</li>
+    <li><code>/health</code> エンドポイント疎通確認は <strong>2 秒タイムアウト</strong></li>
+    <li>CLI サブコマンド: <code>flush</code> / <code>check</code> / <code>send</code> / <code>send -</code> (stdin から JSON)</li>
+  </ul>
+</div>
+
+<!-- State Machine -->
+<div class="section">
+  <h2 style="margin-top:0">ラベル駆動 状態マシン</h2>
+  <p>53 ラベル体系のうち <code>state:*</code> 系列で Issue / PR のライフサイクルを表現。</p>
+  <svg class="state-svg" viewBox="0 0 880 140" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#e4b04a"/>
+      </marker>
+      <marker id="arr2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L9,3 z" fill="#ff7aa2"/>
+      </marker>
+    </defs>
+    <g font-family="JetBrains Mono,monospace" font-size="12" fill="#f5e9d6">
+      <rect x="10"  y="40" width="130" height="42" rx="8" fill="#2a2235" stroke="#ff7aa2" stroke-width="2"/>
+      <text x="75"  y="65" text-anchor="middle">state:pending</text>
+      <rect x="170" y="40" width="140" height="42" rx="8" fill="#2a2235" stroke="#e4b04a" stroke-width="2"/>
+      <text x="240" y="65" text-anchor="middle">state:analyzing</text>
+      <rect x="340" y="40" width="160" height="42" rx="8" fill="#2a2235" stroke="#7adf9c" stroke-width="2"/>
+      <text x="420" y="65" text-anchor="middle">state:implementing</text>
+      <rect x="530" y="40" width="140" height="42" rx="8" fill="#2a2235" stroke="#6cb8ff" stroke-width="2"/>
+      <text x="600" y="65" text-anchor="middle">state:reviewing</text>
+      <rect x="700" y="40" width="120" height="42" rx="8" fill="#2a2235" stroke="#b08aff" stroke-width="2"/>
+      <text x="760" y="65" text-anchor="middle">state:done</text>
+      <line x1="142" y1="61" x2="166" y2="61" stroke="#e4b04a" stroke-width="2" marker-end="url(#arr)"/>
+      <line x1="312" y1="61" x2="336" y2="61" stroke="#e4b04a" stroke-width="2" marker-end="url(#arr)"/>
+      <line x1="502" y1="61" x2="526" y2="61" stroke="#e4b04a" stroke-width="2" marker-end="url(#arr)"/>
+      <line x1="672" y1="61" x2="696" y2="61" stroke="#e4b04a" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="340" y="100" width="160" height="32" rx="6" fill="#2a2235" stroke="#ff9a55" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="420" y="120" text-anchor="middle" fill="#ff9a55">state:blocked</text>
+      <line x1="420" y1="84" x2="420" y2="98" stroke="#ff7aa2" stroke-width="2" marker-end="url(#arr2)"/>
+    </g>
+  </svg>
+  <p style="text-align:center;font-size:11px">state-machine.yml が各遷移ジョブ (initial-triage / coordinator-assignment / pr-created / pr-merged) を担当。</p>
+</div>
+
+<!-- Workflow Table -->
+<div class="section">
+  <h2 style="margin-top:0">17 ワークフロー一覧</h2>
+  <table>
+    <thead>
+      <tr><th>Workflow</th><th>Trigger</th><th>Jobs</th><th>役割</th><th>Duration</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>webhook-handler</td><td>issues / PR / push</td><td>route-event</td><td>イベント振り分け</td><td>~5s</td></tr>
+      <tr><td>state-machine</td><td>labeled / PR closed</td><td>initial-triage / coordinator-assignment / pr-created / pr-merged</td><td>状態遷移</td><td>~10s</td></tr>
+      <tr><td>autonomous-agent</td><td>label 🤖agent:*</td><td>dispatch / execute / commit</td><td>Agent 実行</td><td>2-3m</td></tr>
+      <tr><td>ai-auto-label</td><td>issues.opened</td><td>classify</td><td>Anthropic API 分類</td><td>~15s</td></tr>
+      <tr><td>integrated-system-ci</td><td>PR / push</td><td>lint → unit → e2e → build → report</td><td>統合 CI</td><td>3-4m</td></tr>
+      <tr><td>security-audit</td><td>PR / weekly</td><td>npm-audit / gitleaks / codeql / sbom</td><td>セキュリティ</td><td>2-3m</td></tr>
+      <tr><td>docker-build</td><td>main / tag</td><td>buildx multi-arch</td><td>コンテナ</td><td>3-5m</td></tr>
+      <tr><td>cli-cross-platform</td><td>PR</td><td>matrix 3×2</td><td>互換性</td><td>2-4m</td></tr>
+      <tr><td>npm-publish</td><td>tag</td><td>build / publish</td><td>npm 公開</td><td>1-2m</td></tr>
+      <tr><td>mcp-health-check</td><td>PR (条件付)</td><td>health</td><td>MCP 検証</td><td>~30s</td></tr>
+      <tr><td>snapshot-test</td><td>PR</td><td>snapshot diff</td><td>UI 回帰</td><td>~1m</td></tr>
+      <tr><td>gitleaks</td><td>PR / push</td><td>scan</td><td>シークレット検出</td><td>~20s</td></tr>
+      <tr><td>codeql</td><td>weekly / PR</td><td>analyze</td><td>静的解析</td><td>3-5m</td></tr>
+      <tr><td>commit-to-issue</td><td>push</td><td>link</td><td>コミット連携</td><td>~5s</td></tr>
+      <tr><td>auto-release</td><td>tag</td><td>changelog / release</td><td>リリース自動化</td><td>~30s</td></tr>
+      <tr><td>label-sync</td><td>schedule</td><td>sync 53 labels</td><td>ラベル同期</td><td>~10s</td></tr>
+      <tr><td>統合 CI (umbrella)</td><td>workflow_run</td><td>aggregate</td><td>結果集約</td><td>~5s</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Parallel Slots -->
+<div class="section">
+  <h2 style="margin-top:0">並列実行スロット</h2>
+  <p>GitHub Actions の concurrency と Miyabi の Agent runner が連携し、最大 12+ 並列を実現。</p>
+  <div class="slot-grid">
+    <div class="slot">
+      <div class="slot-name">Agent Concurrency</div>
+      <div class="slot-num">3</div>
+      <div class="slot-desc">CoordinatorAgent が DAG を解いて Issue/CodeGen/Review を最大 3 並列ディスパッチ。</div>
+    </div>
+    <div class="slot">
+      <div class="slot-name">CI Workflow</div>
+      <div class="slot-num">4–12</div>
+      <div class="slot-desc">lint / unit / e2e / build / security / snapshot / health などが PR 単位で並走。</div>
+    </div>
+    <div class="slot">
+      <div class="slot-name">Cross Platform Matrix</div>
+      <div class="slot-num">6</div>
+      <div class="slot-desc">3 OS × 2 Node バージョンの完全マトリクスで CLI を検証。</div>
+    </div>
+    <div class="slot">
+      <div class="slot-name">Total Peak</div>
+      <div class="slot-num">12+</div>
+      <div class="slot-desc">Phase 6 + Phase 8 が重なるとピーク時で 12 を超えるジョブが同時実行。</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Miyabi Event Cascade Timeline · Issue → Deploy in ~12 minutes · 17 workflows × 9 phases × 21 agents
+</footer>
+
+</div>
+</body>
+</html>
