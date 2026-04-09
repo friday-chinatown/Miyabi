@@ -1,0 +1,432 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>Trace: Gantt Chart</title><style>
+:root{--bg:#0a0814;--panel:#161023;--panel2:#1e1730;--ink:#f5e9d6;--ink-dim:#a89884;--sakura:#ff7aa2;--gold:#e4b04a;--line:#3a2f4f;--sumi:#2a2235;}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;line-height:1.65}
+header.top{padding:36px 40px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#1a0f28,#0a0814)}
+header.top h1{margin:0 0 6px;font-size:28px;color:var(--sakura)}
+header.top p{margin:4px 0;color:var(--ink-dim);font-size:13px}
+header.top .stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
+header.top .stat{padding:6px 14px;background:var(--sumi);border:1px solid var(--gold);border-radius:20px;color:var(--gold);font-size:12px;font-weight:700}
+main{max-width:1300px;margin:auto;padding:30px 40px;display:flex;flex-direction:column;gap:16px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 24px;position:relative;border-left:5px solid var(--sakura)}
+.stage.s1{border-left-color:#6cc4a1}.stage.s2{border-left-color:#6da7ff}.stage.s3{border-left-color:#c98bff}.stage.s4{border-left-color:#ff9d6e}.stage.s5{border-left-color:#ffd166}.stage.s6{border-left-color:#ff7aa2}.stage.s7{border-left-color:#e4b04a}.stage.s8{border-left-color:#7ad9c7}.stage.s9{border-left-color:#a89884}
+.stage-h{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.stage-num{display:inline-block;padding:3px 10px;border-radius:8px;background:var(--sumi);color:var(--gold);font-size:11px;font-weight:700;letter-spacing:.06em}
+.stage h2{margin:0;font-size:18px;color:var(--ink)}
+.stage .file{font-family:"SF Mono",Menlo,monospace;font-size:11px;color:var(--ink-dim)}
+.stage h4{margin:12px 0 4px;color:var(--sakura);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.stage p,.stage ul,.stage ol{font-size:13px;margin:4px 0}
+.stage ul,.stage ol{padding-left:22px}
+.stage li{margin:2px 0}
+.stage code{background:#0a0814;color:var(--gold);padding:1px 6px;border-radius:4px;font-family:"SF Mono",Menlo,monospace;font-size:11px}
+.stage pre{background:#0a0814;border:1px solid var(--line);border-radius:6px;padding:10px 14px;overflow-x:auto;font-size:11px;color:var(--ink);font-family:"SF Mono",Menlo,monospace}
+.stage pre code{background:none;padding:0}
+.io{display:flex;gap:10px;align-items:stretch;margin:10px 0;flex-wrap:wrap}
+.io-box{flex:1;min-width:260px;background:var(--sumi);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.io-box.in{border-left:3px solid #6da7ff}
+.io-box.out{border-left:3px solid #ff7aa2}
+.io-box h5{margin:0 0 4px;font-size:10px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em}
+.arrow{text-align:center;color:var(--sakura);font-size:20px;margin:6px 0}
+footer{padding:24px 40px;text-align:center;color:var(--ink-dim);font-size:12px;border-top:1px solid var(--line)}
+</style></head><body>
+<header class="top">
+<h1>🎯 データフロートレース: ガントチャート機能</h1>
+<p>User Input → Issue → IntentSpace → DAG → CodeGen → Review → PR → Deploy</p>
+<p>「ガントチャート機能を追加したい」という一言が、実際にどんなコードを経由して最終的なPRになるかを実コード行番号付きでトレース</p>
+<div class="stats">
+<span class="stat">14 stages</span>
+<span class="stat">4 agents</span>
+<span class="stat">Critical Path 130 min</span>
+<span class="stat">4-layer fallback</span>
+<span class="stat">5-task DAG</span>
+</div>
+</header>
+<main>
+
+<article class="stage s1">
+<div class="stage-h"><span class="stage-num">STAGE 1</span><h2>👤 User Input — Issue作成</h2></div>
+<p>ユーザーが GitHub でガントチャート機能の実装をリクエスト。</p>
+<div class="io"><div class="io-box in"><h5>入力</h5>
+<ul><li><b>Title</b>: "ガントチャート機能を追加したい"</li><li><b>Body</b>: "DAG の可視化機能..."</li><li><b>Labels</b>: <code>["type:feature", "priority:P2"]</code></li><li><b>Number</b>: #123</li></ul>
+</div></div>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s2">
+<div class="stage-h"><span class="stage-num">STAGE 2</span><h2>⚡ Webhook Trigger</h2><span class="file">.github/workflows/autonomous-agent.yml</span></div>
+<p>GitHub Webhook が発火し、autonomous-agent.yml が起動。</p>
+<h4>実行ジョブ</h4>
+<ul>
+<li><code>check-trigger</code> job (行20-62): <code>🤖agent-execute</code> ラベル有無チェック → <code>should_execute=true</code>, <code>issue_number=123</code></li>
+<li><code>execute-agents</code> job (行64-297): 依存チェック後、エージェント並列実行</li>
+</ul>
+<h4>実行コマンド</h4>
+<pre><code>npm run agents:parallel:exec -- \
+  --issue 123 \
+  --concurrency 3 \
+  --log-level info</code></pre>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s3">
+<div class="stage-h"><span class="stage-num">STAGE 3</span><h2>🔧 Parallel Executor</h2><span class="file">scripts/operations/parallel-executor.ts</span></div>
+<p>npm スクリプトから tsx 経由で呼ばれる実行スクリプト。Issueを取得しCoordinatorAgentへ引き渡す。</p>
+<ul>
+<li><code>loadConfig()</code> 行106-141 → AgentConfig 生成 (deviceIdentifier, worktree設定)</li>
+<li><code>fetchIssue()</code> 行147-173 → GitHub API <code>octokit.issues.get()</code> で Issue データ取得</li>
+<li><code>executeIssue()</code> 行212-261 → Issue → Task 変換 (行224-241)</li>
+<li><code>executeIssuesInParallel()</code> 行303-324 → concurrency=3 で並列制御</li>
+<li><code>agent.execute(task)</code> 行244 → CoordinatorAgent 呼び出し</li>
+</ul>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s4">
+<div class="stage-h"><span class="stage-num">STAGE 4</span><h2>🔍 IssueAgent.analyze()</h2><span class="file">packages/miyabi-agent-sdk/src/agents/IssueAgent.ts 行63-109</span></div>
+<p>Issueを解析し、type/priority/complexity を判定してラベル付与。</p>
+<div class="io">
+<div class="io-box in"><h5>IssueInput (行13-21)</h5><pre><code>{
+  issueNumber: 123,
+  owner: "user",
+  repository: "Miyabi",
+  useRealAPI: true,
+  claudeCodeClient: ClaudeCodeClient,
+  githubClient: GitHubClient
+}</code></pre></div>
+<div class="io-box out"><h5>IssueOutput (行23-37)</h5><pre><code>{
+  success: true,
+  data: {
+    number: 123,
+    title: "ガントチャート機能を追加したい",
+    labels: ["type:feature","priority:P2-Medium","complexity:medium"],
+    complexity: "medium",
+    priority: "P2",
+    type: "feature"
+  }
+}</code></pre></div>
+</div>
+<h4>keywordBasedAnalysis() 行184-264</h4>
+<ul>
+<li>type判定 行195-208: "feature" (デフォルト)</li>
+<li>priority判定 行210-220: "P2" (ラベルから)</li>
+<li>complexity判定 行222-240: "medium" (キーワード無し→デフォルト)</li>
+</ul>
+<h4>LLM優先順位 (analyzeWithClaude 行134-182)</h4>
+<ol><li>ClaudeCodeClient (行147-161)</li><li>AnthropicClient (行163-177) + コスト計算</li><li>キーワードMock (行179-182)</li></ol>
+<p>処理後 <code>applyLabels()</code> で <code>github.issues.addLabels()</code> 実行</p>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s5">
+<div class="stage-h"><span class="stage-num">STAGE 5</span><h2>🧭 IntentSpace 変換</h2><span class="file">packages/coding-agents/omega-system/adapters/issue-to-intent.ts</span></div>
+<p>Issue を Ω-System の 4次元 IntentSpace (goals/preferences/objectives/modality) へ変換。</p>
+<h4>主要処理</h4>
+<ul>
+<li><code>extractGoals()</code> 行38-75: チェックボックス/番号/見出しからgoals抽出、無ければtitleがprimary</li>
+<li><code>determinePriority()</code> 行101-107: <code>priority:P2-Medium</code> → <code>"medium"</code></li>
+<li><code>determineQualityBias()</code> 行140: デフォルト <code>"balanced"</code></li>
+<li><code>determineAutomationLevel()</code> 行153: デフォルト <code>"semi-auto"</code></li>
+</ul>
+<div class="io-box out"><h5>IntentSpace 生成結果</h5><pre><code>{
+  metadata: { intentId:"intent-issue-123", confidence:0.85 },
+  goals: {
+    primary: {
+      main: { id:"goal-123-0", type:"primary",
+        description:"ガントチャート機能を追加したい",
+        priority:"medium",
+        successCriteria:["Implementation complete","Tests pass","No TS errors"]
+      }
+    }
+  },
+  preferences: { qualityVsSpeed:{bias:"balanced",threshold:70} },
+  objectives: {
+    functional:[{ description:"ガントチャート機能を追加したい", priority:"medium" }],
+    nonFunctional:[{category:"maintainability",target:"100% test pass"}]
+  },
+  modality: {
+    primary:"code",
+    code:{ language:"typescript", style:"documented", includeTests:true }
+  }
+}</code></pre></div>
+</article>
+</content>
+</invoke><div class="arrow">↓</div>
+
+<article class="stage s6">
+<div class="stage-h"><span class="stage-num">STAGE 6</span><h2>🗂️ CoordinatorAgent → DAG 生成</h2><span class="file">packages/miyabi-agent-sdk/src/agents/CoordinatorAgent.ts</span></div>
+<p>Issue を 5 タスクに分解し、依存関係の DAG を構築。</p>
+<h4>execute() 行46-66</h4>
+<ol><li>analyzeIssue() 行48: complexity判定</li><li>generateDAG() 行49: DAG構築</li><li>validateDAG() 行50: サイクル検出 (DFS)</li><li>findCriticalPath() 行51: DP で最長経路</li><li>groupParallelizable() 行52: 並列グループ化</li><li>calculateDuration() 行53: 総実行時間</li></ol>
+<h4>generateDAG() 行78-139 — complexity="medium" (行97-112)</h4>
+<pre><code>nodes = [
+  { id:"task-1", agent:"IssueAgent",  estimatedTime:30, deps:[] },
+  { id:"task-2", agent:"CodeGenAgent", estimatedTime:60, deps:["task-1"] },  // コア実装
+  { id:"task-3", agent:"CodeGenAgent", estimatedTime:45, deps:["task-1"] },  // テスト(並列)
+  { id:"task-4", agent:"ReviewAgent",  estimatedTime:30, deps:["task-2","task-3"] },
+  { id:"task-5", agent:"PRAgent",      estimatedTime:10, deps:["task-4"] }
+];
+edges = [
+  {from:"task-1",to:"task-2"},
+  {from:"task-1",to:"task-3"},
+  {from:"task-2",to:"task-4"},
+  {from:"task-3",to:"task-4"},
+  {from:"task-4",to:"task-5"}
+];</code></pre>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s7">
+<div class="stage-h"><span class="stage-num">STAGE 7</span><h2>🎯 Critical Path 計算 (DP)</h2><span class="file">CoordinatorAgent.ts 行171-215</span></div>
+<p>トポロジカルソート後、動的計画法で最長経路を計算。</p>
+<h4>topologicalSort() 行217-249 (Kahn's algorithm)</h4>
+<p>結果: <code>[task-1, task-2, task-3, task-4, task-5]</code></p>
+<h4>DP計算 (maxDistance Map)</h4>
+<pre><code>task-1: 0 + 30 = 30   (predecessor: null)
+task-2: 30 + 60 = 90  (predecessor: task-1)
+task-3: 30 + 45 = 75  (predecessor: task-1)
+task-4: max(90,75) + 30 = 120  (predecessor: task-2)
+task-5: 120 + 10 = 130  (predecessor: task-4)</code></pre>
+<h4>Critical Path 逆トレース (行207-214)</h4>
+<p><code>task-5 → task-4 → task-2 → task-1</code> → 反転 → <b>Critical Path = [task-1, task-2, task-4, task-5] (130分)</b></p>
+<p>Task-3 の slack: <b>15分</b> (90 - 75) — 遅延しても全体に影響なし</p>
+
+<h4>ガントチャート可視化</h4>
+<svg viewBox="0 0 820 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;background:#0a0814;border-radius:6px">
+<g font-family="sans-serif" font-size="11" fill="#f5e9d6">
+<line x1="100" y1="20" x2="100" y2="170" stroke="#3a2f4f"/>
+<line x1="230" y1="20" x2="230" y2="170" stroke="#3a2f4f"/>
+<line x1="360" y1="20" x2="360" y2="170" stroke="#3a2f4f"/>
+<line x1="490" y1="20" x2="490" y2="170" stroke="#3a2f4f"/>
+<line x1="620" y1="20" x2="620" y2="170" stroke="#3a2f4f"/>
+<line x1="750" y1="20" x2="750" y2="170" stroke="#3a2f4f"/>
+<text x="100" y="15" fill="#a89884">0</text>
+<text x="230" y="15" fill="#a89884">30</text>
+<text x="360" y="15" fill="#a89884">60</text>
+<text x="490" y="15" fill="#a89884">90</text>
+<text x="620" y="15" fill="#a89884">120</text>
+<text x="750" y="15" fill="#a89884">130</text>
+<text x="10" y="44" fill="#e4b04a">Task-1</text>
+<rect x="100" y="30" width="130" height="20" fill="#6cc4a1" rx="3"/>
+<text x="115" y="44" fill="#0a0814" font-weight="700">Issue分析</text>
+<text x="10" y="74" fill="#e4b04a">Task-2 ★</text>
+<rect x="230" y="60" width="260" height="20" fill="#ff7aa2" rx="3"/>
+<text x="250" y="74" fill="#0a0814" font-weight="700">コード生成 (実装) — Critical</text>
+<text x="10" y="104" fill="#e4b04a">Task-3</text>
+<rect x="230" y="90" width="195" height="20" fill="#6da7ff" rx="3" opacity=".7"/>
+<text x="250" y="104" fill="#0a0814" font-weight="700">テスト生成 (並列, slack 15m)</text>
+<text x="10" y="134" fill="#e4b04a">Task-4 ★</text>
+<rect x="490" y="120" width="130" height="20" fill="#ff7aa2" rx="3"/>
+<text x="510" y="134" fill="#0a0814" font-weight="700">Review — Critical</text>
+<text x="10" y="164" fill="#e4b04a">Task-5 ★</text>
+<rect x="620" y="150" width="45" height="20" fill="#ff7aa2" rx="3"/>
+<text x="628" y="164" fill="#0a0814" font-weight="700">PR</text>
+</g>
+</svg>
+<p style="font-size:11px;color:#a89884">★ = Critical Path 上のタスク</p>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s8">
+<div class="stage-h"><span class="stage-num">STAGE 8</span><h2>⚙️ CodeGenAgent.generate() (Task-2)</h2><span class="file">packages/miyabi-agent-sdk/src/agents/CodeGenAgent.ts 行81-131</span></div>
+<p>Task-2 (コア実装) が CodeGenAgent で実行される。4層フォールバックで確実に結果を返す。</p>
+<div class="io-box in"><h5>CodeGenInput 実例</h5><pre><code>{
+  taskId: "task-2",
+  requirements: `ガントチャート機能を追加したい。
+    - Gantt チャート表示コンポーネント (React)
+    - DAG ノード → Gantt バーのマッピング
+    - Critical Path のハイライト
+    - 並列実行グループの視覚化
+    技術: TypeScript, React, Canvas API
+    テストカバレッジ: 80% 以上`,
+  context: {
+    repository: "Miyabi",
+    owner: "user",
+    baseBranch: "main",
+    relatedFiles: [
+      "packages/miyabi-web/src/components/DAG.tsx",
+      "packages/miyabi-web/src/types/workflow.ts"
+    ]
+  },
+  language: "typescript",
+  useRealAPI: true,
+  claudeCodeClient: ClaudeCodeClient
+}</code></pre></div>
+
+<h4>4層フォールバック (generateCode() 行164-259)</h4>
+<ol>
+<li><b>Mode 0 — Codex CLI</b> 行192-211 (try/catch, コーディング特化)</li>
+<li><b>Mode 1 — Claude Code CLI</b> 行213-229 ($0)</li>
+<li><b>Mode 2 — Anthropic API</b> 行231-247 (有料フォールバック)</li>
+<li><b>Mode 3 — Mock テンプレート</b> 行249-258 (必ず成功)</li>
+</ol>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s9">
+<div class="stage-h"><span class="stage-num">STAGE 9</span><h2>🔌 CodexClient.generateCode()</h2><span class="file">packages/miyabi-agent-sdk/src/clients/CodexClient.ts 行115-162</span></div>
+<p>codex CLI を spawn し stdin でプロンプト送信。</p>
+<h4>起動コマンド</h4>
+<pre><code>codex exec -                 # stdin 経由 (shellエスケープ回避)
+  timeout: 120秒
+  stdin: &lt;プロンプト&gt;</code></pre>
+<h4>プロンプト整形例 (行133-158)</h4>
+<pre><code>Generate code for this task. Return ONLY a JSON object:
+
+Task: ガントチャート機能を追加したい。
+    - Gantt チャート表示 (React)
+    - DAG → Gantt バー マッピング
+    - Critical Path ハイライト...
+
+Context: File: packages/miyabi-web/src/components/DAG.tsx
+    ```
+    import React from 'react';
+    export const DAGComponent = () =&gt; { ... }
+    ```
+
+Language: typescript
+
+Return JSON: { "files":[...], "tests":[...], "qualityScore": 95 }</code></pre>
+<h4>返り値 (parseJSON() 行315-354, 4パターン対応)</h4>
+<pre><code>{
+  files: [{ path, content, action: "create"|"modify"|"delete" }],
+  tests: [{ path, content, action }],
+  qualityScore: 88
+}</code></pre>
+</article>
+<div class="arrow">↓</div>
+
+<article class="stage s1">
+<div class="stage-h"><span class="stage-num">STAGE 10</span><h2>📁 生成ファイル (実在確認)</h2></div>
+<p>実際に <code>packages/miyabi-web/src/components/gantt/</code> 配下に実在するファイル:</p>
+<pre><code>packages/miyabi-web/src/components/gantt/
+├── GanttChart.tsx (1247行)       ← 実在
+│   ├── Task / Milestone / TaskGroup 型定義
+│   ├── GanttConfig インターフェース
+│   ├── SAMPLE_TASKS / SAMPLE_GROUPS / SAMPLE_MILESTONES
+│   └── ZoomLevel: 'day' | 'week' | 'month'
+└── GanttChart.test.tsx (362行)   ← 実在
+    ├── 基本レンダリング (7テスト)
+    ├── ズーム切替 (4テスト)
+    ├── ダークモード (5テスト)
+    ├── グループ折りたたみ (6テスト)
+    ├── 今日線 (3テスト)
+    ├── アクセシビリティ (3テスト)
+    └── マイルストーン・凡例・設定 (3テスト)
+
+(予想追加生成ファイル):
+├── GanttBar.tsx
+├── GanttTimeline.tsx
+├── TaskTooltip.tsx
+└── gantt.module.css</code></pre>
+<p class="file">👉 この Stage は「実際に Miyabi リポジトリに存在する GanttChart」を確認した結果です。</p>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s2">
+<div class="stage-h"><span class="stage-num">STAGE 11</span><h2>🎯 ReviewAgent.review() — 80点ゲート</h2><span class="file">packages/miyabi-agent-sdk/src/agents/ReviewAgent.ts 行73-215</span></div>
+<p>生成コードを複数軸で評価し、80点未満なら提案付きで差戻し。</p>
+<h4>品質スコア計算式 (行304-321)</h4>
+<pre><code>staticScore   = 40 - (errorCount × 10 + warningCount × 2)  // 最大40点
+securityScore = passed ? 30 : 0                              // 30点
+coverageScore = min(30, coverage% / 80 × 30)                // 30点
+──────────────────────────────────────────────────
+totalScore    = max(0, min(100, static + security + coverage))</code></pre>
+<h4>80点ゲート判定 (行187)</h4>
+<pre><code>passed = qualityScore >= input.standards.minQualityScore  // default 80</code></pre>
+<p>ガントチャート機能の想定スコア: <b>88点</b> (static 36 + security 30 + coverage 22)</p>
+<h4>失敗時 (generateSuggestions 行323-361)</h4>
+<ul>
+<li>"Fix N static analysis errors"</li>
+<li>"Increase test coverage from X% to 80%"</li>
+<li>"Quality score is N points below threshold"</li>
+<li>CodeGenAgent 自動再生成 (最大3回)</li>
+</ul>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s3">
+<div class="stage-h"><span class="stage-num">STAGE 12</span><h2>📬 PRAgent.create() — Draft PR 作成</h2><span class="file">packages/miyabi-agent-sdk/src/agents/PRAgent.ts 行58-105</span></div>
+<ol>
+<li><b>ブランチ作成</b> 行67-73: <code>agent/issue-123-{timestamp}</code> (行109)</li>
+<li><b>Commit</b> 行76-83: Conventional Commits 準拠 (行151-157)<ul>
+<li>全 create → <code>feat</code></li>
+<li>modify 含む → <code>fix</code></li>
+<li>delete 含む → <code>refactor</code></li>
+<li>scope: 最初のファイルパス先頭 (<code>miyabi-web</code>)</li>
+<li>→ <code>feat(miyabi-web): autonomous implementation for issue #123</code></li>
+</ul></li>
+<li><b>Draft PR 作成</b> 行86-95:<ul>
+<li>Title: <code>feat: autonomous implementation for issue #123</code></li>
+<li>Body: 品質レポート + チェックリスト (行183-223)</li>
+</ul></li>
+<li><b>返却</b>: <code>{number, url, branch, status:"draft"}</code></li>
+</ol>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s4">
+<div class="stage-h"><span class="stage-num">STAGE 13</span><h2>🏭 GitHub Actions CI/CD</h2></div>
+<p>PR 作成後、並列で走るワークフロー群:</p>
+<ul>
+<li><code>integrated-system-ci.yml</code> — lint → unit-test → e2e → build → report</li>
+<li><code>security-audit.yml</code> — npm audit / Gitleaks / CodeQL / SBOM (4並列)</li>
+<li><code>snapshot-test.yml</code> — スナップショット比較</li>
+<li><code>mcp-health-check.yml</code> — 条件付 (MCP関連変更時)</li>
+<li><code>state-machine.yml</code> (pr-created) — <code>state:reviewing</code> へ遷移</li>
+</ul>
+</article>
+
+<div class="arrow">↓</div>
+
+<article class="stage s5">
+<div class="stage-h"><span class="stage-num">STAGE 14</span><h2>🏁 最終結果</h2></div>
+<div class="io"><div class="io-box out"><h5>PR #456 (draft)</h5><pre><code>Branch: agent/issue-123-1712486400000
+Title:  feat: autonomous implementation for issue #123
+Files:
+  + packages/miyabi-web/src/components/gantt/GanttChart.tsx
+  + packages/miyabi-web/src/components/gantt/GanttChart.test.tsx
+Labels: [🤖agent-generated, automated, needs-review]
+Quality Score: 88/100
+Total Time: 130 min (Critical Path)
+
+Issue #123 state: reviewing → (merge後) done</code></pre></div></div>
+<p><b>リリース完了後</b>: Issue #123 クローズ、ラベル: <code>✅state:done</code> + <code>🤖agent-generated</code></p>
+</article>
+
+<article class="stage s6">
+<div class="stage-h"><span class="stage-num">SUMMARY</span><h2>🔄 型変換チェーン</h2></div>
+<pre><code>User入力
+  ↓
+GitHub Issue #123 { title, body, labels }
+  ↓ (parallel-executor.ts)
+Task { number, title, body, labels }
+  ↓ (IssueAgent.analyze)
+IssueInput → IssueOutput { complexity:"medium", priority:"P2", type:"feature" }
+  ↓ (issue-to-intent.ts)
+IntentSpace { goals, preferences, objectives, modality }
+  ↓ (CoordinatorAgent.generateDAG)
+DAG { nodes:[5 tasks], edges:[5], criticalPath:[1,2,4,5], duration:130 }
+  ↓ (CodeGenAgent.generate Task-2)
+CodeGenInput → CodeGenOutput { files:[GanttChart.tsx], tests:[...], qualityScore:88 }
+  ↓ (ReviewAgent.review)
+ReviewOutput { qualityScore:88, passed:true, suggestions:[] }
+  ↓ (PRAgent.create)
+PR { number:456, url, branch:"agent/issue-123-...", status:"draft" }
+  ↓ (CI/CD + merge)
+Deployed ✅</code></pre>
+</article>
+
+</main>
+<footer>
+データフロートレース · ガントチャート機能 · 並列サブエージェント調査 (3 agents) + 並列HTML構築 (3 agents) · 実コード行番号付き
+</footer>
+</body></html>
