@@ -1,0 +1,217 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>Miyabi Infra Context</title>
+<style>
+:root{--bg:#0a0814;--panel:#161023;--ink:#f5e9d6;--ink2:#a89884;--sakura:#ff7aa2;--gold:#e4b04a;--line:#3a2f4f;--sumi:#2a2235}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans",sans-serif;line-height:1.7}
+.top{padding:32px 40px;border-bottom:1px solid var(--line)}
+.top h1{margin:0;font-size:26px;color:var(--sakura)}
+.top p{margin:4px 0;color:var(--ink2);font-size:13px}
+main{max-width:1200px;margin:auto;padding:24px 40px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:16px;border-left:5px solid var(--sakura)}
+.item.i1{border-left-color:#ff7aa2}.item.i2{border-left-color:#6cc4a1}.item.i3{border-left-color:#e4b04a}.item.i4{border-left-color:#6da7ff}
+.item.i5{border-left-color:#c98bff}.item.i6{border-left-color:#ff9d6e}.item.i7{border-left-color:#5be0e0}.item.i8{border-left-color:#a89884}
+.item h2{margin:0 0 8px;font-size:18px;color:var(--gold)}
+.item h3{margin:14px 0 4px;font-size:12px;color:var(--sakura);text-transform:uppercase;letter-spacing:.08em}
+.item p,.item ul,.item ol{font-size:13px;margin:4px 0}.item ul{padding-left:20px}.item li{margin:2px 0}
+.item code{background:#0a0814;color:var(--gold);padding:1px 5px;border-radius:3px;font-size:11px;font-family:monospace}
+.item pre{background:#0a0814;border:1px solid var(--line);border-radius:6px;padding:10px;font-size:11px;overflow-x:auto;font-family:monospace}
+.item table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.item th,.item td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left}
+.item th{background:var(--sumi);color:var(--sakura);font-size:11px}
+footer{padding:20px 40px;text-align:center;color:var(--ink2);font-size:11px;border-top:1px solid var(--line)}
+</style></head><body>
+<header class="top">
+<h1>雅 Miyabi — インフラコンテクスト</h1>
+<p>8項目: 目的 / 原因 / 対処 — プロジェクト基盤の全体像を構造化</p>
+</header>
+<main>
+
+<section class="item i1">
+<h2>1. APIフリー移行</h2>
+<h3>目的</h3>
+<ul>
+<li>Anthropic API 従量課金 <b>$400/月 → $0</b> への経済的自立化</li>
+<li>APIキー管理リスクの排除（漏洩・ローテーション不要に）</li>
+</ul>
+<h3>原因</h3>
+<ul>
+<li>従来 <code>AnthropicClient</code> (SDK直接) に全面依存</li>
+<li>CI/CD 以外でも <code>ANTHROPIC_API_KEY</code> が必須</li>
+<li>14 Business Agents 含め全エージェントが API 直接呼び出し</li>
+</ul>
+<h3>対処</h3>
+<p><b>TaskRouter (806行, SDK最大ファイル)</b>: タスクカテゴリ→プロバイダ自動ルーティング</p>
+<table>
+<tr><th>カテゴリ</th><th>推奨プロバイダ</th><th>使用Agent</th></tr>
+<tr><td>orchestration / analysis / deployment / business</td><td>Claude CLI（司令塔）</td><td>Coordinator, Issue, Deploy, 14 Business</td></tr>
+<tr><td>coding / review / testing</td><td>Codex CLI（ワーカー）</td><td>CodeGen, Review, Test</td></tr>
+</table>
+<p><b>4層フォールバック</b>:</p>
+<pre>Mode 0: Codex CLI     → $0, コーディング特化 (try/catch→次へ)
+Mode 1: Claude Code CLI → $0, 汎用分析
+Mode 2: Anthropic API  → 有料, キーある時のみ
+Mode 3: Mock テンプレート → 必ず成功</pre>
+<p><b>ProviderFactory.createAll()</b>: APIキー未設定 → CLIプロバイダのみ生成（行562-582）</p>
+<p><b>ヘルスチェック</b>: 60秒TTLキャッシュ + 5秒 Promise.race タイムアウト</p>
+<h3>改修ファイル</h3>
+<ul>
+<li><code>CodeGenAgent.ts</code> / <code>ReviewAgent.ts</code> — Mode 0 Codex 追加</li>
+<li><code>TaskRouter.ts</code> — 新規 806行 (ROUTING_TABLE + FALLBACK_ORDER + HealthCache)</li>
+<li><code>CodexClient.ts</code> — 新規 / <code>ClaudeCodeClient.ts</code> — 強化</li>
+<li><code>clients/index.ts</code> + <code>index.ts</code> — CodexClient export 追加</li>
+</ul>
+<h3>効果</h3>
+<table>
+<tr><th>指標</th><th>Before</th><th>After</th></tr>
+<tr><td>月額コスト</td><td>$400</td><td><b>$0</b></td></tr>
+<tr><td>APIキー</td><td>必須</td><td>オプション</td></tr>
+<tr><td>セキュリティ</td><td>キー管理リスク</td><td>ローカル完結</td></tr>
+</table>
+</section>
+
+<section class="item i2">
+<h2>2. モノレポ構成 (11パッケージ)</h2>
+<h3>目的</h3>
+<ul><li>密結合な11パッケージを pnpm workspaces で統合管理</li><li>型定義共有、ローカルリンクで即時反映</li></ul>
+<h3>原因</h3>
+<ul><li>Agent SDK / CLI / Web / MCP 等が型・インターフェースで密結合</li><li>個別リポでは変更同期が困難</li></ul>
+<h3>対処</h3>
+<p><b>5層レイヤーアーキテクチャ</b>:</p>
+<pre>L5 User/CLI     │ cli (30cmd), miyabi-web (Next.js)
+L4 Orchestration │ coding-agents (Ω, WaterSpider, 7 Agents)
+L3 Agent SDK     │ miyabi-agent-sdk (TaskRouter, 6 Clients)
+L2 Integration   │ mcp-bundle(172tools), github-projects, task-manager, doc-generator
+L1 Foundation    │ shared-utils, core, context-engineering</pre>
+<p><b>依存方向</b>: shared-utils ← 全パッケージ, agent-sdk ← cli+coding-agents, coding-agents ← cli</p>
+</section>
+
+<section class="item i3">
+<h2>3. Ω-System (自律実行エンジン)</h2>
+<h3>目的</h3>
+<ul><li>Issue → PR → Deploy を 10-15分で完全自律化</li></ul>
+<h3>原因</h3>
+<ul><li>手作業ボトルネック（分析→実装→レビュー→デプロイが数時間～1日）</li></ul>
+<h3>対処</h3>
+<p><b>数学定義</b>: <code>Ω: I×W→R</code> / <code>E = θ₆∘θ₅∘θ₄∘θ₃∘θ₂∘θ₁</code></p>
+<table>
+<tr><th>θ</th><th>名称</th><th>入出力</th><th>行数</th><th>特徴</th></tr>
+<tr><td>θ₁</td><td>Understanding</td><td>I×W → StrategicPlan</td><td>485</td><td>複雑度推定, 能力推論</td></tr>
+<tr><td>θ₂</td><td>Generation</td><td>S×W → TaskSet(DAG)</td><td>502</td><td>トポロジカルソート, トークン推定</td></tr>
+<tr><td>θ₃</td><td>Allocation</td><td>𝕋×W → AgentAllocation</td><td>—</td><td>6種Agent選択, 並列度計算</td></tr>
+<tr><td>θ₄</td><td>Execution</td><td>A → ResultSet</td><td>—</td><td>非同期バッチ, リトライ</td></tr>
+<tr><td>θ₅</td><td>Integration</td><td>R → Deliverable</td><td>—</td><td>PR生成, Conventional Commits</td></tr>
+<tr><td>θ₆</td><td>Learning</td><td>D×I×W → Knowledge</td><td>—</td><td><b>非致命的</b>（失敗しても継続）</td></tr>
+</table>
+<p><b>OmegaEngine (545行)</b>: maxExecution 600s, maxRetries 3, 段階検証, trace.intermediates 全保存</p>
+</section>
+
+<section class="item i4">
+<h2>4. GitHub-as-OS</h2>
+<h3>目的</h3>
+<ul><li>GitHubの機能群をOSコンポーネントとして活用し、独自インフラ構築を回避</li></ul>
+<h3>原因</h3>
+<ul><li>独自タスク管理/CI/状態管理システムの構築・運用コスト</li></ul>
+<h3>対処</h3>
+<table>
+<tr><th>OS概念</th><th>GitHub機能</th><th>規模</th></tr>
+<tr><td>タスクキュー</td><td>Issues</td><td>無制限</td></tr>
+<tr><td>状態機械</td><td>Labels</td><td>53個・10カテゴリ</td></tr>
+<tr><td>データ層</td><td>Projects V2</td><td>Kanban</td></tr>
+<tr><td>実行エンジン</td><td>Actions</td><td>17 workflows</td></tr>
+<tr><td>イベントバス</td><td>Webhooks</td><td>リアルタイム</td></tr>
+</table>
+<p><b>状態遷移</b>: <code>pending → analyzing → implementing → reviewing → done</code> (+blocked エスカレーション)</p>
+</section>
+
+<section class="item i5">
+<h2>5. 21エージェントシステム</h2>
+<h3>目的</h3>
+<ul><li>開発ライフサイクル全体を21の専門AIエージェントで自動化</li></ul>
+<h3>原因</h3>
+<ul><li>人手による分析/実装/レビュー/デプロイの非効率と品質ばらつき</li></ul>
+<h3>対処</h3>
+<table>
+<tr><th>色</th><th>役割</th><th>数</th><th>並列</th><th>エージェント例</th></tr>
+<tr><td style="color:#ff7aa2">🔴</td><td>統括</td><td>2</td><td>不可</td><td>しきるん(Coordinator), あきんどさん(AIEntrepreneur)</td></tr>
+<tr><td style="color:#6cc4a1">🟢</td><td>実行</td><td>10</td><td>可</td><td>つくるん(CodeGen), つくろん(ProductConcept), かくん(ProductDesign), みちびきん(Funnel), ひろめるん(Marketing), かくちゃん(Content), つぶやきん(SNS), どうがん(YouTube), うるん(Sales), おきゃくさま(CRM)</td></tr>
+<tr><td style="color:#6da7ff">🔵</td><td>分析</td><td>6</td><td>可</td><td>めだまん(Review), みつけるん(Issue), なりきりん(Persona), じぶんさん(SelfAnalysis), しらべるん(MarketResearch), かぞえるん(Analytics)</td></tr>
+<tr><td style="color:#e4b04a">🟡</td><td>サポート</td><td>3</td><td>条件付</td><td>まとめるん(PR), はこぶん(Deployment), つなぐん(Hooks)</td></tr>
+</table>
+<p><b>DAGベース並列実行</b>: Kahn's algorithm でトポロジカルソート → 最大5並行 → ファイルロック + Worktree分離</p>
+</section>
+
+<section class="item i6">
+<h2>6. イベント駆動アーキテクチャ</h2>
+<h3>目的</h3>
+<ul><li>Issue作成→Deploy完了まで手動トリガーゼロの完全自動パイプライン</li></ul>
+<h3>原因</h3>
+<ul><li>手動トリガーによる遅延と工程漏れ</li></ul>
+<h3>対処</h3>
+<ul>
+<li><b>webhook-handler.yml</b> — 中央ルーター: 全イベント分類→適切なWorkflow起動</li>
+<li><b>state-machine.yml</b> — ラベル駆動状態遷移
+  <ul>
+  <li>initial-triage: opened → pending + 優先度(P0/P1/P2)</li>
+  <li>coordinator-assignment: agent:coordinator → analyzing</li>
+  <li>pr-created: PR opened → reviewing</li>
+  <li>pr-merged: merged → done</li>
+  </ul>
+</li>
+<li><b>autonomous-agent.yml</b> — Agent実行エンジン
+  <ul>
+  <li>check-trigger: 🤖agent-execute / /agent コマンド / workflow_dispatch</li>
+  <li>execute-agents: <code>npm run agents:parallel:exec --concurrency 3</code></li>
+  </ul>
+</li>
+<li><b>webhook-fallback.js</b> (Issue #137) — オフラインキュー
+  <ul>
+  <li>5秒タイムアウト (AbortController) → <code>~/.ai/logs/webhook-queue/</code> にJSON保存</li>
+  <li><code>node webhook-fallback.js flush</code> で一括再送（最大3リトライ → failed/ 移動）</li>
+  <li>git操作は<b>決してブロックしない</b> (graceful degradation)</li>
+  </ul>
+</li>
+</ul>
+</section>
+
+<section class="item i7">
+<h2>7. 品質ゲート</h2>
+<h3>目的</h3>
+<ul><li>AI生成コードの品質を <b>80点以上</b> に保証</li></ul>
+<h3>原因</h3>
+<ul><li>LLM生成コードの品質ばらつき（0-100点の幅）</li></ul>
+<h3>対処</h3>
+<p><b>ReviewAgent 品質スコア (100点満点)</b>:</p>
+<pre>Static Analysis:  40点 (error × -10, warning × -2)
+Security Scan:    30点 (pass=30, fail=0)
+Test Coverage:    30点 (min(30, coverage%/80 × 30))
+────────────────────────────────────────
+Total:           max(0, min(100, static + security + coverage))</pre>
+<ul>
+<li><b>80点ゲート</b>: <code>qualityScore >= 80</code> → pass</li>
+<li><b>Auto-Loop</b>: 不合格 → suggestions生成 → CodeGenAgent再実行 (<b>最大3回</b>)</li>
+<li><b>CI/CD並列</b>: lint + typecheck + unit-test + e2e + security-audit + build</li>
+</ul>
+</section>
+
+<section class="item i8">
+<h2>8. CLIタイムアウト問題</h2>
+<h3>目的</h3>
+<ul><li>長時間タスクで CLI 呼び出し (child_process.spawn) がタイムアウトする問題の解決</li></ul>
+<h3>原因</h3>
+<ul>
+<li>固定タイムアウト設定 (Codex 120秒, Claude healthCheck 5秒等)</li>
+<li>無出力状態を「死亡」と誤判定</li>
+<li>大規模コード生成で5分以上要する場合がある</li>
+</ul>
+<h3>対処（5段階、軽い順）</h3>
+<ol>
+<li><b>idle timeout + 延長</b>: stdout チャンク毎にタイマーリセット、全体30分まで延長</li>
+<li><b>ストリーミング受信</b>: <code>--output-format stream-json</code> で行ごとparse</li>
+<li><b>タスク分割</b>: CoordinatorAgent DAG で15分制約内に強制分解</li>
+<li><b>バックグラウンドジョブ</b>: JobRunner.ts新設、detached spawn + <code>.miyabi/jobs/id.json</code></li>
+<li><b>GitHub Actions委譲</b>: Issue作成 → Actions上でagent実行 → PR/コメントで結果返却</li>
+</ol>
+</section>
+
+</main>
+<footer>Miyabi Infra Context · 8項目 目的/原因/対処 · Generated 2026-04-10</footer>
+</body></html>
